@@ -485,44 +485,46 @@ button {
 
 .pi-counter {
   position: fixed;
-  top: 84px;
-  left: 20px;
-  z-index: 40;
-  display: flex;
-  align-items: baseline;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(4px);
-  border-radius: 999px;
-  padding: 8px 18px;
-  box-shadow: var(--shadow-soft);
+  top: 90px;
+  left: 24px;
+  right: 24px;
+  z-index: 0;
+  max-width: 640px;
   font-family: "Courier New", monospace;
-  font-weight: 700;
-  max-width: min(80vw, 460px);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  font-weight: 800;
+  line-height: 1.15;
+  word-break: break-all;
   pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.3;
 }
 
 .pi-symbol {
   color: var(--purple-btn-1);
-  font-size: 1.1rem;
+  font-size: clamp(3.2rem, 7vw, 5.5rem);
 }
 
 .pi-value {
-  color: var(--green-dark);
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  margin-left: 5px;
+  color: var(--green-dark-2);
+  font-size: clamp(1.6rem, 3.4vw, 2.75rem);
+  letter-spacing: 0.01em;
+  margin-left: 10px;
 }
 
 @media (max-width: 640px) {
   .pi-counter {
-    top: auto;
-    bottom: 16px;
-    left: 12px;
-    right: 12px;
-    max-width: none;
+    top: 76px;
+    left: 14px;
+    right: 14px;
+    opacity: 0.24;
+  }
+
+  .pi-symbol {
+    font-size: 2.6rem;
+  }
+
+  .pi-value {
+    font-size: 1.2rem;
   }
 }
 

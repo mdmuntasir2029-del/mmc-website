@@ -6,18 +6,18 @@ import PiCounter from "../components/PiCounter";
 const HIGHLIGHTS = [
   {
     icon: "∑",
-    title: "Weekly Problem Sets",
-    desc: "Curated math challenges to sharpen speed, accuracy, and creative problem-solving.",
+    title: "Weekly Session- Thursdays are our birthdays!",
+    desc: "Weekly Sessions every Thursday. Chime in, whether you like math or like fun or both. ",
   },
   {
     icon: "\u{1F3C6}",
-    title: "Competitions",
-    desc: "Team and individual contests, olympiad prep, and inter-school meets.",
+    title: "Prepare and Participate",
+    desc: "Prepare for team and individual contests and olympiads. Participate in inter-school meets and other competitive math events.",
   },
   {
     icon: "\u{1F4DA}",
-    title: "Resource Library",
-    desc: "Presentations, quizzes, and question banks shared by the club, all in one place.",
+    title: "Contribute and Contest",
+    desc: "Presentations, quizzes, and question banks shared by the club and members alike, all in one place.",
   },
   {
     icon: "\u{1F91D}",
