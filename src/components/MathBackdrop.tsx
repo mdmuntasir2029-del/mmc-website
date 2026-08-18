@@ -24,19 +24,6 @@ const EQUATIONS: Equation[] = [
   { text: "n!", top: "92%", right: "3%", size: "1.8rem", rotate: "5deg" },
 ];
 
-const PI_DIGITS =
-  "3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
-
-function splitChunks(str: string, size: number): string[] {
-  const chunks: string[] = [];
-  for (let i = 0; i < str.length; i += size) {
-    chunks.push(str.slice(i, i + size));
-  }
-  return chunks;
-}
-
-const PI_CHUNKS = splitChunks(PI_DIGITS, 12);
-
 export default function MathBackdrop() {
   return (
     <div className="math-backdrop" aria-hidden="true">
@@ -53,20 +40,6 @@ export default function MathBackdrop() {
           }}
         >
           {eq.text}
-        </RevealOnScroll>
-      ))}
-
-      {PI_CHUNKS.map((chunk, i) => (
-        <RevealOnScroll
-          key={`pi-${i}`}
-          className="pi-chunk"
-          style={{
-            top: `${3 + i * (94 / PI_CHUNKS.length)}%`,
-            left: i % 2 === 0 ? "0.5%" : undefined,
-            right: i % 2 === 1 ? "0.5%" : undefined,
-          }}
-        >
-          {chunk}
         </RevealOnScroll>
       ))}
     </div>

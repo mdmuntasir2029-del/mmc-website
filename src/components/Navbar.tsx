@@ -31,6 +31,9 @@ export default function Navbar() {
             <li>
               <Link to="/#about">About</Link>
             </li>
+            <li>
+              <Link to="/awards">Awards</Link>
+            </li>
             {isAdmin && (
               <li>
                 <Link to="/admin">Admin Panel</Link>

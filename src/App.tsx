@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import Home from "./pages/Home";
+import Awards from "./pages/Awards";
 import Access from "./pages/Access";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
@@ -18,6 +19,7 @@ function App() {
       <main className="page-main">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/awards" element={<Awards />} />
           <Route path="/register" element={<Access />} />
           <Route path="/signin" element={<Access />} />
           <Route
