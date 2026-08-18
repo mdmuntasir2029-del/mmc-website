@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import Modal from "../../components/Modal";
 import * as db from "../../lib/db";
-import { fileToDataUrl } from "../../lib/storage";
 import type { ActivityLogEntry } from "../../lib/types";
 
 export default function ActivityLog() {
@@ -10,6 +9,7 @@ export default function ActivityLog() {
   const [showAdd, setShowAdd] = useState(false);
   const [selected, setSelected] = useState<ActivityLogEntry | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -25,6 +25,16 @@ export default function ActivityLog() {
     await db.deleteActivityLogEntry(id);
     setSelected(null);
     load();
+  }
+
+  async function handleDownload(filePath: string) {
+    setDownloading(true);
+    try {
+      const url = await db.getFileUrl(filePath);
+      window.open(url, "_blank");
+    } finally {
+      setDownloading(false);
+    }
   }
 
   return (
@@ -95,16 +105,16 @@ export default function ActivityLog() {
             <p style={{ marginBottom: 0 }}>{selected.how}</p>
           </div>
 
-          {selected.fileName && selected.fileDataUrl && (
+          {selected.fileName && selected.filePath && (
             <div className="modal-detail">
               <div className="k">Attached Document</div>
-              <a
-                href={selected.fileDataUrl}
-                download={selected.fileName}
+              <button
                 className="btn btn-secondary btn-sm"
+                disabled={downloading}
+                onClick={() => handleDownload(selected.filePath!)}
               >
-                Download {selected.fileName}
-              </a>
+                {downloading ? "Preparing..." : `Download ${selected.fileName}`}
+              </button>
             </div>
           )}
 
@@ -144,21 +154,16 @@ function AddEntryModal({
     }
     setSubmitting(true);
     try {
-      let fileName: string | null = null;
-      let fileDataUrl: string | null = null;
-      if (file) {
-        fileName = file.name;
-        fileDataUrl = await fileToDataUrl(file);
-      }
-      await db.addActivityLogEntry({
-        date,
-        title: title.trim(),
-        what: what.trim(),
-        where: where.trim(),
-        how: how.trim(),
-        fileName,
-        fileDataUrl,
-      });
+      await db.addActivityLogEntry(
+        {
+          date,
+          title: title.trim(),
+          what: what.trim(),
+          where: where.trim(),
+          how: how.trim(),
+        },
+        file
+      );
       onSaved();
     } catch {
       setError("Could not save this entry. Try a smaller file.");

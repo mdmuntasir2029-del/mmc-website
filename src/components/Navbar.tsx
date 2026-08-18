@@ -6,8 +6,8 @@ export default function Navbar() {
   const { isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
 
-  function handleSignOut() {
-    signOut();
+  async function handleSignOut() {
+    await signOut();
     navigate("/");
   }
 
@@ -31,9 +31,6 @@ export default function Navbar() {
             <li>
               <Link to="/#about">About</Link>
             </li>
-            <li>
-              <Link to="/signin">Sign In</Link>
-            </li>
             {isAdmin && (
               <li>
                 <Link to="/admin">Admin Panel</Link>
@@ -48,9 +45,14 @@ export default function Navbar() {
               Sign Out
             </button>
           ) : (
-            <Link to="/register" className="btn-shine">
-              Register
-            </Link>
+            <>
+              <Link to="/signin" className="btn-ghost">
+                Sign In
+              </Link>
+              <Link to="/register" className="btn-shine">
+                Register
+              </Link>
+            </>
           )}
         </div>
       </div>

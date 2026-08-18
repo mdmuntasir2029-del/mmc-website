@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import * as db from "../../lib/db";
-import { fileToDataUrl } from "../../lib/storage";
 import type { ResourceCategory, ResourceItem } from "../../lib/types";
 
 const CATEGORIES: { key: ResourceCategory; label: string }[] = [
@@ -30,6 +29,7 @@ export default function Resources() {
   }, [category]);
 
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   async function handleUpload(e: FormEvent) {
     e.preventDefault();
@@ -40,12 +40,7 @@ export default function Resources() {
     }
     setSubmitting(true);
     try {
-      const fileDataUrl = await fileToDataUrl(file);
-      await db.addResource(category, {
-        title: title.trim(),
-        fileName: file.name,
-        fileDataUrl,
-      });
+      await db.addResource(category, { title: title.trim() }, file);
       setTitle("");
       setFile(null);
       setFileInputKey((k) => k + 1);
@@ -60,6 +55,16 @@ export default function Resources() {
   async function handleDelete(id: string) {
     await db.deleteResource(category, id);
     load(category);
+  }
+
+  async function handleDownload(item: ResourceItem) {
+    setDownloadingId(item.id);
+    try {
+      const url = await db.getFileUrl(item.filePath);
+      window.open(url, "_blank");
+    } finally {
+      setDownloadingId(null);
+    }
   }
 
   return (
@@ -145,13 +150,13 @@ export default function Resources() {
                 </div>
               </div>
               <div className="row">
-                <a
-                  href={item.fileDataUrl}
-                  download={item.fileName}
+                <button
                   className="btn btn-secondary btn-sm"
+                  disabled={downloadingId === item.id}
+                  onClick={() => handleDownload(item)}
                 >
-                  Download
-                </a>
+                  {downloadingId === item.id ? "Preparing..." : "Download"}
+                </button>
                 <button
                   className="btn btn-danger btn-sm"
                   onClick={() => handleDelete(item.id)}

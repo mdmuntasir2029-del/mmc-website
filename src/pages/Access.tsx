@@ -3,7 +3,6 @@ import type { FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as db from "../lib/db";
 import * as auth from "../lib/auth";
-import { useAuth } from "../context/AuthContext";
 import {
   STUDENT_CODE_MAX_YEAR,
   validateEmail,
@@ -16,7 +15,6 @@ type Tab = "register" | "signin";
 export default function Access() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { refresh } = useAuth();
 
   const initialTab: Tab = location.pathname === "/signin" ? "signin" : "register";
   const [tab, setTab] = useState<Tab>(initialTab);
@@ -49,7 +47,7 @@ export default function Access() {
             {tab === "register" ? (
               <RegisterForm />
             ) : (
-              <SignInForm onSuccess={() => { refresh(); navigate("/admin"); }} />
+              <SignInForm onSuccess={() => navigate("/admin")} />
             )}
           </div>
         </div>
@@ -128,8 +126,12 @@ function RegisterForm() {
       setPhone("");
       setEmail("");
       setDeclared(false);
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setError(
+        err instanceof db.DuplicateMemberError
+          ? err.message
+          : "Something went wrong. Please try again."
+      );
       setStatus("error");
     } finally {
       setSubmitting(false);
@@ -265,12 +267,8 @@ function RegisterForm() {
 function SignInForm({ onSuccess }: { onSuccess: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const isAdminAddress = auth.isAdminEmail(email);
-  const needsSetup = isAdminAddress && email.trim() !== "" && !auth.hasAdminPassword();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -290,28 +288,10 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
 
     setSubmitting(true);
     try {
-      if (!auth.hasAdminPassword()) {
-        if (password.length < 6) {
-          setError("Choose a password with at least 6 characters.");
-          return;
-        }
-        if (password !== confirmPassword) {
-          setError("Passwords don't match.");
-          return;
-        }
-        await auth.setAdminPassword(password);
-        auth.startSession(auth.ADMIN_EMAIL);
-        onSuccess();
-        return;
-      }
-
-      const ok = await auth.verifyAdminPassword(password);
-      if (!ok) {
-        setError("Incorrect password.");
-        return;
-      }
-      auth.startSession(auth.ADMIN_EMAIL);
+      await auth.signIn(email.trim(), password);
       onSuccess();
+    } catch {
+      setError("Incorrect email or password.");
     } finally {
       setSubmitting(false);
     }
@@ -326,12 +306,6 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
       </p>
 
       {error && <div className="form-msg error">{error}</div>}
-      {needsSetup && (
-        <div className="form-msg success">
-          First time signing in &mdash; choose a password below to secure
-          the admin account.
-        </div>
-      )}
 
       <form onSubmit={handleSubmit}>
         <div className="form-field">
@@ -348,8 +322,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
 
         <div className="form-field">
           <label>
-            {needsSetup ? "Create Password" : "Password"}{" "}
-            <span className="required">*</span>
+            Password <span className="required">*</span>
           </label>
           <input
             type="password"
@@ -359,22 +332,8 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
           />
         </div>
 
-        {needsSetup && (
-          <div className="form-field">
-            <label>
-              Confirm Password <span className="required">*</span>
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
-        )}
-
         <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%" }}>
-          {submitting ? "Please wait..." : needsSetup ? "Set Password & Sign In" : "Sign In"}
+          {submitting ? "Signing in..." : "Sign In"}
         </button>
       </form>
     </>

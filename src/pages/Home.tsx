@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import poster from "../assets/regposter.jpg";
+import MathBackdrop from "../components/MathBackdrop";
+import AwardsPanel from "../components/AwardsPanel";
 
 const HIGHLIGHTS = [
   {
@@ -28,7 +30,9 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <>
+    <div className="home-page">
+      <MathBackdrop />
+
       <section className="hero">
         <div className="container hero-inner">
           <div>
@@ -93,6 +97,8 @@ export default function Home() {
         </div>
       </section>
 
+      <AwardsPanel />
+
       <section className="section section-green-deep">
         <div className="container">
           <div className="contact-card">
@@ -112,6 +118,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

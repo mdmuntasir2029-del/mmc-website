@@ -18,7 +18,7 @@ export interface ActivityLogEntry {
   where: string;
   how: string;
   fileName: string | null;
-  fileDataUrl: string | null;
+  filePath: string | null;
   createdAt: string;
 }
 
@@ -28,7 +28,7 @@ export interface ResourceItem {
   id: string;
   title: string;
   fileName: string;
-  fileDataUrl: string;
+  filePath: string;
   uploadedAt: string;
 }
 

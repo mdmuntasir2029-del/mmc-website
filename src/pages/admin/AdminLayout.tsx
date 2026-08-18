@@ -13,8 +13,8 @@ export default function AdminLayout() {
   const { email, signOut } = useAuth();
   const navigate = useNavigate();
 
-  function handleSignOut() {
-    signOut();
+  async function handleSignOut() {
+    await signOut();
     navigate("/");
   }
 

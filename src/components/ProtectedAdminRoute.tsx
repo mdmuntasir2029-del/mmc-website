@@ -7,7 +7,16 @@ export default function ProtectedAdminRoute({
 }: {
   children: ReactNode;
 }) {
-  const { isAdmin } = useAuth();
+  const { isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{ padding: "60px 24px", textAlign: "center", color: "var(--ink-soft)" }}>
+        Checking your session...
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return <Navigate to="/signin" replace />;
   }
