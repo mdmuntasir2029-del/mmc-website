@@ -1,17 +1,12 @@
 /**
- * Admin auth, backed by Supabase Auth. There is exactly one privileged
- * account — create it once in Supabase Dashboard → Authentication → Users
- * (see supabase/schema.sql and the project README for the full setup).
- * RLS policies in schema.sql are the real enforcement; the email check
- * here is just for the sign-in form's messaging.
+ * Auth, backed by Supabase Auth. Who counts as an admin is controlled by
+ * the `admins` table in Supabase (see supabase/schema.sql) — add or
+ * remove an admin with a SQL statement there, no code change or redeploy
+ * needed. is_admin() is a SECURITY DEFINER function so the client can
+ * check membership without the `admins` table itself ever being
+ * readable through the API.
  */
 import { supabase } from "./supabaseClient";
-
-export const ADMIN_EMAIL = "mdmuntasir.2029@gmail.com";
-
-export function isAdminEmail(email: string): boolean {
-  return email.trim().toLowerCase() === ADMIN_EMAIL;
-}
 
 export async function signIn(email: string, password: string): Promise<void> {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -20,4 +15,10 @@ export async function signIn(email: string, password: string): Promise<void> {
 
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
+}
+
+export async function checkIsAdmin(): Promise<boolean> {
+  const { data, error } = await supabase.rpc("is_admin");
+  if (error) return false;
+  return data === true;
 }

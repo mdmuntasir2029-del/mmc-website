@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { to: "/admin", label: "Dashboard", icon: "\u{1F4CA}", end: true },
   { to: "/admin/activity-log", label: "Club Activity Log", icon: "\u{1F4C5}", end: false },
   { to: "/admin/resources", label: "Resources", icon: "\u{1F4DA}", end: false },
+  { to: "/admin/articles", label: "Articles", icon: "\u{1F4F0}", end: false },
   { to: "/admin/members", label: "Member Management", icon: "\u{1F465}", end: false },
   { to: "/admin/forum", label: "Executive Forum", icon: "\u{1F4AC}", end: false },
 ];

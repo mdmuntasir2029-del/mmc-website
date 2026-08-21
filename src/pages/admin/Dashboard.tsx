@@ -7,23 +7,26 @@ export default function Dashboard() {
     members: 0,
     logEntries: 0,
     resources: 0,
+    articles: 0,
     forumPosts: 0,
   });
 
   useEffect(() => {
     (async () => {
-      const [members, log, pres, quizzes, questions, posts] = await Promise.all([
+      const [members, log, pres, quizzes, questions, articles, posts] = await Promise.all([
         db.getMembers(),
         db.getActivityLog(),
         db.getResources("presentations"),
         db.getResources("quizzes"),
         db.getResources("questions"),
+        db.getArticles(),
         db.getForumPosts(),
       ]);
       setCounts({
         members: members.length,
         logEntries: log.length,
         resources: pres.length + quizzes.length + questions.length,
+        articles: articles.length,
         forumPosts: posts.length,
       });
     })();
@@ -51,20 +54,14 @@ export default function Dashboard() {
           <div className="num">{counts.resources}</div>
           <div className="label">Resources Uploaded</div>
         </Link>
+        <Link to="/admin/articles" className="stat-card">
+          <div className="num">{counts.articles}</div>
+          <div className="label">Articles Published</div>
+        </Link>
         <Link to="/admin/forum" className="stat-card">
           <div className="num">{counts.forumPosts}</div>
           <div className="label">Forum Posts</div>
         </Link>
-      </div>
-
-      <div className="panel">
-        <h3>Storage note</h3>
-        <p style={{ marginBottom: 0 }}>
-          This admin panel currently runs on browser-local storage as a
-          working prototype &mdash; data lives on this device/browser only.
-          It's built with a clean data layer so it can be swapped for a real
-          backend (Supabase) without changing any of these screens.
-        </p>
       </div>
     </>
   );

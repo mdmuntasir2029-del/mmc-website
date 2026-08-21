@@ -279,16 +279,15 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
       return;
     }
 
-    if (!auth.isAdminEmail(email)) {
-      setError(
-        "This portal is currently restricted to the club admin. Member sign-in is coming soon."
-      );
-      return;
-    }
-
     setSubmitting(true);
     try {
       await auth.signIn(email.trim(), password);
+      const isAdmin = await auth.checkIsAdmin();
+      if (!isAdmin) {
+        await auth.signOut();
+        setError("This account doesn't have admin access.");
+        return;
+      }
       onSuccess();
     } catch {
       setError("Incorrect email or password.");
@@ -301,8 +300,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
     <>
       <h2>Sign In</h2>
       <p className="access-subtitle">
-        The admin panel is exclusive to the club admin account. Member
-        sign-in is on the way.
+        Admin panel access only &mdash; member sign-in is on the way.
       </p>
 
       {error && <div className="form-msg error">{error}</div>}

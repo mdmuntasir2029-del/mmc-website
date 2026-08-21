@@ -38,3 +38,15 @@ export interface ForumPost {
   message: string;
   createdAt: string;
 }
+
+export interface Article {
+  id: string;
+  title: string;
+  author: string;
+  abstract: string;
+  publishedDate: string;
+  fileName: string | null;
+  filePath: string | null;
+  link: string | null;
+  createdAt: string;
+}

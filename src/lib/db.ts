@@ -11,6 +11,7 @@ import type {
   ResourceCategory,
   ResourceItem,
   ForumPost,
+  Article,
 } from "./types";
 
 const SIGNED_URL_TTL_SECONDS = 60 * 10;
@@ -318,4 +319,86 @@ export async function addForumPost(
 export async function deleteForumPost(id: string): Promise<void> {
   const { error } = await supabase.from("forum_posts").delete().eq("id", id);
   if (error) throw error;
+}
+
+// ---------- Articles ----------
+
+interface ArticleRow {
+  id: string;
+  title: string;
+  author: string;
+  abstract: string;
+  published_date: string;
+  file_name: string | null;
+  file_path: string | null;
+  link: string | null;
+  created_at: string;
+}
+
+function fromArticleRow(row: ArticleRow): Article {
+  return {
+    id: row.id,
+    title: row.title,
+    author: row.author,
+    abstract: row.abstract,
+    publishedDate: row.published_date,
+    fileName: row.file_name,
+    filePath: row.file_path,
+    link: row.link,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getArticles(): Promise<Article[]> {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .order("published_date", { ascending: false });
+  if (error) throw error;
+  return (data as ArticleRow[]).map(fromArticleRow);
+}
+
+export async function addArticle(
+  data: { title: string; author: string; abstract: string; publishedDate: string; link: string | null },
+  file: File | null
+): Promise<Article> {
+  let filePath: string | null = null;
+  let fileName: string | null = null;
+
+  if (file) {
+    fileName = file.name;
+    filePath = `articles/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+    await uploadFile(filePath, file);
+  }
+
+  const { data: row, error } = await supabase
+    .from("articles")
+    .insert({
+      title: data.title,
+      author: data.author,
+      abstract: data.abstract,
+      published_date: data.publishedDate,
+      link: data.link,
+      file_name: fileName,
+      file_path: filePath,
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    await removeFile(filePath);
+    throw error;
+  }
+  return fromArticleRow(row as ArticleRow);
+}
+
+export async function deleteArticle(id: string): Promise<void> {
+  const { data: row } = await supabase
+    .from("articles")
+    .select("file_path")
+    .eq("id", id)
+    .single();
+  const { error } = await supabase.from("articles").delete().eq("id", id);
+  if (error) throw error;
+  await removeFile((row as { file_path: string | null } | null)?.file_path ?? null);
 }

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClient";
-import { ADMIN_EMAIL } from "../lib/auth";
+import { checkIsAdmin } from "../lib/auth";
 
 interface AuthContextValue {
   isAdmin: boolean;
@@ -15,35 +15,49 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    let cancelled = false;
+
+    async function syncAdmin(nextSession: Session | null) {
+      const admin = nextSession ? await checkIsAdmin() : false;
+      if (!cancelled) setIsAdmin(admin);
+    }
+
+    supabase.auth.getSession().then(async ({ data }) => {
       setSession(data.session);
-      setLoading(false);
+      await syncAdmin(data.session);
+      if (!cancelled) setLoading(false);
     });
 
     const { data: subscription } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
         setSession(newSession);
-        setLoading(false);
+        syncAdmin(newSession).finally(() => {
+          if (!cancelled) setLoading(false);
+        });
       }
     );
 
-    return () => subscription.subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscription.subscription.unsubscribe();
+    };
   }, []);
 
-  const value = useMemo<AuthContextValue>(() => {
-    const email = session?.user?.email ?? null;
-    return {
-      isAdmin: email !== null && email.toLowerCase() === ADMIN_EMAIL,
-      email,
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      isAdmin,
+      email: session?.user?.email ?? null,
       loading,
       signOut: async () => {
         await supabase.auth.signOut();
       },
-    };
-  }, [session, loading]);
+    }),
+    [session, isAdmin, loading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
