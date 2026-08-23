@@ -264,19 +264,25 @@ function RegisterForm() {
   );
 }
 
+type SignInMode = "signin" | "setup" | "forgot";
+
 function SignInForm({ onSuccess }: { onSuccess: () => void }) {
-  const [mode, setMode] = useState<"signin" | "setup">("signin");
+  const [mode, setMode] = useState<SignInMode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [pendingConfirmation, setPendingConfirmation] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
-  function switchMode(next: "signin" | "setup") {
+  function switchMode(next: SignInMode) {
     setMode(next);
     setError("");
     setPassword("");
     setConfirmPassword("");
+    setPendingConfirmation(false);
+    setResetSent(false);
   }
 
   async function handleSignIn(e: FormEvent) {
@@ -324,7 +330,13 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
 
     setSubmitting(true);
     try {
-      await auth.claimAccount(email.trim(), password);
+      const signedIn = await auth.claimAccount(email.trim(), password);
+      if (!signedIn) {
+        // Email confirmation is enabled — there's no session yet until
+        // they click the link Supabase just sent.
+        setPendingConfirmation(true);
+        return;
+      }
       const isAdmin = await auth.checkIsAdmin();
       if (!isAdmin) {
         await auth.signOut();
@@ -341,6 +353,79 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleForgot(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+
+    if (!email.trim()) {
+      setError("Enter your email first.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await auth.requestPasswordReset(email.trim());
+    } finally {
+      // Same message whether or not the account exists — Supabase itself
+      // avoids revealing that, and so should this form.
+      setResetSent(true);
+      setSubmitting(false);
+    }
+  }
+
+  if (pendingConfirmation) {
+    return (
+      <>
+        <h2>Check Your Email</h2>
+        <div className="form-msg success">
+          We've sent a confirmation link to {email.trim()}. Click it, then come back and sign in.
+        </div>
+        <button type="button" className="link-toggle" onClick={() => switchMode("signin")}>
+          Back to Sign In
+        </button>
+      </>
+    );
+  }
+
+  if (mode === "forgot") {
+    return (
+      <>
+        <h2>Reset Your Password</h2>
+        <p className="access-subtitle">Enter your admin email and we'll send you a reset link.</p>
+
+        {error && <div className="form-msg error">{error}</div>}
+        {resetSent && (
+          <div className="form-msg success">
+            If that email has an admin account, a reset link is on its way &mdash; check your inbox.
+          </div>
+        )}
+
+        {!resetSent && (
+          <form onSubmit={handleForgot}>
+            <div className="form-field">
+              <label>
+                Email <span className="required">*</span>
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+            <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%" }}>
+              {submitting ? "Sending..." : "Send Reset Link"}
+            </button>
+          </form>
+        )}
+
+        <button type="button" className="link-toggle" onClick={() => switchMode("signin")}>
+          Back to Sign In
+        </button>
+      </>
+    );
   }
 
   return (
@@ -402,6 +487,11 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
         </button>
       </form>
 
+      {mode === "signin" && (
+        <button type="button" className="link-toggle" onClick={() => switchMode("forgot")}>
+          Forgot your password?
+        </button>
+      )}
       <button type="button" className="link-toggle" onClick={() => switchMode(mode === "signin" ? "setup" : "signin")}>
         {mode === "signin"
           ? "First time signing in with this email? Set your password"

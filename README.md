@@ -19,9 +19,10 @@ npm run dev
    and `admins` tables, their row-level security policies, and the
    private `mmc-files` storage bucket used for uploads. It's safe to
    re-run any time (e.g. after pulling changes to this file).
-3. Turn off email confirmation so a new admin's self-serve password setup
-   (below) works immediately: **Authentication → Providers → Email →**
-   toggle **Confirm email** off.
+3. Set up Brevo as the SMTP provider so Supabase's confirmation and
+   password-reset emails actually deliver reliably (Supabase's own
+   default mailer is low-volume and rate-limited) — see **Brevo email
+   setup** below. Do this before adding real admins.
 4. `schema.sql` already seeds `mdmuntasir.2029@gmail.com` into the
    `admins` table — that email just needs to set its password once via
    the "First time signing in?" link on `/signin` (see below).
@@ -36,6 +37,35 @@ npm run dev
 7. Add the same two variables in Vercel: **Project Settings → Environment
    Variables**, then redeploy so the build picks them up.
 
+## Brevo email setup
+
+Supabase Auth sends its own emails (signup confirmation, password reset)
+through whatever mailer is configured — by default that's Supabase's own
+low-volume sender, which is rate-limited and can land in spam. Routing
+it through Brevo instead is a one-time dashboard setting, no code:
+
+1. In [Brevo](https://www.brevo.com), go to **SMTP & API → SMTP** to get
+   your SMTP login (your Brevo account email) and **generate an SMTP
+   key** (this is different from Brevo's API key — it's the one used
+   here). Also verify a sender address/domain under **Senders** — Brevo
+   won't relay mail from an unverified sender.
+2. In Supabase Dashboard → **Project Settings → Authentication → SMTP
+   Settings**, enable **Custom SMTP** and fill in:
+   - Host: `smtp-relay.brevo.com`
+   - Port: `587`
+   - Username: your Brevo account email
+   - Password: the SMTP key from step 1 (not your Brevo login password)
+   - Sender email / name: your verified sender
+3. Save. From then on, every Supabase Auth email goes through Brevo.
+4. Now that delivery is reliable, turn **Confirm email** on:
+   **Authentication → Providers → Email → Confirm email**. This closes a
+   real gap — with it off, someone who knows or guesses a listed admin's
+   email could claim that account before the real person does (see the
+   note in `src/lib/auth.ts`'s `claimAccount`); with it on, the account
+   isn't usable until a confirmation link reaches the actual inbox. The
+   self-serve setup flow and the sign-in form both already adapt to
+   whichever setting is active — no code changes needed either way.
+
 ## Adding another admin
 
 Admin access is controlled entirely by the `admins` table in Supabase —
@@ -47,28 +77,23 @@ create their Supabase Auth account.
    insert into admins (email) values ('newadmin@example.com');
    ```
 2. Tell them to go to `/signin` and click **"First time signing in with
-   this email? Set your password"** — they choose their own password
-   right there and are signed in immediately.
+   this email? Set your password"**. With Brevo + Confirm email set up
+   as above, they'll get a confirmation email to click before the
+   account is usable; without it, they're signed in immediately.
 
 That self-serve setup is really `supabase.auth.signUp()` under the hood,
 which Supabase refuses to run a second time for the same email once it
 already has a password — so this only ever works once per address, not
-as a way to reset an existing one (that still requires the dashboard;
-see the note in `src/pages/Access.tsx`). It only grants access at all if
-the email is already in `admins` — anyone can technically create an
+as a way to reset an existing one. It only grants access at all if the
+email is already in `admins` — anyone can technically create an
 unprivileged Supabase Auth account with any email through this form (the
 same as Supabase's own public signup would allow), but `is_admin()` gates
 every table and storage bucket, so that account gets nothing without
 also being listed in `admins`.
 
-⚠️ Because email confirmation is off, there's a narrow window between
-adding an email to `admins` and that person actually claiming it where
-someone else who knows/guesses that address could claim it first. Tell
-new admins to set their password right after you add them to close that
-window quickly, or re-enable **Confirm email** if you'd rather trade the
-one-click setup for that protection.
-
 To remove an admin: `delete from admins where email = 'old@example.com';`
+(this doesn't delete their Supabase Auth account, just their access —
+their old password stops meaning anything for this site either way).
 
 The `admins` table has RLS enabled with no policies on it at all, so it
 isn't readable through the API by anyone — not even signed-in admins.
@@ -103,3 +128,12 @@ will be picked up automatically via the existing `@font-face` rule.
   in — it attempts a real sign-in, then calls `is_admin()`; if that comes
   back false it immediately signs the session back out. The actual
   enforcement is always the RLS policies, never anything client-side.
+- Forgot password: "Forgot your password?" on `/signin` calls
+  `supabase.auth.resetPasswordForEmail()`, which emails a recovery link
+  pointing at `/reset-password` (`src/pages/ResetPassword.tsx`). That
+  page waits for Supabase's `PASSWORD_RECOVERY` auth event (or an
+  already-active session, as a fallback for the case where that event
+  fires before the page finishes mounting) before showing the "choose a
+  new password" form, so it can't be used without a valid link. Passwords
+  set this way go through `supabase.auth.updateUser()`, which — unlike
+  the first-time `claimAccount()` — does update an existing password.

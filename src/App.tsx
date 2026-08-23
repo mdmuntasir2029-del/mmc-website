@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Awards from "./pages/Awards";
 import Articles from "./pages/Articles";
 import Access from "./pages/Access";
+import ResetPassword from "./pages/ResetPassword";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import ActivityLog from "./pages/admin/ActivityLog";
@@ -25,6 +26,7 @@ function App() {
           <Route path="/articles" element={<Articles />} />
           <Route path="/register" element={<Access />} />
           <Route path="/signin" element={<Access />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/admin"
             element={
