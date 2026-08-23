@@ -23,7 +23,7 @@ export default function Footer() {
             </li>
             <li>
               <a
-                href="https://instagram.com/manaratmath"
+                href="https://instagram.com/manaratmath.official"
                 target="_blank"
                 rel="noreferrer"
               >
