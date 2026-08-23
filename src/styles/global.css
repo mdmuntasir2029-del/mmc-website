@@ -80,6 +80,7 @@ p {
 
 a {
   color: inherit;
+  text-decoration: none;
 }
 
 img {
@@ -845,7 +846,8 @@ button {
 
 .footer-links {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 10px 20px;
   list-style: none;
   padding: 0;
   margin: 0;
