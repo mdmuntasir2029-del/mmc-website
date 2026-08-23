@@ -265,12 +265,21 @@ function RegisterForm() {
 }
 
 function SignInForm({ onSuccess }: { onSuccess: () => void }) {
+  const [mode, setMode] = useState<"signin" | "setup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(e: FormEvent) {
+  function switchMode(next: "signin" | "setup") {
+    setMode(next);
+    setError("");
+    setPassword("");
+    setConfirmPassword("");
+  }
+
+  async function handleSignIn(e: FormEvent) {
     e.preventDefault();
     setError("");
 
@@ -296,16 +305,56 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
     }
   }
 
+  async function handleSetup(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+
+    if (!email.trim() || !password.trim()) {
+      setError("Email and password are required.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Choose a password with at least 6 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords don't match.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await auth.claimAccount(email.trim(), password);
+      const isAdmin = await auth.checkIsAdmin();
+      if (!isAdmin) {
+        await auth.signOut();
+        setError(
+          "Account created, but this email doesn't have admin access. Ask an existing admin to add it first."
+        );
+        return;
+      }
+      onSuccess();
+    } catch {
+      setError(
+        "Couldn't set up this account — it may already have a password. Try signing in instead, or ask another admin to reset it."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <>
-      <h2>Sign In</h2>
+      <h2>{mode === "signin" ? "Sign In" : "Set Up Your Admin Account"}</h2>
       <p className="access-subtitle">
-        Admin panel access only &mdash; member sign-in is on the way.
+        {mode === "signin"
+          ? "Admin panel access only — member sign-in is on the way."
+          : "For an email that's already been added as an admin but hasn't set a password yet."}
       </p>
 
       {error && <div className="form-msg error">{error}</div>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={mode === "signin" ? handleSignIn : handleSetup}>
         <div className="form-field">
           <label>
             Email <span className="required">*</span>
@@ -320,7 +369,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
 
         <div className="form-field">
           <label>
-            Password <span className="required">*</span>
+            {mode === "signin" ? "Password" : "Choose a Password"} <span className="required">*</span>
           </label>
           <input
             type="password"
@@ -330,10 +379,34 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
           />
         </div>
 
+        {mode === "setup" && (
+          <div className="form-field">
+            <label>
+              Confirm Password <span className="required">*</span>
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </div>
+        )}
+
         <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%" }}>
-          {submitting ? "Signing in..." : "Sign In"}
+          {submitting
+            ? "Please wait..."
+            : mode === "signin"
+              ? "Sign In"
+              : "Create Account & Sign In"}
         </button>
       </form>
+
+      <button type="button" className="link-toggle" onClick={() => switchMode(mode === "signin" ? "setup" : "signin")}>
+        {mode === "signin"
+          ? "First time signing in with this email? Set your password"
+          : "Already have a password? Sign in instead"}
+      </button>
     </>
   );
 }

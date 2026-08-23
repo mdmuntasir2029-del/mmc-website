@@ -920,6 +920,23 @@ button {
   font-size: 0.95rem;
 }
 
+.link-toggle {
+  display: block;
+  margin: 16px auto 0;
+  background: none;
+  border: none;
+  color: var(--purple-btn-1);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link-toggle:hover {
+  color: var(--green-dark);
+}
+
 .form-field {
   margin-bottom: 18px;
 }

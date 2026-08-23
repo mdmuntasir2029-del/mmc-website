@@ -13,6 +13,18 @@ export async function signIn(email: string, password: string): Promise<void> {
   if (error) throw error;
 }
 
+/**
+ * First-time account setup for an email already listed in `admins`.
+ * Supabase's signUp() never overwrites an existing account's password —
+ * it errors instead — so this can only ever "claim" an email once, not
+ * reset one. With email confirmation disabled in the Supabase dashboard,
+ * a successful call signs the browser in immediately.
+ */
+export async function claimAccount(email: string, password: string): Promise<void> {
+  const { error } = await supabase.auth.signUp({ email, password });
+  if (error) throw error;
+}
+
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
 }

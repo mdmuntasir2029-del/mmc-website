@@ -19,34 +19,54 @@ npm run dev
    and `admins` tables, their row-level security policies, and the
    private `mmc-files` storage bucket used for uploads. It's safe to
    re-run any time (e.g. after pulling changes to this file).
-3. Create the first admin account: **Authentication → Users → Add user**,
-   email `mdmuntasir.2029@gmail.com`, set a password, and toggle **Auto
-   Confirm User** on. `schema.sql` seeds this same email into the
-   `admins` table, so it's the one covered out of the box.
-4. Grab your keys from **Project Settings → API**: the **Project URL** and
+3. Turn off email confirmation so a new admin's self-serve password setup
+   (below) works immediately: **Authentication → Providers → Email →**
+   toggle **Confirm email** off.
+4. `schema.sql` already seeds `mdmuntasir.2029@gmail.com` into the
+   `admins` table — that email just needs to set its password once via
+   the "First time signing in?" link on `/signin` (see below).
+5. Grab your keys from **Project Settings → API**: the **Project URL** and
    the **anon / public** key (not the service role key — that one should
    never end up in frontend code).
-5. Put them in `.env.local` for local dev:
+6. Put them in `.env.local` for local dev:
    ```
    VITE_SUPABASE_URL=https://your-project-ref.supabase.co
    VITE_SUPABASE_ANON_KEY=your-anon-public-key
    ```
-6. Add the same two variables in Vercel: **Project Settings → Environment
+7. Add the same two variables in Vercel: **Project Settings → Environment
    Variables**, then redeploy so the build picks them up.
 
 ## Adding another admin
 
 Admin access is controlled entirely by the `admins` table in Supabase —
-nothing in the code needs to change.
+nothing in the code needs to change, and there's no separate step to
+create their Supabase Auth account.
 
-1. Give the person a Supabase Auth account, same as the first admin:
-   **Authentication → Users → Add user**, set a password, toggle **Auto
-   Confirm User** on.
-2. In the SQL Editor, run:
+1. In the SQL Editor, run:
    ```sql
    insert into admins (email) values ('newadmin@example.com');
    ```
-3. They can sign in at `/signin` right away.
+2. Tell them to go to `/signin` and click **"First time signing in with
+   this email? Set your password"** — they choose their own password
+   right there and are signed in immediately.
+
+That self-serve setup is really `supabase.auth.signUp()` under the hood,
+which Supabase refuses to run a second time for the same email once it
+already has a password — so this only ever works once per address, not
+as a way to reset an existing one (that still requires the dashboard;
+see the note in `src/pages/Access.tsx`). It only grants access at all if
+the email is already in `admins` — anyone can technically create an
+unprivileged Supabase Auth account with any email through this form (the
+same as Supabase's own public signup would allow), but `is_admin()` gates
+every table and storage bucket, so that account gets nothing without
+also being listed in `admins`.
+
+⚠️ Because email confirmation is off, there's a narrow window between
+adding an email to `admins` and that person actually claiming it where
+someone else who knows/guesses that address could claim it first. Tell
+new admins to set their password right after you add them to close that
+window quickly, or re-enable **Confirm email** if you'd rather trade the
+one-click setup for that protection.
 
 To remove an admin: `delete from admins where email = 'old@example.com';`
 
