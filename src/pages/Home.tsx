@@ -6,7 +6,7 @@ import PiCounter from "../components/PiCounter";
 const HIGHLIGHTS = [
   {
     icon: "∑",
-    title: "Weekly Session- Thursdays are our birthdays!",
+    title: "Weekly Sessions",
     desc: "Weekly Sessions every Thursday. Chime in, whether you like math or like fun or both. ",
   },
   {
