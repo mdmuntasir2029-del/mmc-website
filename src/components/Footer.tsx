@@ -27,7 +27,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noreferrer"
               >
-                @manaratmath
+                @manaratmath.official
               </a>
             </li>
           </ul>
