@@ -266,6 +266,26 @@ function RegisterForm() {
 
 type SignInMode = "signin" | "setup" | "forgot";
 
+/**
+ * Turns a signUp() failure into a message that actually says what went
+ * wrong, instead of always guessing "this account already exists" — a
+ * rate-limited default mailer (Supabase's own, before Brevo is wired up)
+ * fails the same call and needs a completely different fix.
+ */
+function describeSetupError(err: unknown): string {
+  const status = (err as { status?: number } | null)?.status;
+  const code = (err as { code?: string } | null)?.code;
+  const message = err instanceof Error ? err.message : String(err);
+
+  if (status === 429 || code === "over_email_send_rate_limit") {
+    return "Supabase's email sender is temporarily rate-limited (this isn't about your account). Wait a few minutes and try again, or finish routing email through Brevo (see the README) to fix this for good.";
+  }
+  if (code === "user_already_exists" || /already registered/i.test(message)) {
+    return "This email already has a password set. Try signing in instead, or use \"Forgot your password?\" to reset it.";
+  }
+  return `Couldn't set up this account: ${message}`;
+}
+
 function SignInForm({ onSuccess }: { onSuccess: () => void }) {
   const [mode, setMode] = useState<SignInMode>("signin");
   const [email, setEmail] = useState("");
@@ -346,10 +366,8 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
         return;
       }
       onSuccess();
-    } catch {
-      setError(
-        "Couldn't set up this account — it may already have a password. Try signing in instead, or ask another admin to reset it."
-      );
+    } catch (err) {
+      setError(describeSetupError(err));
     } finally {
       setSubmitting(false);
     }
