@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import Modal from "../../components/Modal";
+import { IconClip } from "../../components/icons";
 import * as db from "../../lib/db";
 import type { Article } from "../../lib/types";
 
@@ -49,7 +50,12 @@ export default function AdminArticles() {
                 <div className="name">{a.title}</div>
                 <div className="meta">
                   {a.author} &middot; {new Date(a.publishedDate + "T00:00:00").toLocaleDateString()}
-                  {a.fileName && <> &middot; {"\u{1F4CE}"} {a.fileName}</>}
+                  {a.fileName && (
+                    <>
+                      {" "}
+                      &middot; <IconClip className="inline-icon" /> {a.fileName}
+                    </>
+                  )}
                   {a.link && <> &middot; has link</>}
                 </div>
               </div>

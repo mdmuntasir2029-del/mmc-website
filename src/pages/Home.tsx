@@ -2,25 +2,26 @@ import { useNavigate } from "react-router-dom";
 import poster from "../assets/regposter.jpg";
 import MathBackdrop from "../components/MathBackdrop";
 import PiCounter from "../components/PiCounter";
+import { IconTrophy, IconBook, IconUsers } from "../components/icons";
 
 const HIGHLIGHTS = [
   {
-    icon: "∑",
+    icon: <span aria-hidden="true">&Sigma;</span>,
     title: "Weekly Sessions",
     desc: "Weekly Sessions every Thursday. Chime in, whether you like math or like fun or both. ",
   },
   {
-    icon: "\u{1F3C6}",
+    icon: <IconTrophy size={26} />,
     title: "Prepare and Participate",
     desc: "Prepare for team and individual contests and olympiads. Participate in inter-school meets and other competitive math events.",
   },
   {
-    icon: "\u{1F4DA}",
+    icon: <IconBook size={26} />,
     title: "Contribute and Contest",
     desc: "Presentations, quizzes, and question banks shared by the club and members alike, all in one place.",
   },
   {
-    icon: "\u{1F91D}",
+    icon: <IconUsers size={26} />,
     title: "A Community of Mathletes",
     desc: "Work with peers who love numbers just as much as you do.",
   },

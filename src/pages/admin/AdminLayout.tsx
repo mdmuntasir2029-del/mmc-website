@@ -1,13 +1,21 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import {
+  IconDashboard,
+  IconCalendar,
+  IconBook,
+  IconNewspaper,
+  IconUsers,
+  IconChat,
+} from "../../components/icons";
 
 const NAV_ITEMS = [
-  { to: "/admin", label: "Dashboard", icon: "\u{1F4CA}", end: true },
-  { to: "/admin/activity-log", label: "Club Activity Log", icon: "\u{1F4C5}", end: false },
-  { to: "/admin/resources", label: "Resources", icon: "\u{1F4DA}", end: false },
-  { to: "/admin/articles", label: "Articles", icon: "\u{1F4F0}", end: false },
-  { to: "/admin/members", label: "Member Management", icon: "\u{1F465}", end: false },
-  { to: "/admin/forum", label: "Executive Forum", icon: "\u{1F4AC}", end: false },
+  { to: "/admin", label: "Dashboard", Icon: IconDashboard, end: true },
+  { to: "/admin/activity-log", label: "Club Activity Log", Icon: IconCalendar, end: false },
+  { to: "/admin/resources", label: "Resources", Icon: IconBook, end: false },
+  { to: "/admin/articles", label: "Articles", Icon: IconNewspaper, end: false },
+  { to: "/admin/members", label: "Member Management", Icon: IconUsers, end: false },
+  { to: "/admin/forum", label: "Executive Forum", Icon: IconChat, end: false },
 ];
 
 export default function AdminLayout() {
@@ -36,7 +44,7 @@ export default function AdminLayout() {
               `admin-nav-link ${isActive ? "active" : ""}`
             }
           >
-            <span>{item.icon}</span> {item.label}
+            <item.Icon /> {item.label}
           </NavLink>
         ))}
 

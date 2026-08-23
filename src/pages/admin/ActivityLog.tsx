@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import Modal from "../../components/Modal";
+import { IconClip } from "../../components/icons";
 import * as db from "../../lib/db";
 import type { ActivityLogEntry } from "../../lib/types";
 
@@ -69,7 +70,11 @@ export default function ActivityLog() {
                   <h4>{entry.title}</h4>
                   <span>{entry.where}</span>
                 </div>
-                {entry.fileName && <span className="tag">{"\u{1F4CE}"} File</span>}
+                {entry.fileName && (
+                  <span className="tag">
+                    <IconClip /> File
+                  </span>
+                )}
               </div>
             ))}
           </div>

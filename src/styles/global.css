@@ -108,8 +108,8 @@ button {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: linear-gradient(180deg, var(--purple-nav) 0%, var(--purple-nav-deep) 100%);
-  box-shadow: 0 2px 16px rgba(95, 61, 196, 0.15);
+  background: transparent;
+  box-shadow: none;
 }
 
 .navbar-inner {
@@ -764,9 +764,15 @@ button {
 }
 
 .card-icon {
-  font-size: 2rem;
-  margin-bottom: 10px;
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 12px;
+  color: var(--green-dark);
+  font-size: 1.7rem;
+  font-weight: 700;
 }
 
 .contact-card {
@@ -1275,6 +1281,10 @@ tr:hover td {
   color: var(--ink-soft);
 }
 
+.inline-icon {
+  vertical-align: -2px;
+}
+
 .tag {
   display: inline-flex;
   align-items: center;
@@ -1423,19 +1433,17 @@ tr:hover td {
   }
 
   .admin-sidebar {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
+    padding: 18px 16px;
+    gap: 4px;
   }
 
   .admin-sidebar-header {
-    width: 100%;
+    margin-bottom: 12px;
   }
 
   .admin-sidebar-footer {
-    margin-top: 0;
-    border-top: none;
-    padding-top: 0;
+    margin-top: 16px;
+    padding-top: 16px;
   }
 
   .navbar-links {
@@ -1448,5 +1456,25 @@ tr:hover td {
 
   .admin-content {
     padding: 24px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-brand-text {
+    display: none;
+  }
+
+  .navbar-inner {
+    padding: 10px 16px;
+  }
+
+  .navbar-actions {
+    gap: 8px;
+  }
+
+  .btn-shine,
+  .btn-ghost {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
   }
 }
