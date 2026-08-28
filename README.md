@@ -84,14 +84,19 @@ create their Supabase Auth account.
 That self-serve setup is really `supabase.auth.signUp()` under the hood,
 which Supabase refuses to run a second time for the same email once it
 already has a password — so this only ever works once per address, not
-as a way to reset an existing one. It only grants access at all if the
-email is already in `admins` — anyone can technically create an
-unprivileged Supabase Auth account with any email through this form (the
-same as Supabase's own public signup would allow), but `is_admin()` gates
-every table and storage bucket, so that account gets nothing without
-also being listed in `admins`.
+as a way to reset an existing one. Before calling it, the sign-in form
+first checks the email against `admins` via `is_email_admin()` (another
+SECURITY DEFINER function, returns true/false for one specific email
+without exposing the list) and refuses outright if it isn't listed —
+so a non-admin email gets an immediate "hasn't been added as an admin"
+message and no Supabase Auth account is created for it at all.
 
 To remove an admin: `delete from admins where email = 'old@example.com';`
+(this only revokes access — it doesn't delete their Supabase Auth
+account. Any stray accounts created while this project's admin auth was
+being built/tested — before the is_email_admin() pre-check existed —
+are harmless but can be cleaned up manually under **Authentication →
+Users** if you want the list tidy.)
 (this doesn't delete their Supabase Auth account, just their access —
 their old password stops meaning anything for this site either way).
 

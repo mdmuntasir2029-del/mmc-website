@@ -8,15 +8,14 @@ create extension if not exists pgcrypto;
 -- Who gets into /admin is controlled by rows in this table, not by
 -- anything in the codebase.
 --
--- To add another admin:
---   1. Give them a Supabase Auth account: Authentication → Users → Add
---      user (same as the first admin — set a password, toggle Auto
---      Confirm User on).
---   2. Run in the SQL Editor:
---        insert into admins (email) values ('newemail@example.com');
+-- To add another admin, just run in the SQL Editor:
+--   insert into admins (email) values ('newemail@example.com');
+-- They then self-serve their own password from /signin — "First time
+-- signing in with this email? Set your password" — no separate step to
+-- create their Supabase Auth account.
 --
 -- To remove one:
---        delete from admins where email = 'oldemail@example.com';
+--   delete from admins where email = 'oldemail@example.com';
 --
 -- This table has RLS enabled with NO policies on it at all, so it isn't
 -- readable or writable through the API by anyone, including signed-in
@@ -45,6 +44,21 @@ as $$
 $$;
 
 grant execute on function is_admin() to anon, authenticated;
+
+-- Lets the sign-in page check ONE specific email against the allowlist
+-- before creating a Supabase Auth account for it (signUp() has no idea
+-- about `admins` — it'll happily create a login for anyone). Only ever
+-- returns true/false for the exact email asked about, never the list.
+create or replace function is_email_admin(check_email text) returns boolean
+language sql security definer stable
+set search_path = public
+as $$
+  select exists (
+    select 1 from admins where lower(email) = lower(check_email)
+  );
+$$;
+
+grant execute on function is_email_admin(text) to anon, authenticated;
 
 -- ========== Tables ==========
 

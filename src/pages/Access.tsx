@@ -350,6 +350,14 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
 
     setSubmitting(true);
     try {
+      const allowed = await auth.checkEmailIsAdmin(email.trim());
+      if (!allowed) {
+        setError(
+          "This email hasn't been added as an admin. Ask an existing admin to add it first — no account will be created until then."
+        );
+        return;
+      }
+
       const signedIn = await auth.claimAccount(email.trim(), password);
       if (!signedIn) {
         // Email confirmation is enabled — there's no session yet until

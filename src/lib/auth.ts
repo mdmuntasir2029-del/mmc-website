@@ -39,6 +39,18 @@ export async function checkIsAdmin(): Promise<boolean> {
 }
 
 /**
+ * Checks whether a specific email is on the admin allowlist WITHOUT
+ * signing anyone in or creating an account — used to reject a first-time
+ * setup attempt before ever calling claimAccount(), so a non-admin email
+ * never gets a Supabase Auth account created for it in the first place.
+ */
+export async function checkEmailIsAdmin(email: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc("is_email_admin", { check_email: email });
+  if (error) return false;
+  return data === true;
+}
+
+/**
  * Sends a password-reset email (via Supabase Auth, routed through
  * whatever SMTP provider is configured in the dashboard). Doesn't throw
  * on an unknown email — Supabase itself avoids revealing whether an
