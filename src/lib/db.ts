@@ -188,6 +188,55 @@ export async function addActivityLogEntry(
   return fromActivityLogRow(row as ActivityLogRow);
 }
 
+export async function updateActivityLogEntry(
+  id: string,
+  data: { date: string; title: string; what: string; where: string; how: string },
+  fileChange: { file: File | null; remove: boolean }
+): Promise<ActivityLogEntry> {
+  const updatePayload: Record<string, unknown> = {
+    date: data.date,
+    title: data.title,
+    what: data.what,
+    where_text: data.where,
+    how: data.how,
+  };
+
+  let oldFilePath: string | null = null;
+  if (fileChange.file || fileChange.remove) {
+    const { data: existingRow } = await supabase
+      .from("activity_log")
+      .select("file_path")
+      .eq("id", id)
+      .single();
+    oldFilePath = (existingRow as { file_path: string | null } | null)?.file_path ?? null;
+  }
+
+  if (fileChange.file) {
+    const filePath = `activity-log/${crypto.randomUUID()}-${sanitizeFileName(fileChange.file.name)}`;
+    await uploadFile(filePath, fileChange.file);
+    updatePayload.file_name = fileChange.file.name;
+    updatePayload.file_path = filePath;
+  } else if (fileChange.remove) {
+    updatePayload.file_name = null;
+    updatePayload.file_path = null;
+  }
+
+  const { data: row, error } = await supabase
+    .from("activity_log")
+    .update(updatePayload)
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+
+  if ((fileChange.file || fileChange.remove) && oldFilePath) {
+    await removeFile(oldFilePath);
+  }
+
+  return fromActivityLogRow(row as ActivityLogRow);
+}
+
 export async function deleteActivityLogEntry(id: string): Promise<void> {
   const { data: row } = await supabase
     .from("activity_log")

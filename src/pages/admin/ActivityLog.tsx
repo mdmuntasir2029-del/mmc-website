@@ -8,6 +8,7 @@ import type { ActivityLogEntry } from "../../lib/types";
 export default function ActivityLog() {
   const [entries, setEntries] = useState<ActivityLogEntry[]>([]);
   const [showAdd, setShowAdd] = useState(false);
+  const [editing, setEditing] = useState<ActivityLogEntry | null>(null);
   const [selected, setSelected] = useState<ActivityLogEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
@@ -82,10 +83,25 @@ export default function ActivityLog() {
       </div>
 
       {showAdd && (
-        <AddEntryModal
+        <EntryFormModal
+          mode="add"
+          entry={null}
           onClose={() => setShowAdd(false)}
           onSaved={() => {
             setShowAdd(false);
+            load();
+          }}
+        />
+      )}
+
+      {editing && (
+        <EntryFormModal
+          mode="edit"
+          entry={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            setSelected(null);
             load();
           }}
         />
@@ -123,33 +139,42 @@ export default function ActivityLog() {
             </div>
           )}
 
-          <button
-            className="btn btn-danger btn-sm"
-            onClick={() => handleDelete(selected.id)}
-          >
-            Delete Entry
-          </button>
+          <div className="row">
+            <button className="btn btn-secondary btn-sm" onClick={() => setEditing(selected)}>
+              Edit Entry
+            </button>
+            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(selected.id)}>
+              Delete Entry
+            </button>
+          </div>
         </Modal>
       )}
     </>
   );
 }
 
-function AddEntryModal({
+function EntryFormModal({
+  mode,
+  entry,
   onClose,
   onSaved,
 }: {
+  mode: "add" | "edit";
+  entry: ActivityLogEntry | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [title, setTitle] = useState("");
-  const [what, setWhat] = useState("");
-  const [where, setWhere] = useState("");
-  const [how, setHow] = useState("");
+  const [date, setDate] = useState(entry?.date ?? new Date().toISOString().slice(0, 10));
+  const [title, setTitle] = useState(entry?.title ?? "");
+  const [what, setWhat] = useState(entry?.what ?? "");
+  const [where, setWhere] = useState(entry?.where ?? "");
+  const [how, setHow] = useState(entry?.how ?? "");
   const [file, setFile] = useState<File | null>(null);
+  const [removeExistingFile, setRemoveExistingFile] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const hasExistingFile = mode === "edit" && !!entry?.fileName && !removeExistingFile;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -159,16 +184,21 @@ function AddEntryModal({
     }
     setSubmitting(true);
     try {
-      await db.addActivityLogEntry(
-        {
-          date,
-          title: title.trim(),
-          what: what.trim(),
-          where: where.trim(),
-          how: how.trim(),
-        },
-        file
-      );
+      const payload = {
+        date,
+        title: title.trim(),
+        what: what.trim(),
+        where: where.trim(),
+        how: how.trim(),
+      };
+      if (mode === "add") {
+        await db.addActivityLogEntry(payload, file);
+      } else if (entry) {
+        await db.updateActivityLogEntry(entry.id, payload, {
+          file,
+          remove: removeExistingFile,
+        });
+      }
       onSaved();
     } catch {
       setError("Could not save this entry. Try a smaller file.");
@@ -178,7 +208,7 @@ function AddEntryModal({
   }
 
   return (
-    <Modal title="Add Activity Log Entry" onClose={onClose}>
+    <Modal title={mode === "add" ? "Add Activity Log Entry" : "Edit Activity Log Entry"} onClose={onClose}>
       {error && <div className="form-msg error">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-row">
@@ -217,18 +247,35 @@ function AddEntryModal({
           <textarea rows={2} value={how} onChange={(e) => setHow(e.target.value)} placeholder="Format, structure, resources used" />
         </div>
 
+        {hasExistingFile && (
+          <p className="form-hint">
+            Current file: {entry!.fileName} &mdash;{" "}
+            <button
+              type="button"
+              className="link-toggle"
+              style={{ display: "inline", margin: 0, fontSize: "0.82rem" }}
+              onClick={() => setRemoveExistingFile(true)}
+            >
+              remove
+            </button>
+          </p>
+        )}
+
         <div className="form-field">
-          <label>Document (optional)</label>
+          <label>{hasExistingFile ? "Replace Document (optional)" : "Document (optional)"}</label>
           <div className="form-file">
             <input
               type="file"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                setFile(e.target.files?.[0] ?? null);
+                setRemoveExistingFile(false);
+              }}
             />
           </div>
         </div>
 
         <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%" }}>
-          {submitting ? "Saving..." : "Save Entry"}
+          {submitting ? "Saving..." : mode === "add" ? "Save Entry" : "Save Changes"}
         </button>
       </form>
     </Modal>
