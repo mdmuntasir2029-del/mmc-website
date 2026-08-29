@@ -14,6 +14,7 @@
 
   --cream: #fbfbf5;
   --white: #ffffff;
+  --surface-tint: #f2faf0;
   --ink: #123319;
   --ink-soft: #365b41;
 
@@ -27,6 +28,7 @@
   --font-heading: "Baloo 2", "Brick Sans", sans-serif;
   --font-body: "Poppins", "Segoe UI", sans-serif;
   --font-brick: "Brick Sans", "Baloo 2", sans-serif;
+  --font-math: "Cambria Math", Cambria, "Times New Roman", serif;
 }
 
 /* Optional real "Brick Sans" font file — drop BrickSans.woff2 into
@@ -478,8 +480,9 @@ button {
 
 .math-eq {
   position: absolute;
-  font-family: var(--font-heading);
+  font-family: var(--font-math);
   font-weight: 700;
+  font-style: italic;
   color: var(--green-dark-2);
   white-space: nowrap;
   mix-blend-mode: multiply;
@@ -501,8 +504,8 @@ button {
   right: 24px;
   z-index: 0;
   max-width: 640px;
-  font-family: "Courier New", monospace;
-  font-weight: 800;
+  font-family: var(--font-math);
+  font-weight: 700;
   line-height: 1.15;
   word-break: break-all;
   pointer-events: none;
@@ -762,7 +765,8 @@ button {
 }
 
 .card {
-  background: var(--white);
+  background: var(--surface-tint);
+  border: 1px solid rgba(21, 122, 61, 0.1);
   border-radius: var(--radius-md);
   padding: 26px;
   box-shadow: var(--shadow-soft);
@@ -787,7 +791,8 @@ button {
 }
 
 .contact-card {
-  background: var(--white);
+  background: var(--surface-tint);
+  border: 1px solid rgba(21, 122, 61, 0.1);
   border-radius: var(--radius-lg);
   padding: 32px;
   box-shadow: var(--shadow-soft);
@@ -839,9 +844,7 @@ button {
 
 .footer-brand img {
   height: 34px;
-  background: #fff;
-  border-radius: 8px;
-  padding: 3px;
+  width: auto;
 }
 
 .footer-links {
