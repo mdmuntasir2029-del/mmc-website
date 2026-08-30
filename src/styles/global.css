@@ -444,11 +444,6 @@ button {
   color: var(--white);
 }
 
-.section-green,
-.section-contact {
-  background: var(--green-light);
-}
-
 .section-green-deep h2,
 .section-green-deep h3,
 .section-green-deep p {
