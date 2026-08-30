@@ -42,13 +42,6 @@ export default function Home() {
             <h1 className="hero-title">
               Manarat <span>Mathletes</span> Club
             </h1>
-            <p className="hero-tagline">to infinity unbound.</p>
-            <p className="hero-desc">
-              A student-run club for anyone who wants to think in numbers,
-              patterns, and proofs &mdash; from casual puzzle-solvers to
-              olympiad hopefuls. Member registrations for the 2026&ndash;2027
-              session are open now.
-            </p>
             <div className="hero-cta-row">
               <button
                 className="btn-shine"

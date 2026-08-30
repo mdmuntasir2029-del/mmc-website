@@ -26,7 +26,7 @@
   --radius-sm: 8px;
 
   --font-heading: "Baloo 2", "Brick Sans", sans-serif;
-  --font-body: "Poppins", "Segoe UI", sans-serif;
+  --font-body: "Cambria Math", Cambria, "Times New Roman", serif;
   --font-brick: "Brick Sans", "Baloo 2", sans-serif;
   --font-math: "Cambria Math", Cambria, "Times New Roman", serif;
 }
@@ -395,7 +395,7 @@ button {
 .hero-cta-row {
   display: flex;
   gap: 14px;
-  margin-top: 26px;
+  margin-top: 38px;
   flex-wrap: wrap;
 }
 
