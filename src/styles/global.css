@@ -439,6 +439,7 @@ button {
 }
 
 .section-green-deep {
+  background: var(--green-dark-2);
   color: var(--white);
 }
 
@@ -552,7 +553,7 @@ button {
     var(--green-light) 55%,
     var(--green-mid) 100%
   );
-  min-height: 80vh;
+  min-height: 100vh;
   padding-top: 24px;
 }
 
@@ -565,7 +566,7 @@ button {
     var(--green-light) 55%,
     var(--green-mid) 100%
   );
-  min-height: 80vh;
+  min-height: 100vh;
 }
 
 .article-list {
@@ -921,7 +922,7 @@ button {
 .access-wrap {
   background: linear-gradient(180deg, var(--purple-nav) 0%, var(--green-light-soft) 55%, var(--green-light) 100%);
   padding: 56px 0 90px;
-  min-height: 70vh;
+  min-height: 100vh;
 }
 
 .access-card {
