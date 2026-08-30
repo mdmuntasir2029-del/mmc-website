@@ -828,7 +828,6 @@ button {
   color: #dff5e4;
   padding: 40px 0 22px;
   margin-top: auto;
-  border-top: 4px solid var(--green-light);
 }
 
 .footer-inner {
