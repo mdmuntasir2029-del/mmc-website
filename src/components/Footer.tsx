@@ -6,9 +6,15 @@ export default function Footer() {
     <footer className="footer">
       <div className="container">
         <div className="footer-inner">
-          <div className="footer-brand">
-            <img src={logoMark} alt="Manarat Mathletes Club logo" />
-            Manarat Mathletes Club
+          <div className="footer-brand-block">
+            <div className="footer-brand">
+              <img src={logoMark} alt="Manarat Mathletes Club logo" />
+              Manarat Mathletes Club
+            </div>
+            <p className="footer-address">
+              Manarat Dhaka International School &amp; College, Gulshan,
+              Dhaka-1212
+            </p>
           </div>
 
           <ul className="footer-links">
@@ -17,9 +23,6 @@ export default function Footer() {
             </li>
             <li>
               <Link to="/register">Register</Link>
-            </li>
-            <li>
-              <Link to="/signin">Sign In</Link>
             </li>
             <li>
               <a
@@ -41,6 +44,9 @@ export default function Footer() {
           <span>
             Developed by <a href="#">Muntasir B28</a>
           </span>
+          <Link to="/signin" className="footer-admin-link">
+            Admin
+          </Link>
         </div>
       </div>
     </footer>

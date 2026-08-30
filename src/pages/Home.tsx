@@ -42,18 +42,19 @@ export default function Home() {
             <h1 className="hero-title">
               Manarat <span>Mathletes</span> Club
             </h1>
+            <p className="hero-desc">
+              A student-run club for anyone who wants to think in numbers,
+              patterns, and proofs &mdash; from casual puzzle-solvers to
+              olympiad hopefuls. Member registrations for the
+              2026&ndash;2027 session are open now. Boys from Classes 3-A2
+              are welcome to register and find their love for math!
+            </p>
             <div className="hero-cta-row">
               <button
                 className="btn-shine"
                 onClick={() => navigate("/register")}
               >
                 Register
-              </button>
-              <button
-                className="btn-ghost"
-                onClick={() => navigate("/signin")}
-              >
-                Sign In
               </button>
             </div>
           </div>
@@ -94,20 +95,36 @@ export default function Home() {
 
       <section className="section section-green-deep">
         <div className="container">
-          <div className="contact-card">
-            <span className="label">Club In-Charge</span>
-            <div className="value">Md. Shariful Islam</div>
-            <p style={{ color: "var(--ink-soft)", marginBottom: "6px" }}>
-              For questions about membership or club activities, reach out
-              directly.
-            </p>
-            <a
-              href="tel:01921044564"
-              className="btn btn-primary"
-              style={{ marginTop: "10px" }}
-            >
-              01921044564
-            </a>
+          <div className="section-heading">
+            <h2>Contact Us</h2>
+          </div>
+
+          <div className="card-grid contact-grid">
+            <div className="contact-card">
+              <span className="label">Club In-Charge</span>
+              <div className="value">Md. Shariful Islam</div>
+              <a
+                href="https://wa.me/8801921044564"
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-primary"
+              >
+                01921044564
+              </a>
+            </div>
+
+            <div className="contact-card">
+              <span className="label">Developer</span>
+              <div className="value">Muntasir Zaman</div>
+              <a
+                href="https://wa.me/8801916921252"
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-primary"
+              >
+                01916921252
+              </a>
+            </div>
           </div>
         </div>
       </section>

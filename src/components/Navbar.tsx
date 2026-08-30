@@ -51,14 +51,9 @@ export default function Navbar() {
               Sign Out
             </button>
           ) : (
-            <>
-              <Link to="/signin" className="btn-ghost">
-                Sign In
-              </Link>
-              <Link to="/register" className="btn-shine">
-                Register
-              </Link>
-            </>
+            <Link to="/register" className="btn-shine">
+              Register
+            </Link>
           )}
         </div>
       </div>

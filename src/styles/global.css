@@ -338,6 +338,7 @@ button {
 .home-page {
   position: relative;
   overflow: hidden;
+  min-height: 100vh;
   background: linear-gradient(
     180deg,
     var(--purple-nav) 0%,
@@ -395,7 +396,7 @@ button {
 .hero-cta-row {
   display: flex;
   gap: 14px;
-  margin-top: 38px;
+  margin-top: 26px;
   flex-wrap: wrap;
 }
 
@@ -796,9 +797,12 @@ button {
   border-radius: var(--radius-lg);
   padding: 32px;
   box-shadow: var(--shadow-soft);
-  max-width: 520px;
-  margin: 0 auto;
   text-align: center;
+}
+
+.contact-grid {
+  max-width: 700px;
+  margin: 0 auto;
 }
 
 .contact-card .label {
@@ -823,6 +827,7 @@ button {
   color: #dff5e4;
   padding: 40px 0 22px;
   margin-top: auto;
+  border-top: 4px solid var(--green-light);
 }
 
 .footer-inner {
@@ -831,6 +836,12 @@ button {
   gap: 24px;
   justify-content: space-between;
   align-items: center;
+}
+
+.footer-brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .footer-brand {
@@ -845,6 +856,13 @@ button {
 .footer-brand img {
   height: 34px;
   width: auto;
+}
+
+.footer-address {
+  margin: 0;
+  padding-left: 44px;
+  font-size: 0.82rem;
+  color: #a9d9b4;
 }
 
 .footer-links {
@@ -884,6 +902,18 @@ button {
   color: #a6f0b8;
   text-decoration: none;
   font-weight: 600;
+}
+
+.footer-admin-link {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: rgba(169, 217, 180, 0.55);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-admin-link:hover {
+  color: #a6f0b8;
 }
 
 /* ===================== Access (Register / Sign in) ===================== */
