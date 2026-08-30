@@ -93,7 +93,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section section-green">
+      <section className="section section-contact">
         <div className="container">
           <div className="section-heading">
             <h2>Contact Us</h2>

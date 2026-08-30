@@ -433,6 +433,7 @@ button {
 .hero,
 .section-green,
 .section-green-deep,
+.section-contact,
 .section-awards {
   position: relative;
   z-index: 1;
@@ -441,6 +442,10 @@ button {
 .section-green-deep {
   background: var(--green-dark-2);
   color: var(--white);
+}
+
+.section-contact {
+  background: var(--green-light);
 }
 
 .section-green-deep h2,
