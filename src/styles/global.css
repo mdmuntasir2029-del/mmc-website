@@ -18,6 +18,10 @@
   --ink: #123319;
   --ink-soft: #365b41;
 
+  --page-bg: #0c4d26;
+  --text-on-dark: #f3f7ef;
+  --text-on-dark-soft: #a9c9ac;
+
   --shadow-soft: 0 10px 30px rgba(12, 77, 38, 0.15);
   --shadow-btn: 0 8px 20px rgba(95, 61, 196, 0.45);
 
@@ -111,18 +115,10 @@ button {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: linear-gradient(
-    180deg,
-    rgba(155, 111, 224, 0.58) 0%,
-    rgba(180, 145, 235, 0.42) 45%,
-    rgba(222, 210, 247, 0.26) 100%
-  );
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 8px 26px rgba(95, 61, 196, 0.18);
+  background: rgba(6, 36, 18, 0.72);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .navbar-inner {
@@ -140,7 +136,7 @@ button {
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: var(--ink);
+  color: var(--text-on-dark);
 }
 
 .navbar-brand img {
@@ -152,7 +148,7 @@ button {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.1rem;
-  color: #2d1a5c;
+  color: var(--text-on-dark);
   line-height: 1.1;
 }
 
@@ -168,13 +164,13 @@ button {
 .navbar-links a {
   text-decoration: none;
   font-weight: 600;
-  color: #3a2a63;
+  color: var(--text-on-dark-soft);
   font-size: 0.95rem;
   transition: color 0.2s ease;
 }
 
 .navbar-links a:hover {
-  color: var(--purple-btn-1);
+  color: var(--text-on-dark);
 }
 
 .navbar-actions {
@@ -266,19 +262,20 @@ button {
 
 .btn-ghost {
   font-weight: 600;
-  color: #3a2a63;
+  color: var(--text-on-dark);
   background: transparent;
-  border: 2px solid var(--purple-btn-1);
+  border: 2px solid rgba(243, 247, 239, 0.35);
   border-radius: 999px;
   padding: 0.55rem 1.3rem;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-ghost:hover {
-  background: var(--purple-btn-1);
-  color: var(--white);
+  background: var(--text-on-dark);
+  color: var(--page-bg);
+  border-color: var(--text-on-dark);
 }
 
 /* ===================== Buttons (general) ===================== */
@@ -339,16 +336,7 @@ button {
   position: relative;
   overflow: hidden;
   min-height: 100vh;
-  background: linear-gradient(
-    180deg,
-    var(--purple-nav) 0%,
-    var(--green-light-soft) 24%,
-    var(--green-light) 46%,
-    var(--green-light) 64%,
-    var(--green-mid) 82%,
-    var(--green-dark) 94%,
-    var(--green-dark-2) 100%
-  );
+  background: var(--page-bg);
 }
 
 .hero {
@@ -365,8 +353,8 @@ button {
 .hero-eyebrow {
   display: inline-block;
   font-weight: 700;
-  color: var(--purple-btn-1);
-  background: rgba(155, 111, 224, 0.15);
+  color: var(--purple-btn-3);
+  background: rgba(208, 166, 255, 0.14);
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 0.85rem;
@@ -375,21 +363,21 @@ button {
 
 .hero-title {
   font-size: clamp(2.1rem, 4vw, 3.2rem);
-  color: var(--green-dark-2);
+  color: var(--text-on-dark);
 }
 
 .hero-title span {
-  color: var(--purple-btn-1);
+  color: var(--purple-btn-3);
 }
 
 .hero-tagline {
   font-style: italic;
-  color: var(--ink-soft);
+  color: var(--text-on-dark-soft);
   font-weight: 500;
 }
 
 .hero-desc {
-  color: var(--ink-soft);
+  color: var(--text-on-dark-soft);
   max-width: 46ch;
 }
 
@@ -456,8 +444,12 @@ button {
   margin: 0 auto 44px;
 }
 
+.section-heading h2 {
+  color: var(--text-on-dark);
+}
+
 .section-heading p {
-  color: var(--ink-soft);
+  color: var(--text-on-dark-soft);
 }
 
 /* ===================== Scroll reveal ===================== */
@@ -471,89 +463,53 @@ button {
   opacity: var(--reveal-opacity, 1);
 }
 
-/* ===================== Math backdrop (decorative) ===================== */
+/* ===================== Curved pi trail (scroll-linked) ===================== */
 
-.math-backdrop {
+.pi-trail {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
 }
 
-.math-eq {
-  position: absolute;
+.pi-trail-track {
+  fill: none;
+  stroke: rgba(243, 247, 239, 0.16);
+  stroke-width: 2.5;
+  stroke-dasharray: 7 12;
+  stroke-linecap: round;
+}
+
+.pi-trail-progress {
+  fill: none;
+  stroke: var(--purple-btn-3);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.85;
+  transition: stroke-dashoffset 0.12s linear;
+}
+
+.pi-trail-text {
   font-family: var(--font-math);
   font-weight: 700;
   font-style: italic;
-  color: var(--green-dark-2);
-  white-space: nowrap;
-  mix-blend-mode: multiply;
-  --reveal-opacity: 0.16;
+  font-size: 26px;
+  fill: rgba(243, 247, 239, 0.5);
+  letter-spacing: 0.5px;
 }
 
 @media (max-width: 900px) {
-  .math-backdrop {
+  .pi-trail {
     display: none;
-  }
-}
-
-/* ===================== Pi counter (scroll-linked) ===================== */
-
-.pi-counter {
-  position: fixed;
-  top: 90px;
-  left: 24px;
-  right: 24px;
-  z-index: 0;
-  max-width: 640px;
-  font-family: var(--font-math);
-  font-weight: 700;
-  line-height: 1.15;
-  word-break: break-all;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-  opacity: 0.3;
-}
-
-.pi-symbol {
-  color: var(--purple-btn-1);
-  font-size: clamp(3.2rem, 7vw, 5.5rem);
-}
-
-.pi-value {
-  color: var(--green-dark-2);
-  font-size: clamp(1.6rem, 3.4vw, 2.75rem);
-  letter-spacing: 0.01em;
-  margin-left: 10px;
-}
-
-@media (max-width: 640px) {
-  .pi-counter {
-    top: 76px;
-    left: 14px;
-    right: 14px;
-    opacity: 0.24;
-  }
-
-  .pi-symbol {
-    font-size: 2.6rem;
-  }
-
-  .pi-value {
-    font-size: 1.2rem;
   }
 }
 
 /* ===================== Awards page ===================== */
 
 .awards-page {
-  background: linear-gradient(
-    180deg,
-    var(--green-light-soft) 0%,
-    var(--green-light) 55%,
-    var(--green-mid) 100%
-  );
+  background: var(--page-bg);
   min-height: 100vh;
   padding-top: 24px;
 }
@@ -561,13 +517,12 @@ button {
 /* ===================== Articles page ===================== */
 
 .articles-page {
-  background: linear-gradient(
-    180deg,
-    var(--green-light-soft) 0%,
-    var(--green-light) 55%,
-    var(--green-mid) 100%
-  );
+  background: var(--page-bg);
   min-height: 100vh;
+}
+
+.articles-page .empty-state {
+  color: var(--text-on-dark-soft);
 }
 
 .article-list {
@@ -618,7 +573,7 @@ button {
   aspect-ratio: 16 / 8;
   min-height: 420px;
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(251, 251, 245, 0.94);
   box-shadow: var(--shadow-soft);
 }
 
@@ -768,8 +723,8 @@ button {
 }
 
 .card {
-  background: var(--surface-tint);
-  border: 1px solid rgba(21, 122, 61, 0.1);
+  background: var(--cream);
+  border: 1px solid rgba(12, 77, 38, 0.08);
   border-radius: var(--radius-md);
   padding: 26px;
   box-shadow: var(--shadow-soft);
@@ -794,8 +749,8 @@ button {
 }
 
 .contact-card {
-  background: var(--surface-tint);
-  border: 1px solid rgba(21, 122, 61, 0.1);
+  background: var(--cream);
+  border: 1px solid rgba(12, 77, 38, 0.08);
   border-radius: var(--radius-lg);
   padding: 32px;
   box-shadow: var(--shadow-soft);
@@ -920,7 +875,7 @@ button {
 /* ===================== Access (Register / Sign in) ===================== */
 
 .access-wrap {
-  background: linear-gradient(180deg, var(--purple-nav) 0%, var(--green-light-soft) 55%, var(--green-light) 100%);
+  background: var(--page-bg);
   padding: 56px 0 90px;
   min-height: 100vh;
 }

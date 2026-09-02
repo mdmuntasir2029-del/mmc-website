@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import poster from "../assets/regposter.jpg";
-import MathBackdrop from "../components/MathBackdrop";
-import PiCounter from "../components/PiCounter";
+import CurvedPiTrail from "../components/CurvedPiTrail";
 import { IconTrophy, IconBook, IconUsers } from "../components/icons";
 
 const HIGHLIGHTS = [
@@ -32,8 +31,7 @@ export default function Home() {
 
   return (
     <div className="home-page">
-      <MathBackdrop />
-      <PiCounter />
+      <CurvedPiTrail />
 
       <section className="hero">
         <div className="container hero-inner">
