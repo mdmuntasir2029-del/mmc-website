@@ -65,6 +65,7 @@ body {
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -336,6 +337,7 @@ button {
   position: relative;
   overflow: hidden;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--page-bg);
 }
 
@@ -511,6 +513,7 @@ button {
 .awards-page {
   background: var(--page-bg);
   min-height: 100vh;
+  min-height: 100dvh;
   padding-top: 24px;
 }
 
@@ -519,6 +522,7 @@ button {
 .articles-page {
   background: var(--page-bg);
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .articles-page .empty-state {
@@ -878,6 +882,7 @@ button {
   background: var(--page-bg);
   padding: 56px 0 90px;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .access-card {
