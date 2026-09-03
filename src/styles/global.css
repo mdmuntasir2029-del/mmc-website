@@ -228,8 +228,15 @@ button {
     rgba(255, 255, 255, 0.75) 50%,
     transparent 100%
   );
-  transform: skewX(-20deg);
+  /* Animated via transform (translateX), not the `left` offset — `left`
+     forces a layout recalculation on every animation frame, and since
+     this button lives in the sticky navbar it's on screen and animating
+     the whole time the page scrolls, which was compounding with the
+     navbar's own scroll repaints into the reported flicker/instability.
+     transform is compositor-only, so it costs nothing extra to animate. */
+  transform: skewX(-20deg) translateX(0%);
   animation: shineSweep 3.2s ease-in-out infinite;
+  will-change: transform;
 }
 
 .btn-shine:hover {
@@ -239,13 +246,13 @@ button {
 
 @keyframes shineSweep {
   0% {
-    left: -60%;
+    transform: skewX(-20deg) translateX(0%);
   }
   35% {
-    left: 130%;
+    transform: skewX(-20deg) translateX(475%);
   }
   100% {
-    left: 130%;
+    transform: skewX(-20deg) translateX(475%);
   }
 }
 
