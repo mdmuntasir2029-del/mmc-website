@@ -3,7 +3,12 @@ import { useEffect, useRef, useState } from "react";
 const PI_DIGITS =
   "3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
 
-const TRAIL_TEXT = `π = ${PI_DIGITS}`;
+// Only a short window of digits is laid out along the path at once —
+// re-running SVG textPath glyph layout for a ~200 char string on every
+// scroll tick is what was causing the scroll jank/jumpiness; a ~55 char
+// window is far cheaper to re-lay-out each frame.
+const WINDOW_SIZE = 55;
+const MAX_START = PI_DIGITS.length - WINDOW_SIZE;
 
 // One winding curve, reused for the always-visible dashed track, the
 // solid "drawn as you scroll" progress line, and the path the pi
@@ -27,13 +32,28 @@ export default function CurvedPiTrail() {
   }, []);
 
   useEffect(() => {
-    function handleScroll() {
+    let ticking = false;
+
+    function update() {
       const scrollTop = window.scrollY;
       const scrollable = document.documentElement.scrollHeight - window.innerHeight;
       const next = scrollable > 0 ? Math.min(1, Math.max(0, scrollTop / scrollable)) : 0;
       setProgress(next);
+      ticking = false;
     }
-    handleScroll();
+
+    // requestAnimationFrame-throttled: scroll (and especially inertial /
+    // high-polling-rate trackpad scroll) can fire far more often than the
+    // display can paint, so without this the state update — and the SVG
+    // textPath relayout it triggers — was running many times per frame.
+    function handleScroll() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    }
+
+    update();
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);
     return () => {
@@ -43,8 +63,10 @@ export default function CurvedPiTrail() {
   }, []);
 
   const dashOffset = pathLength * (1 - progress);
-  // Slides the digit string's starting point along the curve as the
-  // user scrolls, so it rolls out following the line instead of just
+  const startIndex = Math.floor(progress * MAX_START);
+  const windowText = `π = ${PI_DIGITS.slice(startIndex, startIndex + WINDOW_SIZE)}`;
+  // Slides the digit window's position along the curve as the user
+  // scrolls, so it rolls out following the line instead of only
   // growing in place from the top.
   const startOffset = `${progress * 82}%`;
 
@@ -73,7 +95,7 @@ export default function CurvedPiTrail() {
 
       <text className="pi-trail-text">
         <textPath href="#pi-trail-curve" startOffset={startOffset}>
-          {TRAIL_TEXT}
+          {windowText}
         </textPath>
       </text>
     </svg>
