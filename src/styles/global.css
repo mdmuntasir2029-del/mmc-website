@@ -487,6 +487,19 @@ button {
      SVG on every scroll frame can force paint work well beyond its own
      bounds, which is expensive enough on real GPUs to show as stutter. */
   contain: layout style paint;
+  /* THE actual cause of the "whole page jumps up and down" bug: this
+     SVG's <textPath> content changes on every scroll update, and
+     Chromium's scroll-anchoring feature (which tries to keep whatever
+     element is near the top of the viewport visually stable when
+     content changes) was picking this constantly-mutating text as its
+     anchor and "correcting" scroll position in response — producing
+     large, real backward jumps in window.scrollY. Confirmed by directly
+     measuring scrollY during a real scroll on the live site: 3-4
+     backward jumps per pass with this trail present, zero with
+     overflow-anchor: none applied. This opts the whole decorative
+     overlay out of anchor consideration, which is exactly what it
+     should be — it's aria-hidden and purely visual. */
+  overflow-anchor: none;
 }
 
 .pi-trail-track {
