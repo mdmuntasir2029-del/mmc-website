@@ -32,25 +32,37 @@ export default function CurvedPiTrail() {
   }, []);
 
   useEffect(() => {
+    // Re-laying-out the <textPath> and repainting a ~3000-unit-tall SVG
+    // on every animation frame (up to 60x/sec) during a real scroll is
+    // still expensive enough on real GPUs to cause visible stutter, even
+    // with rAF-throttling alone (which only caps updates to once *per
+    // frame*, not to a lower rate). This adds a wall-clock throttle on
+    // top: real updates happen at most ~12x/sec while actively
+    // scrolling, plus a short trailing debounce so the trail still
+    // snaps to the exact final position shortly after scrolling stops.
+    const THROTTLE_MS = 80;
     let ticking = false;
+    let lastRun = 0;
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
     function update() {
       const scrollTop = window.scrollY;
       const scrollable = document.documentElement.scrollHeight - window.innerHeight;
       const next = scrollable > 0 ? Math.min(1, Math.max(0, scrollTop / scrollable)) : 0;
       setProgress(next);
-      ticking = false;
+      lastRun = performance.now();
     }
 
-    // requestAnimationFrame-throttled: scroll (and especially inertial /
-    // high-polling-rate trackpad scroll) can fire far more often than the
-    // display can paint, so without this the state update — and the SVG
-    // textPath relayout it triggers — was running many times per frame.
     function handleScroll() {
       if (!ticking) {
         ticking = true;
-        requestAnimationFrame(update);
+        requestAnimationFrame(() => {
+          if (performance.now() - lastRun >= THROTTLE_MS) update();
+          ticking = false;
+        });
       }
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(update, 120);
     }
 
     update();
@@ -59,6 +71,7 @@ export default function CurvedPiTrail() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
+      clearTimeout(debounceTimer);
     };
   }, []);
 

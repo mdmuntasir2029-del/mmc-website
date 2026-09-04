@@ -481,6 +481,12 @@ button {
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  /* Isolates this element's repaints (it redraws on ~every scroll tick)
+     so the browser doesn't have to reconsider the rest of the page's
+     layout/paint each time — without this, repainting a ~3000px-tall
+     SVG on every scroll frame can force paint work well beyond its own
+     bounds, which is expensive enough on real GPUs to show as stutter. */
+  contain: layout style paint;
 }
 
 .pi-trail-track {
