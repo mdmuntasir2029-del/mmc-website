@@ -3,12 +3,14 @@ import { useEffect, useRef, useState } from "react";
 const PI_DIGITS =
   "3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
 
-// Only a short window of digits is laid out along the path at once —
-// re-running SVG textPath glyph layout for a ~200 char string on every
-// scroll tick is what was causing the scroll jank/jumpiness; a ~55 char
-// window is far cheaper to re-lay-out each frame.
-const WINDOW_SIZE = 55;
-const MAX_START = PI_DIGITS.length - WINDOW_SIZE;
+// The number always starts from "3.14159..." and simply grows longer as
+// the user scrolls (an accumulating counter), rather than showing a
+// fixed-length window that slides through the digit string — that read
+// as the whole number "traveling" instead of the digit count increasing.
+// Capped well under the full ~205-digit string so laying the text out
+// along the path each update stays cheap.
+const MIN_DIGITS = 4;
+const MAX_DIGITS = 130;
 
 // One winding curve, reused for the always-visible dashed track, the
 // solid "drawn as you scroll" progress line, and the path the pi
@@ -76,12 +78,12 @@ export default function CurvedPiTrail() {
   }, []);
 
   const dashOffset = pathLength * (1 - progress);
-  const startIndex = Math.floor(progress * MAX_START);
-  const windowText = `π = ${PI_DIGITS.slice(startIndex, startIndex + WINDOW_SIZE)}`;
-  // Slides the digit window's position along the curve as the user
-  // scrolls, so it rolls out following the line instead of only
-  // growing in place from the top.
-  const startOffset = `${progress * 82}%`;
+  const digitCount = Math.max(MIN_DIGITS, Math.floor(progress * MAX_DIGITS));
+  const windowText = `π = ${PI_DIGITS.slice(0, digitCount)}`;
+  // Fixed near the start of the curve — only the digit count grows with
+  // scroll, so the number visually extends further down the path over
+  // time instead of its starting point sliding along it.
+  const startOffset = "2%";
 
   return (
     <svg
