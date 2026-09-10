@@ -586,6 +586,40 @@ button {
   margin-bottom: 0;
 }
 
+/* Sine-wave reveal: each card settles onto a point of a sine curve
+   (--rest-y, computed per index in Home.tsx) and slides up into it with
+   a per-card stagger, so the four cards ripple in as the section scrolls
+   into view. */
+.lineup-card {
+  opacity: 0;
+  transform: translateY(calc(var(--rest-y, 0px) + 70px));
+  transition: opacity 0.6s ease,
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lineup-card.is-in {
+  opacity: 1;
+  transform: translateY(var(--rest-y, 0px));
+}
+
+@media (max-width: 900px) {
+  /* Fewer columns / stacked — a vertical wave offset just makes uneven
+     gaps, so flatten it and keep only the staggered fade-slide. */
+  .lineup-card,
+  .lineup-card.is-in {
+    --rest-y: 0px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lineup-card,
+  .lineup-card.is-in {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ===================== CTA banner ===================== */
 
 .cta-banner {

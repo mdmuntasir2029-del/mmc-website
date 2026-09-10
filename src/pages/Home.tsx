@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import poster from "../assets/regposter.jpg";
 import CurvedPiTrail from "../components/CurvedPiTrail";
@@ -26,8 +28,31 @@ const HIGHLIGHTS = [
   },
 ];
 
+// Vertical offset of each lineup card, sampled from one period of a sine
+// wave across the four cards — so at rest they sit on a visible wave.
+const waveRestY = (i: number, count: number) =>
+  Math.round(18 * Math.sin((i / count) * Math.PI * 2));
+
 export default function Home() {
   const navigate = useNavigate();
+  const lineupRef = useRef<HTMLDivElement | null>(null);
+  const [lineupIn, setLineupIn] = useState(false);
+
+  useEffect(() => {
+    const el = lineupRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setLineupIn(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -10% 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="home-page">
@@ -119,9 +144,18 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="card-grid">
-            {HIGHLIGHTS.map((h) => (
-              <div className="card" key={h.title}>
+          <div className="card-grid" ref={lineupRef}>
+            {HIGHLIGHTS.map((h, i) => (
+              <div
+                className={`card lineup-card${lineupIn ? " is-in" : ""}`}
+                key={h.title}
+                style={
+                  {
+                    "--rest-y": `${waveRestY(i, HIGHLIGHTS.length)}px`,
+                    transitionDelay: `${i * 120}ms`,
+                  } as CSSProperties
+                }
+              >
                 <span className="card-icon">{h.icon}</span>
                 <h3>{h.title}</h3>
                 <p>{h.desc}</p>
