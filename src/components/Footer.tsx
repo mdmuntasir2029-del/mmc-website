@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import logoMark from "../assets/logo-mark.png";
 
 export default function Footer() {
   return (
@@ -8,7 +7,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand-block">
             <div className="footer-brand">
-              <img src={logoMark} alt="Manarat Mathletes Club logo" />
+              <img src="/logowhite.png" alt="Manarat Mathletes Club logo" />
               Manarat Mathletes Club
             </div>
             <p className="footer-desc">

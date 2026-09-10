@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
@@ -15,7 +14,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <img src={logo} alt="Manarat Mathletes Club logo" />
+          <img src="/logowhite.png" alt="Manarat Mathletes Club logo" />
           <span className="navbar-brand-text">
             Manarat
             <br />
