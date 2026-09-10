@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import poster from "../assets/regposter.jpg";
@@ -50,28 +49,10 @@ export default function Home() {
   const piScrub = useScrollScrub(pinned);
   const lineupScrub = useScrollScrub(pinned);
 
-  // Fallback reveal for when the pinned scrub is off (mobile / reduced
-  // motion): a one-shot IntersectionObserver on the card grid.
-  const lineupRef = useRef<HTMLDivElement | null>(null);
-  const [lineupInView, setLineupInView] = useState(false);
-  useEffect(() => {
-    if (pinned) return;
-    const el = lineupRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setLineupInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2, rootMargin: "0px 0px -10% 0px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [pinned]);
-
-  const lineupProgress = pinned ? lineupScrub.progress : lineupInView ? 1 : 0;
+  // When the pinned scrub is off (mobile / reduced motion) the lineup
+  // cards are simply shown — no scroll-reveal gate, so they can't get
+  // stuck invisible if an observer never fires.
+  const lineupProgress = pinned ? lineupScrub.progress : 1;
 
   return (
     <div className={pinned ? "home-page home-page--pinned" : "home-page"}>
@@ -186,7 +167,7 @@ export default function Home() {
 
               <div className="lineup-stage">
                 <SineWave progress={lineupProgress} />
-                <div className="card-grid" ref={lineupRef}>
+                <div className="card-grid">
                   {HIGHLIGHTS.map((h, i) => {
                     const shown =
                       lineupProgress >= revealAt(i, HIGHLIGHTS.length);
