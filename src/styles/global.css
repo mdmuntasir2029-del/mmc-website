@@ -364,6 +364,14 @@ button {
   background: var(--page-bg);
 }
 
+/* The pinned scroll sections use position: sticky, which an
+   overflow-hidden ancestor silently disables. The full-page background
+   trail (the only reason for the clip) isn't rendered in this mode, so
+   the clip can go. */
+.home-page--pinned {
+  overflow: visible;
+}
+
 .hero {
   padding: 64px 0 80px;
   position: relative;
@@ -587,14 +595,15 @@ button {
 }
 
 /* Sine-wave reveal: each card settles onto a point of a sine curve
-   (--rest-y, computed per index in Home.tsx) and slides up into it with
-   a per-card stagger, so the four cards ripple in as the section scrolls
-   into view. */
+   (--rest-y, computed per index in Home.tsx) and slides up into it, so
+   the four cards trace a wave. When the section is pinned (see
+   .pin-outer below) each card's `is-in` flips as the scrubbed wavefront
+   reaches it; otherwise they ripple in on a stagger when scrolled to. */
 .lineup-card {
   opacity: 0;
   transform: translateY(calc(var(--rest-y, 0px) + 70px));
-  transition: opacity 0.6s ease,
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.55s ease,
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .lineup-card.is-in {
@@ -602,12 +611,55 @@ button {
   transform: translateY(var(--rest-y, 0px));
 }
 
+.lineup-stage {
+  position: relative;
+  padding-block: 80px;
+}
+
+.sine-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  width: 100%;
+  height: 300px;
+  transform: translateY(-50%);
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sine-wave-track {
+  fill: none;
+  stroke: rgba(12, 77, 38, 0.14);
+  stroke-width: 2;
+  stroke-dasharray: 5 9;
+  stroke-linecap: round;
+}
+
+.sine-wave-draw {
+  fill: none;
+  stroke: var(--purple-btn-2);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+
+.lineup-stage .card-grid {
+  position: relative;
+  z-index: 1;
+}
+
 @media (max-width: 900px) {
-  /* Fewer columns / stacked — a vertical wave offset just makes uneven
-     gaps, so flatten it and keep only the staggered fade-slide. */
+  /* Stacked / fewer columns — a vertical wave offset just makes uneven
+     gaps, so flatten it and hide the decorative wave. */
   .lineup-card,
   .lineup-card.is-in {
     --rest-y: 0px;
+  }
+
+  .sine-wave {
+    display: none;
   }
 }
 
@@ -617,6 +669,86 @@ button {
     transition: none;
     opacity: 1;
     transform: none;
+  }
+}
+
+/* ===================== Pinned scroll-scrub sections ===================== */
+
+/* An outer block taller than the viewport with a sticky child: while the
+   child is pinned, scroll position drives an animation instead of moving
+   the page. Only active >900px with motion allowed — otherwise these are
+   inert passthrough wrappers and the sections lay out normally. */
+.pin-outer {
+  position: relative;
+}
+
+.pin-sticky {
+  overflow-anchor: none;
+}
+
+@media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+  .pin-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .pi-intro-outer {
+    height: 260vh;
+    background-color: var(--page-bg);
+    background-image: radial-gradient(
+      rgba(243, 247, 239, 0.1) 1.5px,
+      transparent 1.5px
+    );
+    background-size: 22px 22px;
+  }
+
+  .pi-trail.pi-trail--inline {
+    position: relative;
+    inset: auto;
+    flex: 1 1 auto;
+    display: block;
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+  }
+
+  /* This is a foreground moment while pinned, not ambient background —
+     make the curve and digits carry. */
+  .pi-trail--inline .pi-trail-track {
+    stroke: rgba(243, 247, 239, 0.24);
+    stroke-width: 3;
+  }
+
+  .pi-trail--inline .pi-trail-progress {
+    stroke: var(--purple-btn-3);
+    stroke-width: 5;
+    opacity: 1;
+  }
+
+  .pi-trail--inline .pi-trail-text {
+    fill: rgba(243, 247, 239, 0.82);
+    font-size: 30px;
+  }
+
+  .lineup-outer {
+    height: 260vh;
+    background: var(--surface-tint);
+  }
+
+  .lineup-outer .pin-sticky {
+    justify-content: center;
+  }
+
+  .lineup-outer .section-lineup {
+    flex: none;
+    width: 100%;
+    padding: 0;
   }
 }
 

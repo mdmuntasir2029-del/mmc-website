@@ -3,6 +3,8 @@ import type { CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import poster from "../assets/regposter.jpg";
 import CurvedPiTrail from "../components/CurvedPiTrail";
+import SineWave from "../components/SineWave";
+import { useScrollScrub, usePinnedScrollEnabled } from "../hooks/useScrollScrub";
 import { IconTrophy, IconBook, IconUsers } from "../components/icons";
 
 const HIGHLIGHTS = [
@@ -28,23 +30,36 @@ const HIGHLIGHTS = [
   },
 ];
 
-// Vertical offset of each lineup card, sampled from one period of a sine
-// wave across the four cards — so at rest they sit on a visible wave.
+// Vertical offset of each lineup card, taken from the same 1.5-period
+// sine curve SineWave draws (sampled at the card's horizontal centre),
+// so the cards sit along the wave. Kept a little inside its amplitude so
+// they don't crowd the heading / CTA.
 const waveRestY = (i: number, count: number) =>
-  Math.round(18 * Math.sin((i / count) * Math.PI * 2));
+  Math.round(-60 * Math.sin(((i + 0.5) / count) * Math.PI * 3));
+
+// Fraction of the pinned scrub each card waits for before it reveals —
+// spaced so a card pops in roughly as the drawn wavefront reaches it.
+const revealAt = (i: number, count: number) => (i + 0.35) / count;
 
 export default function Home() {
   const navigate = useNavigate();
-  const lineupRef = useRef<HTMLDivElement | null>(null);
-  const [lineupIn, setLineupIn] = useState(false);
+  const pinned = usePinnedScrollEnabled();
 
+  const piScrub = useScrollScrub(pinned);
+  const lineupScrub = useScrollScrub(pinned);
+
+  // Fallback reveal for when the pinned scrub is off (mobile / reduced
+  // motion): a one-shot IntersectionObserver on the card grid.
+  const lineupRef = useRef<HTMLDivElement | null>(null);
+  const [lineupInView, setLineupInView] = useState(false);
   useEffect(() => {
+    if (pinned) return;
     const el = lineupRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setLineupIn(true);
+          setLineupInView(true);
           observer.disconnect();
         }
       },
@@ -52,11 +67,13 @@ export default function Home() {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [pinned]);
+
+  const lineupProgress = pinned ? lineupScrub.progress : lineupInView ? 1 : 0;
 
   return (
-    <div className="home-page">
-      <CurvedPiTrail />
+    <div className={pinned ? "home-page home-page--pinned" : "home-page"}>
+      {!pinned && <CurvedPiTrail />}
 
       <section className="hero">
         <div className="container hero-inner">
@@ -95,6 +112,14 @@ export default function Home() {
         </div>
       </section>
 
+      {pinned && (
+        <div className="pin-outer pi-intro-outer" ref={piScrub.outerRef}>
+          <div className="pin-sticky">
+            <CurvedPiTrail progress={piScrub.progress} />
+          </div>
+        </div>
+      )}
+
       <section className="section section-about" id="about">
         <div className="container about-grid">
           <div className="about-text">
@@ -132,38 +157,49 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section section-lineup" id="lineup">
-        <div className="container">
-          <div className="lineup-head">
-            <div>
-              <span className="eyebrow">This year's program</span>
-              <h2>How We Meet &amp; Compete</h2>
-            </div>
-            <Link to="/articles" className="text-link">
-              Browse resources &rarr;
-            </Link>
-          </div>
-
-          <div className="card-grid" ref={lineupRef}>
-            {HIGHLIGHTS.map((h, i) => (
-              <div
-                className={`card lineup-card${lineupIn ? " is-in" : ""}`}
-                key={h.title}
-                style={
-                  {
-                    "--rest-y": `${waveRestY(i, HIGHLIGHTS.length)}px`,
-                    transitionDelay: `${i * 120}ms`,
-                  } as CSSProperties
-                }
-              >
-                <span className="card-icon">{h.icon}</span>
-                <h3>{h.title}</h3>
-                <p>{h.desc}</p>
+      <div className="pin-outer lineup-outer" ref={lineupScrub.outerRef}>
+        <div className="pin-sticky">
+          <section className="section section-lineup" id="lineup">
+            <div className="container">
+              <div className="lineup-head">
+                <div>
+                  <span className="eyebrow">This year's program</span>
+                  <h2>How We Meet &amp; Compete</h2>
+                </div>
+                <Link to="/articles" className="text-link">
+                  Browse resources &rarr;
+                </Link>
               </div>
-            ))}
-          </div>
+
+              <div className="lineup-stage">
+                <SineWave progress={lineupProgress} />
+                <div className="card-grid" ref={lineupRef}>
+                  {HIGHLIGHTS.map((h, i) => {
+                    const shown =
+                      lineupProgress >= revealAt(i, HIGHLIGHTS.length);
+                    return (
+                      <div
+                        className={`card lineup-card${shown ? " is-in" : ""}`}
+                        key={h.title}
+                        style={
+                          {
+                            "--rest-y": `${waveRestY(i, HIGHLIGHTS.length)}px`,
+                            transitionDelay: pinned ? "0ms" : `${i * 120}ms`,
+                          } as CSSProperties
+                        }
+                      >
+                        <span className="card-icon">{h.icon}</span>
+                        <h3>{h.title}</h3>
+                        <p>{h.desc}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
 
       <section className="cta-banner">
         <div className="container cta-banner-inner">
