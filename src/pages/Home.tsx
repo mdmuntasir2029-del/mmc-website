@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import poster from "../assets/regposter.jpg";
 import CurvedPiTrail from "../components/CurvedPiTrail";
 import SineWave from "../components/SineWave";
+import SessionPhotoPanel from "../components/SessionPhotoPanel";
+import LeaderboardSection from "../components/LeaderboardSection";
 import { useScrollScrub, usePinnedScrollEnabled } from "../hooks/useScrollScrub";
 import { IconTrophy, IconBook, IconUsers } from "../components/icons";
 
@@ -110,12 +112,22 @@ export default function Home() {
         </div>
       </section>
 
-      {pinned && (
+      {pinned ? (
         <div className="pin-outer pi-intro-outer" ref={piScrub.outerRef}>
           <div className="pin-sticky">
-            <CurvedPiTrail progress={piScrub.progress} />
+            <div className="pi-intro-row">
+              <SessionPhotoPanel variant="left" />
+              <CurvedPiTrail progress={piScrub.progress} />
+              <SessionPhotoPanel variant="right" />
+            </div>
           </div>
         </div>
+      ) : (
+        <section className="section section-session-photos">
+          <div className="container">
+            <SessionPhotoPanel variant="full" />
+          </div>
+        </section>
       )}
 
       <section className="section section-about" id="about">
@@ -198,6 +210,8 @@ export default function Home() {
           </section>
         </div>
       </div>
+
+      <LeaderboardSection />
 
       <section className="cta-banner">
         <div className="container cta-banner-inner">

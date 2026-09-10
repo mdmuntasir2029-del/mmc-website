@@ -16,9 +16,12 @@ npm run dev
 2. Open **SQL Editor → New query**, paste in the contents of
    [`supabase/schema.sql`](supabase/schema.sql), and run it. This creates
    the `members`, `activity_log`, `resources`, `forum_posts`, `articles`,
-   and `admins` tables, their row-level security policies, and the
-   private `mmc-files` storage bucket used for uploads. It's safe to
-   re-run any time (e.g. after pulling changes to this file).
+   `session_photos`, `leaderboards`, `leaderboard_entries`, and `admins`
+   tables, their row-level security policies, the private `mmc-files`
+   storage bucket for admin uploads, and the public `mmc-public` bucket
+   for session photos (which need permanent URLs). It's safe to re-run
+   any time (e.g. after pulling changes to this file) — **re-run it after
+   this update** to pick up the new tables and bucket.
 3. Set up Brevo as the SMTP provider so Supabase's confirmation and
    password-reset emails actually deliver reliably (Supabase's own
    default mailer is low-volume and rate-limited) — see **Brevo email

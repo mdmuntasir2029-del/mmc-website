@@ -50,3 +50,27 @@ export interface Article {
   link: string | null;
   createdAt: string;
 }
+
+export interface SessionPhoto {
+  id: string;
+  sessionLabel: string;
+  sessionDate: string;
+  imagePath: string;
+  imageUrl: string;
+  caption: string | null;
+  createdAt: string;
+}
+
+export interface LeaderboardEntry {
+  id: string;
+  playerName: string;
+  score: number | null;
+}
+
+export interface Leaderboard {
+  id: string;
+  game: string;
+  playedOn: string;
+  createdAt: string;
+  entries: LeaderboardEntry[];
+}

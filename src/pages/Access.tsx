@@ -10,44 +10,25 @@ import {
   validateStudentCode,
 } from "../lib/validation";
 
-type Tab = "register" | "signin";
-
+/**
+ * One route per purpose, no tab bar: `/register` is member registration
+ * (public), `/signin` is the admin sign-in (only linked from the "Admin"
+ * corner of the footer, so it isn't surfaced to visitors).
+ */
 export default function Access() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const initialTab: Tab = location.pathname === "/signin" ? "signin" : "register";
-  const [tab, setTab] = useState<Tab>(initialTab);
-
-  function switchTab(next: Tab) {
-    setTab(next);
-    navigate(next === "signin" ? "/signin" : "/register", { replace: true });
-  }
+  const isSignIn = location.pathname === "/signin";
 
   return (
     <section className="access-wrap">
       <div className="container">
         <div className="access-card">
-          <div className="access-tabs">
-            <button
-              className={`access-tab ${tab === "register" ? "active" : ""}`}
-              onClick={() => switchTab("register")}
-            >
-              Register
-            </button>
-            <button
-              className={`access-tab ${tab === "signin" ? "active" : ""}`}
-              onClick={() => switchTab("signin")}
-            >
-              Sign In
-            </button>
-          </div>
-
           <div className="access-body">
-            {tab === "register" ? (
-              <RegisterForm />
-            ) : (
+            {isSignIn ? (
               <SignInForm onSuccess={() => navigate("/admin")} />
+            ) : (
+              <RegisterForm />
             )}
           </div>
         </div>

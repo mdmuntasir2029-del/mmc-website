@@ -121,6 +121,38 @@ create table if not exists articles (
   created_at timestamptz not null default now()
 );
 
+-- Photos from club sessions, grouped by week. Shown on the home page
+-- ("Photos From Last Session"); images live in the public mmc-public
+-- bucket so they can be <img>-referenced directly.
+create table if not exists session_photos (
+  id uuid primary key default gen_random_uuid(),
+  session_label text not null,
+  session_date date not null,
+  image_path text not null,
+  caption text,
+  created_at timestamptz not null default now()
+);
+
+-- Leaderboards from games played during club activities. One row per
+-- game/session, with ranked entries in leaderboard_entries.
+create table if not exists leaderboards (
+  id uuid primary key default gen_random_uuid(),
+  game text not null,
+  played_on date not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists leaderboard_entries (
+  id uuid primary key default gen_random_uuid(),
+  leaderboard_id uuid not null references leaderboards(id) on delete cascade,
+  player_name text not null,
+  score numeric,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists leaderboard_entries_board_idx
+  on leaderboard_entries (leaderboard_id);
+
 -- ========== Row Level Security ==========
 
 alter table members enable row level security;
@@ -128,6 +160,9 @@ alter table activity_log enable row level security;
 alter table resources enable row level security;
 alter table forum_posts enable row level security;
 alter table articles enable row level security;
+alter table session_photos enable row level security;
+alter table leaderboards enable row level security;
+alter table leaderboard_entries enable row level security;
 
 drop policy if exists "members_public_insert" on members;
 create policy "members_public_insert" on members
@@ -169,6 +204,32 @@ drop policy if exists "articles_admin_write" on articles;
 create policy "articles_admin_write" on articles
   for all using (is_admin()) with check (is_admin());
 
+-- Session photos & leaderboards are website content: publicly readable,
+-- only admins write.
+drop policy if exists "session_photos_public_select" on session_photos;
+create policy "session_photos_public_select" on session_photos
+  for select to anon, authenticated using (true);
+
+drop policy if exists "session_photos_admin_write" on session_photos;
+create policy "session_photos_admin_write" on session_photos
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "leaderboards_public_select" on leaderboards;
+create policy "leaderboards_public_select" on leaderboards
+  for select to anon, authenticated using (true);
+
+drop policy if exists "leaderboards_admin_write" on leaderboards;
+create policy "leaderboards_admin_write" on leaderboards
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "leaderboard_entries_public_select" on leaderboard_entries;
+create policy "leaderboard_entries_public_select" on leaderboard_entries
+  for select to anon, authenticated using (true);
+
+drop policy if exists "leaderboard_entries_admin_write" on leaderboard_entries;
+create policy "leaderboard_entries_admin_write" on leaderboard_entries
+  for all using (is_admin()) with check (is_admin());
+
 -- ========== Storage (activity log docs, resource files, articles) ==========
 
 insert into storage.buckets (id, name, public)
@@ -200,4 +261,25 @@ drop policy if exists "mmc_files_admin_delete" on storage.objects;
 create policy "mmc_files_admin_delete" on storage.objects
   for delete using (
     bucket_id = 'mmc-files' and is_admin()
+  );
+
+-- ========== Storage (public: session photos) ==========
+-- A separate PUBLIC bucket so session photos get permanent CDN URLs for
+-- <img> tags. Reads are open by virtue of the bucket being public; only
+-- admins can add or remove files.
+
+insert into storage.buckets (id, name, public)
+values ('mmc-public', 'mmc-public', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "mmc_public_admin_write" on storage.objects;
+create policy "mmc_public_admin_write" on storage.objects
+  for insert with check (
+    bucket_id = 'mmc-public' and is_admin()
+  );
+
+drop policy if exists "mmc_public_admin_delete" on storage.objects;
+create policy "mmc_public_admin_delete" on storage.objects
+  for delete using (
+    bucket_id = 'mmc-public' and is_admin()
   );

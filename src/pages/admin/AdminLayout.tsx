@@ -5,6 +5,8 @@ import {
   IconCalendar,
   IconBook,
   IconNewspaper,
+  IconImage,
+  IconTrophy,
   IconUsers,
   IconChat,
 } from "../../components/icons";
@@ -14,6 +16,8 @@ const NAV_ITEMS = [
   { to: "/admin/activity-log", label: "Club Activity Log", Icon: IconCalendar, end: false },
   { to: "/admin/resources", label: "Resources", Icon: IconBook, end: false },
   { to: "/admin/articles", label: "Articles", Icon: IconNewspaper, end: false },
+  { to: "/admin/session-photos", label: "Session Photos", Icon: IconImage, end: false },
+  { to: "/admin/leaderboards", label: "Leaderboards", Icon: IconTrophy, end: false },
   { to: "/admin/members", label: "Member Management", Icon: IconUsers, end: false },
   { to: "/admin/forum", label: "Executive Forum", Icon: IconChat, end: false },
 ];

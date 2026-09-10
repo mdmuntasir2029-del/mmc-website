@@ -721,12 +721,28 @@ button {
     background: transparent;
   }
 
+  /* Photos From Last Session flank the pi trail while it's pinned. */
+  .pi-intro-row {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: stretch;
+    gap: 24px;
+    height: 100%;
+    padding: 0 24px;
+  }
+
+  .pi-intro-row .session-photos {
+    flex: 0 0 clamp(150px, 15vw, 230px);
+    align-self: center;
+  }
+
   .pi-trail.pi-trail--inline {
     position: relative;
     inset: auto;
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    min-width: 0;
     display: block;
-    width: 100%;
+    width: auto;
     height: 100%;
     will-change: transform;
   }
@@ -763,6 +779,180 @@ button {
     width: 100%;
     padding: 0;
   }
+}
+
+/* ===================== Session photos ===================== */
+
+.section-session-photos {
+  background: rgba(10, 32, 20, 0.5);
+  padding: 56px 0;
+}
+
+.session-photos-head {
+  margin-bottom: 16px;
+}
+
+.session-photos-label {
+  display: block;
+  color: var(--text-on-dark);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.session-photos-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.session-photos--full .session-photos-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.session-photos--left .session-photos-grid,
+.session-photos--right .session-photos-grid {
+  grid-template-columns: 1fr;
+}
+
+.session-photos figure {
+  margin: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: rgba(14, 40, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.session-photos img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.session-photos figcaption {
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  color: var(--text-on-dark-soft);
+}
+
+/* ===================== Leaderboard ===================== */
+
+.section-leaderboard {
+  background: rgba(10, 32, 20, 0.5);
+}
+
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.leaderboard-card {
+  background: rgba(14, 40, 25, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
+}
+
+.leaderboard-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.leaderboard-card-head h3 {
+  margin: 0;
+  color: var(--text-on-dark);
+}
+
+.leaderboard-card-head span {
+  font-size: 0.8rem;
+  color: var(--text-on-dark-soft);
+  white-space: nowrap;
+}
+
+.leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leaderboard-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-on-dark);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.leaderboard-list li[data-rank="1"] {
+  background: rgba(208, 166, 255, 0.16);
+}
+
+.leaderboard-list .rank {
+  flex: 0 0 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.82rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-on-dark);
+}
+
+.leaderboard-list li[data-rank="1"] .rank {
+  background: var(--purple-btn-2);
+}
+
+.leaderboard-list .who {
+  flex: 1;
+  font-weight: 600;
+}
+
+.leaderboard-list .score {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-on-dark-soft);
+}
+
+.leaderboard-empty {
+  color: var(--text-on-dark-soft);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ===================== Admin: session photo grid ===================== */
+
+.admin-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.admin-photo {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-photo img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid #e4f2e4;
 }
 
 /* ===================== CTA banner ===================== */

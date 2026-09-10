@@ -13,3 +13,5 @@ if (!url || !anonKey) {
 export const supabase = createClient(url, anonKey);
 
 export const FILES_BUCKET = "mmc-files";
+// Public bucket — session photos, so they get permanent CDN URLs.
+export const PUBLIC_BUCKET = "mmc-public";

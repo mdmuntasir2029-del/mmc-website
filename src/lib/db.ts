@@ -4,7 +4,7 @@
  * localStorage-backed, so pages/components didn't need to change —
  * only this file and auth.ts did.
  */
-import { supabase, FILES_BUCKET } from "./supabaseClient";
+import { supabase, FILES_BUCKET, PUBLIC_BUCKET } from "./supabaseClient";
 import type {
   Member,
   ActivityLogEntry,
@@ -12,6 +12,8 @@ import type {
   ResourceItem,
   ForumPost,
   Article,
+  SessionPhoto,
+  Leaderboard,
 } from "./types";
 
 const SIGNED_URL_TTL_SECONDS = 60 * 10;
@@ -450,4 +452,161 @@ export async function deleteArticle(id: string): Promise<void> {
   const { error } = await supabase.from("articles").delete().eq("id", id);
   if (error) throw error;
   await removeFile((row as { file_path: string | null } | null)?.file_path ?? null);
+}
+
+// ---------- Session Photos ----------
+
+interface SessionPhotoRow {
+  id: string;
+  session_label: string;
+  session_date: string;
+  image_path: string;
+  caption: string | null;
+  created_at: string;
+}
+
+function fromSessionPhotoRow(row: SessionPhotoRow): SessionPhoto {
+  return {
+    id: row.id,
+    sessionLabel: row.session_label,
+    sessionDate: row.session_date,
+    imagePath: row.image_path,
+    imageUrl: supabase.storage.from(PUBLIC_BUCKET).getPublicUrl(row.image_path)
+      .data.publicUrl,
+    caption: row.caption,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getSessionPhotos(): Promise<SessionPhoto[]> {
+  const { data, error } = await supabase
+    .from("session_photos")
+    .select("*")
+    .order("session_date", { ascending: false })
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data as SessionPhotoRow[]).map(fromSessionPhotoRow);
+}
+
+/** The photos from the most recent session, for the home-page panels. */
+export async function getLatestSessionPhotos(): Promise<{
+  label: string;
+  date: string;
+  photos: SessionPhoto[];
+} | null> {
+  const all = await getSessionPhotos();
+  if (all.length === 0) return null;
+  const latestDate = all[0].sessionDate;
+  const photos = all.filter((p) => p.sessionDate === latestDate);
+  return { label: photos[0].sessionLabel, date: latestDate, photos };
+}
+
+export async function addSessionPhoto(
+  data: { sessionLabel: string; sessionDate: string; caption: string | null },
+  file: File
+): Promise<SessionPhoto> {
+  const imagePath = `session-photos/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+  const { error: uploadError } = await supabase.storage
+    .from(PUBLIC_BUCKET)
+    .upload(imagePath, file, { upsert: false });
+  if (uploadError) throw uploadError;
+
+  const { data: row, error } = await supabase
+    .from("session_photos")
+    .insert({
+      session_label: data.sessionLabel,
+      session_date: data.sessionDate,
+      image_path: imagePath,
+      caption: data.caption,
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    await supabase.storage.from(PUBLIC_BUCKET).remove([imagePath]);
+    throw error;
+  }
+  return fromSessionPhotoRow(row as SessionPhotoRow);
+}
+
+export async function deleteSessionPhoto(id: string): Promise<void> {
+  const { data: row } = await supabase
+    .from("session_photos")
+    .select("image_path")
+    .eq("id", id)
+    .single();
+  const { error } = await supabase.from("session_photos").delete().eq("id", id);
+  if (error) throw error;
+  const path = (row as { image_path: string } | null)?.image_path;
+  if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
+}
+
+// ---------- Leaderboards ----------
+
+interface LeaderboardEntryRow {
+  id: string;
+  leaderboard_id: string;
+  player_name: string;
+  score: number | null;
+  created_at: string;
+}
+
+interface LeaderboardRow {
+  id: string;
+  game: string;
+  played_on: string;
+  created_at: string;
+  leaderboard_entries: LeaderboardEntryRow[] | null;
+}
+
+export async function getLeaderboards(): Promise<Leaderboard[]> {
+  const { data, error } = await supabase
+    .from("leaderboards")
+    .select("*, leaderboard_entries(*)")
+    .order("played_on", { ascending: false });
+  if (error) throw error;
+  return (data as LeaderboardRow[]).map((row) => ({
+    id: row.id,
+    game: row.game,
+    playedOn: row.played_on,
+    createdAt: row.created_at,
+    entries: (row.leaderboard_entries ?? [])
+      .map((e) => ({ id: e.id, playerName: e.player_name, score: e.score }))
+      .sort((a, b) => (b.score ?? -Infinity) - (a.score ?? -Infinity)),
+  }));
+}
+
+export async function addLeaderboard(data: {
+  game: string;
+  playedOn: string;
+}): Promise<void> {
+  const { error } = await supabase
+    .from("leaderboards")
+    .insert({ game: data.game, played_on: data.playedOn });
+  if (error) throw error;
+}
+
+export async function deleteLeaderboard(id: string): Promise<void> {
+  const { error } = await supabase.from("leaderboards").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function addLeaderboardEntry(
+  leaderboardId: string,
+  data: { playerName: string; score: number | null }
+): Promise<void> {
+  const { error } = await supabase.from("leaderboard_entries").insert({
+    leaderboard_id: leaderboardId,
+    player_name: data.playerName,
+    score: data.score,
+  });
+  if (error) throw error;
+}
+
+export async function deleteLeaderboardEntry(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("leaderboard_entries")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
 }
