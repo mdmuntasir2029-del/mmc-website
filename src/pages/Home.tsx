@@ -115,12 +115,12 @@ export default function Home() {
               <span className="label">Developer</span>
               <div className="value">Muntasir Zaman</div>
               <a
-                href="https://wa.me/8801916921252"
+                href="https://wa.me/8801402455560"
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-primary"
               >
-                01916921252
+                01402455560
               </a>
             </div>
           </div>
