@@ -28,12 +28,13 @@ export default function DigitalRain() {
     let lastH = -1;
     let resizeTimer: ReturnType<typeof setTimeout> | undefined;
 
-    const katakana =
-      "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+    // Numbers and algebraic letters only (Latin variables + the Greek
+    // letters that stand in for them in maths) — no katakana.
     const numbers = "0123456789";
-    const mathSymbols =
-      "×÷∆ΣΠ√∞≈≠≤≥∫∂αβγθφψω";
-    const allChars = katakana + numbers + mathSymbols;
+    const latin = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const greek =
+      "αβγδεζθλμνξπρστφχψω";
+    const allChars = numbers + latin + greek;
     const randomChar = () =>
       allChars[Math.floor(Math.random() * allChars.length)];
 

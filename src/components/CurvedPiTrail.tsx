@@ -9,16 +9,14 @@ const PI_DIGITS =
   "3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823378678316527120190914564856692346034861045432664821339360726024914127372458700660631558817488152092096282925409171536436789259036001133053054882046652138414695194151160943305727036575959195309218611738193261179310511854807446237996274956735188575272489122793818301194912983367336244065664308602139494639522473719070217986094370277053921717629317675238467481846766940513200056812714526356082778577134275778960917363717872";
 
 const MIN_DIGITS = 4;
-const MAX_DIGITS = 100;
+const MAX_DIGITS = 115;
 
-// Mostly-horizontal wave: low vertical amplitude so it reads as a
-// horizontal wave rather than a diagonal descent, strictly left-to-right
-// so the digits stay upright the whole way along it.
+// Vertical wave: descends top-to-bottom of the pinned viewport, weaving
+// left and right, with the pi digits rolling down it as you scrub.
 const CURVE_D =
-  "M 30 230 C 200 175, 340 175, 500 230 " +
-  "C 660 285, 800 285, 960 230 " +
-  "C 1055 197, 1135 197, 1180 224";
-const VIEWBOX = "0 0 1200 460";
+  "M 300 8 C 470 175, 130 345, 300 510 " +
+  "C 470 675, 130 845, 300 1012";
+const VIEWBOX = "0 0 600 1020";
 
 /**
  * The curved pi trail for the pinned scroll-scrub intro on the home page.
@@ -37,9 +35,9 @@ export default function CurvedPiTrail({ progress }: { progress: number }) {
   const digitCount = Math.max(MIN_DIGITS, Math.floor(progress * MAX_DIGITS));
   const windowText = `π = ${PI_DIGITS.slice(0, digitCount)}`;
 
-  // Subtle upward drift over the pinned scrub so it doesn't feel frozen.
+  // Slight upward drift over the pinned scrub so it doesn't feel frozen.
   const style: CSSProperties = {
-    transform: `translateY(${(8 - progress * 16).toFixed(2)}vh)`,
+    transform: `translateY(${(4 - progress * 8).toFixed(2)}vh)`,
   };
 
   return (
