@@ -669,14 +669,11 @@ button {
 
 @media (max-width: 900px) {
   /* Stacked / fewer columns — a vertical wave offset just makes uneven
-     gaps, so flatten it and hide the decorative wave. */
+     gaps between the stacked cards, so flatten it (the wave itself still
+     draws behind them). */
   .lineup-card,
   .lineup-card.is-in {
     --rest-y: 0px;
-  }
-
-  .sine-wave {
-    display: none;
   }
 }
 
@@ -736,33 +733,11 @@ button {
     align-self: center;
   }
 
-  .pi-trail.pi-trail--inline {
-    position: relative;
-    inset: auto;
+  .pi-intro-row .pi-trail--inline {
     flex: 1 1 0;
     min-width: 0;
-    display: block;
     width: auto;
-    height: 100%;
     will-change: transform;
-  }
-
-  /* This is a foreground moment while pinned, not ambient background —
-     make the curve and digits carry. */
-  .pi-trail--inline .pi-trail-track {
-    stroke: rgba(243, 247, 239, 0.24);
-    stroke-width: 3;
-  }
-
-  .pi-trail--inline .pi-trail-progress {
-    stroke: var(--purple-btn-3);
-    stroke-width: 5;
-    opacity: 1;
-  }
-
-  .pi-trail--inline .pi-trail-text {
-    fill: rgba(243, 247, 239, 0.82);
-    font-size: 30px;
   }
 
   .lineup-outer {
@@ -783,13 +758,26 @@ button {
 
 /* ===================== Session photos ===================== */
 
-.section-session-photos {
+.pi-intro-static {
   background: rgba(10, 32, 20, 0.5);
-  padding: 56px 0;
+}
+
+/* Non-pinned (mobile / reduced-motion) layout for the pi intro: the
+   photos panel, then the pi wave as a standalone decorative ribbon. */
+.pi-intro-wave-mobile {
+  position: relative;
+  height: clamp(320px, 60vh, 480px);
+  margin-top: 32px;
 }
 
 .session-photos-head {
   margin-bottom: 16px;
+}
+
+.session-photos-empty {
+  color: var(--text-on-dark-soft);
+  font-size: 0.86rem;
+  margin: 0;
 }
 
 .session-photos-label {
@@ -986,38 +974,28 @@ button {
 
 /* ===================== Curved pi trail (scroll-linked) ===================== */
 
-.pi-trail {
-  position: absolute;
-  inset: 0;
+/* The pi trail is always the inline (pinned intro / static mobile)
+   variant now — fills its wrapper, positioned in-flow. */
+.pi-trail,
+.pi-trail.pi-trail--inline {
+  position: relative;
+  inset: auto;
+  display: block;
   width: 100%;
   height: 100%;
   z-index: 0;
   pointer-events: none;
-  /* Isolates this element's repaints (it redraws on ~every scroll tick)
-     so the browser doesn't have to reconsider the rest of the page's
-     layout/paint each time — without this, repainting a ~3000px-tall
-     SVG on every scroll frame can force paint work well beyond its own
-     bounds, which is expensive enough on real GPUs to show as stutter. */
   contain: layout style paint;
-  /* THE actual cause of the "whole page jumps up and down" bug: this
-     SVG's <textPath> content changes on every scroll update, and
-     Chromium's scroll-anchoring feature (which tries to keep whatever
-     element is near the top of the viewport visually stable when
-     content changes) was picking this constantly-mutating text as its
-     anchor and "correcting" scroll position in response — producing
-     large, real backward jumps in window.scrollY. Confirmed by directly
-     measuring scrollY during a real scroll on the live site: 3-4
-     backward jumps per pass with this trail present, zero with
-     overflow-anchor: none applied. This opts the whole decorative
-     overlay out of anchor consideration, which is exactly what it
-     should be — it's aria-hidden and purely visual. */
+  /* <textPath> content changes on every scroll update; opt this
+     purely-decorative overlay out of Chromium's scroll anchoring so it
+     can't yank window.scrollY around (see git history for the bug). */
   overflow-anchor: none;
 }
 
 .pi-trail-track {
   fill: none;
-  stroke: rgba(243, 247, 239, 0.16);
-  stroke-width: 2.5;
+  stroke: rgba(243, 247, 239, 0.24);
+  stroke-width: 3;
   stroke-dasharray: 7 12;
   stroke-linecap: round;
 }
@@ -1025,9 +1003,9 @@ button {
 .pi-trail-progress {
   fill: none;
   stroke: var(--purple-btn-3);
-  stroke-width: 3;
+  stroke-width: 5;
   stroke-linecap: round;
-  opacity: 0.85;
+  opacity: 1;
   transition: stroke-dashoffset 0.12s linear;
 }
 
@@ -1035,15 +1013,9 @@ button {
   font-family: var(--font-math);
   font-weight: 700;
   font-style: italic;
-  font-size: 26px;
-  fill: rgba(243, 247, 239, 0.5);
+  font-size: 30px;
+  fill: rgba(243, 247, 239, 0.82);
   letter-spacing: 0.5px;
-}
-
-@media (max-width: 900px) {
-  .pi-trail {
-    display: none;
-  }
 }
 
 /* ===================== Awards page ===================== */

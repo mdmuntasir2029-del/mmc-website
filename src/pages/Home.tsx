@@ -123,9 +123,12 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <section className="section section-session-photos">
+        <section className="section pi-intro-static">
           <div className="container">
             <SessionPhotoPanel variant="full" />
+            <div className="pi-intro-wave-mobile" aria-hidden="true">
+              <CurvedPiTrail progress={1} />
+            </div>
           </div>
         </section>
       )}
