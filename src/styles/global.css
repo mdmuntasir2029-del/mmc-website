@@ -917,10 +917,14 @@ button {
 /* ===================== Footer ===================== */
 
 .footer {
-  background: var(--green-dark-2);
+  background: rgba(12, 77, 38, 0.82);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
   color: #dff5e4;
   padding: 56px 0 22px;
-  margin-top: auto;
+  margin: auto 24px 24px;
 }
 
 .footer-grid {
