@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import DigitalRain from "./components/DigitalRain";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import Home from "./pages/Home";
 import Awards from "./pages/Awards";
@@ -18,6 +19,7 @@ import AdminArticles from "./pages/admin/Articles";
 function App() {
   return (
     <>
+      <DigitalRain />
       <Navbar />
       <main className="page-main">
         <Routes>

@@ -73,8 +73,6 @@ export default function Home() {
 
   return (
     <div className={pinned ? "home-page home-page--pinned" : "home-page"}>
-      {!pinned && <CurvedPiTrail />}
-
       <section className="hero">
         <div className="container hero-inner">
           <div>

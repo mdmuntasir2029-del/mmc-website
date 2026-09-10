@@ -45,10 +45,15 @@ body {
   padding: 0;
 }
 
+html {
+  /* Matches the digital-rain canvas so overscroll / edges stay seamless. */
+  background: #0a0a0a;
+}
+
 body {
   font-family: var(--font-body);
   color: var(--ink);
-  background: var(--cream);
+  background: transparent;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -57,13 +62,27 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  /* Dark, dot-textured surface behind everything — the page wrappers
-     paint their own opaque dark green on top, so this only shows around
-     and *through* the translucent footer, giving its backdrop-filter
-     something real to blur (that's what makes it read as glass). */
-  background-color: var(--page-bg);
-  background-image: radial-gradient(rgba(243, 247, 239, 0.1) 1.5px, transparent 1.5px);
-  background-size: 22px 22px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Site-wide animated background (DigitalRain). Fixed, non-interactive,
+   sits behind everything; page content stacks above via z-index. */
+.digital-rain-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.page-main {
+  flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
 h1,
@@ -100,10 +119,6 @@ button {
   max-width: 1180px;
   margin: 0 auto;
   padding: 0 24px;
-}
-
-.page-main {
-  flex: 1;
 }
 
 /* ===================== Navbar ===================== */
@@ -361,7 +376,9 @@ button {
   overflow: hidden;
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--page-bg);
+  /* Translucent so the digital-rain background reads through, with just
+     enough dark-green wash to keep light text legible over the rain. */
+  background: rgba(9, 42, 24, 0.34);
 }
 
 /* The pinned scroll sections use position: sticky, which an
@@ -700,12 +717,8 @@ button {
 
   .pi-intro-outer {
     height: 260vh;
-    background-color: var(--page-bg);
-    background-image: radial-gradient(
-      rgba(243, 247, 239, 0.1) 1.5px,
-      transparent 1.5px
-    );
-    background-size: 22px 22px;
+    /* Transparent so the pi arc draws straight over the digital rain. */
+    background: transparent;
   }
 
   .pi-trail.pi-trail--inline {
@@ -846,7 +859,7 @@ button {
 /* ===================== Awards page ===================== */
 
 .awards-page {
-  background: var(--page-bg);
+  background: rgba(9, 42, 24, 0.34);
   min-height: 100vh;
   min-height: 100dvh;
   padding-top: 24px;
@@ -855,7 +868,7 @@ button {
 /* ===================== Articles page ===================== */
 
 .articles-page {
-  background: var(--page-bg);
+  background: rgba(9, 42, 24, 0.34);
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -1090,6 +1103,8 @@ button {
 /* ===================== Footer ===================== */
 
 .footer {
+  position: relative;
+  z-index: 1;
   background: rgba(6, 36, 18, 0.55);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
@@ -1249,7 +1264,7 @@ button {
 /* ===================== Access (Register / Sign in) ===================== */
 
 .access-wrap {
-  background: var(--page-bg);
+  background: rgba(9, 42, 24, 0.34);
   padding: 56px 0 90px;
   min-height: 100vh;
   min-height: 100dvh;
