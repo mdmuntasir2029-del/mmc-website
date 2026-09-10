@@ -107,14 +107,6 @@ DEFINER, see `schema.sql`) that the frontend calls via
 `supabase.rpc('is_admin')`; it only ever returns true/false, never the
 list itself.
 
-## Brick Sans font
-
-The Register button is styled for a font named "Brick Sans"
-(`src/styles/global.css`, `--font-brick`), which falls back to Baloo 2
-since Brick Sans isn't available via Google Fonts. If you have a licensed
-copy of the real font, drop `BrickSans.woff2` into `public/fonts/` and it
-will be picked up automatically via the existing `@font-face` rule.
-
 ## Architecture notes
 
 - `src/lib/db.ts` and `src/lib/auth.ts` are the only files that talk to

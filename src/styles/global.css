@@ -29,21 +29,10 @@
   --radius-md: 14px;
   --radius-sm: 8px;
 
-  --font-heading: "Baloo 2", "Brick Sans", sans-serif;
+  --font-heading: "Cambria Math", Cambria, "Times New Roman", serif;
   --font-body: "Cambria Math", Cambria, "Times New Roman", serif;
-  --font-brick: "Brick Sans", "Baloo 2", sans-serif;
+  --font-brick: "Cambria Math", Cambria, "Times New Roman", serif;
   --font-math: "Cambria Math", Cambria, "Times New Roman", serif;
-}
-
-/* Optional real "Brick Sans" font file — drop BrickSans.woff2 into
-   /public/fonts/ if you have a licensed copy. Falls back to Baloo 2
-   gracefully if the file is missing (404 on a @font-face is silent). */
-@font-face {
-  font-family: "Brick Sans";
-  src: url("/fonts/BrickSans.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
 }
 
 * {
@@ -116,10 +105,8 @@ button {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(6, 36, 18, 0.72);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--cream);
+  border-bottom: 1px solid rgba(12, 77, 38, 0.1);
 }
 
 .navbar-inner {
@@ -137,7 +124,7 @@ button {
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: var(--text-on-dark);
+  color: var(--green-dark-2);
 }
 
 .navbar-brand img {
@@ -149,7 +136,7 @@ button {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.1rem;
-  color: var(--text-on-dark);
+  color: var(--green-dark-2);
   line-height: 1.1;
 }
 
@@ -165,13 +152,13 @@ button {
 .navbar-links a {
   text-decoration: none;
   font-weight: 600;
-  color: var(--text-on-dark-soft);
+  color: var(--ink-soft);
   font-size: 0.95rem;
   transition: color 0.2s ease;
 }
 
 .navbar-links a:hover {
-  color: var(--text-on-dark);
+  color: var(--green-dark-2);
 }
 
 .navbar-actions {
@@ -268,11 +255,12 @@ button {
   }
 }
 
+/* Light-background outline button (navbar sits on --cream now). */
 .btn-ghost {
   font-weight: 600;
-  color: var(--text-on-dark);
+  color: var(--green-dark-2);
   background: transparent;
-  border: 2px solid rgba(243, 247, 239, 0.35);
+  border: 2px solid rgba(12, 77, 38, 0.25);
   border-radius: 999px;
   padding: 0.55rem 1.3rem;
   cursor: pointer;
@@ -281,6 +269,27 @@ button {
 }
 
 .btn-ghost:hover {
+  background: var(--green-dark-2);
+  color: var(--white);
+  border-color: var(--green-dark-2);
+}
+
+/* Dark-background outline button, e.g. a secondary CTA in the hero. */
+.btn-ghost-light {
+  font-weight: 600;
+  color: var(--text-on-dark);
+  background: transparent;
+  border: 2px solid rgba(243, 247, 239, 0.35);
+  border-radius: 999px;
+  padding: 0.65rem 1.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-ghost-light:hover {
   background: var(--text-on-dark);
   color: var(--page-bg);
   border-color: var(--text-on-dark);
@@ -350,6 +359,9 @@ button {
 
 .hero {
   padding: 64px 0 80px;
+  position: relative;
+  background-image: radial-gradient(rgba(243, 247, 239, 0.12) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
 }
 
 .hero-inner {
@@ -428,10 +440,11 @@ button {
 }
 
 .hero,
-.section-green,
 .section-green-deep,
-.section-contact,
-.section-awards {
+.section-awards,
+.section-about,
+.section-lineup,
+.cta-banner {
   position: relative;
   z-index: 1;
 }
@@ -459,6 +472,129 @@ button {
 
 .section-heading p {
   color: var(--text-on-dark-soft);
+}
+
+/* ===================== About (light section) ===================== */
+
+.section-about {
+  background: var(--cream);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 56px;
+  align-items: center;
+}
+
+.eyebrow {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--purple-btn-1);
+  margin-bottom: 10px;
+}
+
+.about-text h2 {
+  color: var(--green-dark-2);
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+}
+
+.about-text p {
+  color: var(--ink-soft);
+  max-width: 52ch;
+}
+
+.text-link {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--purple-btn-1);
+  border-bottom: 2px solid rgba(95, 61, 196, 0.3);
+  padding-bottom: 2px;
+  transition: border-color 0.2s ease;
+}
+
+.text-link:hover {
+  border-color: var(--purple-btn-1);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid rgba(12, 77, 38, 0.12);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--white);
+}
+
+.info-cell {
+  padding: 26px 20px;
+  text-align: center;
+  border-right: 1px solid rgba(12, 77, 38, 0.12);
+  border-bottom: 1px solid rgba(12, 77, 38, 0.12);
+}
+
+.info-cell:nth-child(2n) {
+  border-right: none;
+}
+
+.info-cell:nth-last-child(-n + 2) {
+  border-bottom: none;
+}
+
+.info-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--green-dark-2);
+}
+
+.info-label {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+/* ===================== Lineup (light-tint section) ===================== */
+
+.section-lineup {
+  background: var(--surface-tint);
+}
+
+.lineup-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.lineup-head h2 {
+  color: var(--green-dark-2);
+  margin-bottom: 0;
+}
+
+/* ===================== CTA banner ===================== */
+
+.cta-banner {
+  background: var(--green-dark-2);
+  padding: 72px 0;
+  text-align: center;
+}
+
+.cta-banner-inner h2 {
+  color: var(--white);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+}
+
+.cta-banner-inner p {
+  color: var(--text-on-dark-soft);
+  margin-bottom: 28px;
 }
 
 /* ===================== Scroll reveal ===================== */
@@ -778,56 +914,26 @@ button {
   font-weight: 700;
 }
 
-.contact-card {
-  background: var(--cream);
-  border: 1px solid rgba(12, 77, 38, 0.08);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  box-shadow: var(--shadow-soft);
-  text-align: center;
-}
-
-.contact-grid {
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.contact-card .label {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
-  color: var(--purple-btn-1);
-  font-weight: 700;
-}
-
-.contact-card .value {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--green-dark-2);
-  margin: 4px 0 18px;
-}
-
 /* ===================== Footer ===================== */
 
 .footer {
   background: var(--green-dark-2);
   color: #dff5e4;
-  padding: 40px 0 22px;
+  padding: 56px 0 22px;
   margin-top: auto;
 }
 
-.footer-inner {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  justify-content: space-between;
-  align-items: center;
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 40px;
+  padding-bottom: 30px;
 }
 
 .footer-brand-block {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
 .footer-brand {
@@ -836,7 +942,8 @@ button {
   gap: 10px;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.15rem;
+  color: var(--white);
 }
 
 .footer-brand img {
@@ -844,23 +951,44 @@ button {
   width: auto;
 }
 
+.footer-desc,
 .footer-address {
   margin: 0;
-  padding-left: 44px;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   color: #a9d9b4;
+  max-width: 34ch;
 }
 
-.footer-links {
+.footer-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #dff5e4;
+  transition: color 0.2s ease;
+}
+
+.footer-social:hover {
+  color: #a6f0b8;
+}
+
+.footer-col-title {
+  color: var(--purple-btn-3);
+  font-size: 1rem;
+  margin-bottom: 16px;
+}
+
+.footer-quicklinks {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px 20px;
+  flex-direction: column;
+  gap: 10px;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.footer-links a {
+.footer-quicklinks a {
   color: #dff5e4;
   text-decoration: none;
   font-weight: 500;
@@ -868,8 +996,45 @@ button {
   transition: color 0.2s ease;
 }
 
-.footer-links a:hover {
+.footer-quicklinks a:hover {
   color: #a6f0b8;
+}
+
+.footer-contact-item {
+  margin-bottom: 18px;
+}
+
+.footer-contact-item:last-child {
+  margin-bottom: 0;
+}
+
+.footer-contact-label {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a9d9b4;
+}
+
+.footer-contact-name {
+  font-weight: 700;
+  color: var(--white);
+  margin: 2px 0 8px;
+}
+
+.footer-contact-link {
+  display: inline-block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #dff5e4;
+  border-bottom: 1px solid rgba(223, 245, 228, 0.3);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.footer-contact-link:hover {
+  color: #a6f0b8;
+  border-color: #a6f0b8;
 }
 
 .footer-bottom {
@@ -1458,6 +1623,15 @@ tr:hover td {
 @media (max-width: 860px) {
   .hero-inner {
     grid-template-columns: 1fr;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
   }
 
   .admin-shell {

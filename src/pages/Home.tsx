@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import poster from "../assets/regposter.jpg";
 import CurvedPiTrail from "../components/CurvedPiTrail";
 import { IconTrophy, IconBook, IconUsers } from "../components/icons";
@@ -54,6 +54,9 @@ export default function Home() {
               >
                 Register
               </button>
+              <a href="#about" className="btn-ghost-light">
+                Learn More
+              </a>
             </div>
           </div>
 
@@ -67,16 +70,53 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section section-green" id="about">
-        <div className="container">
-          <div className="section-heading">
-            <h2>What We're About</h2>
+      <section className="section section-about" id="about">
+        <div className="container about-grid">
+          <div className="about-text">
+            <span className="eyebrow">About the club</span>
+            <h2>Where mathletes are made</h2>
             <p>
               Manarat Mathletes Club (MMC) brings together students who see
               math as more than a subject &mdash; a way of thinking. We run
               weekly sessions, prepare members for competitions, and build a
               shared library of resources for everyone in the club.
             </p>
+            <a href="#lineup" className="text-link">
+              See how the club runs &rarr;
+            </a>
+          </div>
+
+          <div className="info-grid">
+            <div className="info-cell">
+              <div className="info-value">Thursdays</div>
+              <div className="info-label">Weekly Sessions</div>
+            </div>
+            <div className="info-cell">
+              <div className="info-value">Classes 3&ndash;A2</div>
+              <div className="info-label">Open To</div>
+            </div>
+            <div className="info-cell">
+              <div className="info-value">Team &amp; Solo</div>
+              <div className="info-label">Contest Formats</div>
+            </div>
+            <div className="info-cell">
+              <div className="info-value">2026&ndash;27</div>
+              <div className="info-label">Current Session</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-lineup" id="lineup">
+        <div className="container">
+          <div className="lineup-head">
+            <div>
+              <span className="eyebrow">This year's program</span>
+              <h2>How We Meet &amp; Compete</h2>
+            </div>
+            <Link to="/articles" className="text-link">
+              Browse resources &rarr;
+            </Link>
           </div>
 
           <div className="card-grid">
@@ -91,39 +131,16 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section section-contact">
-        <div className="container">
-          <div className="section-heading">
-            <h2>Contact Us</h2>
-          </div>
-
-          <div className="card-grid contact-grid">
-            <div className="contact-card">
-              <span className="label">Club In-Charge</span>
-              <div className="value">Md. Shariful Islam</div>
-              <a
-                href="https://wa.me/8801921044564"
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-primary"
-              >
-                01921044564
-              </a>
-            </div>
-
-            <div className="contact-card">
-              <span className="label">Developer</span>
-              <div className="value">Muntasir Zaman</div>
-              <a
-                href="https://wa.me/8801402455560"
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-primary"
-              >
-                01402455560
-              </a>
-            </div>
-          </div>
+      <section className="cta-banner">
+        <div className="container cta-banner-inner">
+          <h2>Ready to find your love for math?</h2>
+          <p>
+            Member registrations for the 2026&ndash;2027 session are open
+            now.
+          </p>
+          <button className="btn-shine" onClick={() => navigate("/register")}>
+            Register Now
+          </button>
         </div>
       </section>
     </div>
