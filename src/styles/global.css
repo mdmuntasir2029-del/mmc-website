@@ -715,30 +715,70 @@ button {
   }
 
   .pi-intro-outer {
+    /* JS sets an exact height (scales with how many wave cycles the
+       photo count needs) via inline style; this is just a fallback. */
     height: 260vh;
     /* Transparent so the pi arc draws straight over the digital rain. */
     background: transparent;
   }
 
-  /* Photos From Last Session flank the pi trail while it's pinned. */
-  .pi-intro-row {
+  .pi-wave-stage {
     flex: 1 1 auto;
     display: flex;
-    align-items: stretch;
-    gap: 24px;
+    flex-direction: column;
     height: 100%;
     padding: 0 24px;
   }
 
-  .pi-intro-row .session-photos {
-    flex: 0 0 clamp(200px, 22vw, 340px);
-    align-self: center;
+  .pi-wave-label {
+    flex: 0 0 auto;
+    max-width: 320px;
+    /* The pinned stage starts flush at the viewport top, which is
+       exactly where the sticky navbar sits (z-index above it) — without
+       this the label renders directly behind the navbar. */
+    margin: 84px 0 10px;
   }
 
-  .pi-intro-row .pi-trail--inline {
-    flex: 1 1 0;
-    min-width: 0;
-    width: auto;
+  .pi-wave-area {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    /* Keeps the curve itself confined to a centre strip — .pi-wave-photos
+       below is inset:0 against the *padding* box, so it still gets the
+       full width/height to place photos in these gutters without ever
+       overlapping the wave. Vertical padding keeps the top/bottom-most
+       photo from clipping against the pinned viewport's edge. */
+    padding: 70px clamp(170px, 18vw, 260px);
+  }
+
+  .pi-wave-photos {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .session-photo.pi-wave-photo {
+    position: absolute;
+    width: clamp(140px, 15vw, 230px);
+    margin: 0;
+    transform: translateY(-50%) translateY(18px) scale(0.94);
+  }
+
+  .session-photo.pi-wave-photo.is-in {
+    transform: translateY(-50%);
+  }
+
+  .pi-wave-photo--left {
+    left: 16px;
+  }
+
+  .pi-wave-photo--right {
+    right: 16px;
+  }
+
+  .pi-trail.pi-trail--inline {
+    width: 100%;
+    height: 100%;
     will-change: transform;
   }
 
@@ -799,11 +839,6 @@ button {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
-.session-photos--left .session-photos-grid,
-.session-photos--right .session-photos-grid {
-  grid-template-columns: 1fr;
-}
-
 .session-photo {
   margin: 0;
   border-radius: var(--radius-md);
@@ -822,14 +857,14 @@ button {
   transform: none;
 }
 
-.session-photos img {
+.session-photo img {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
 }
 
-.session-photos figcaption {
+.session-photo figcaption {
   padding: 8px 11px;
   font-size: 0.82rem;
   color: var(--text-on-dark-soft);
