@@ -6,6 +6,7 @@ import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import Home from "./pages/Home";
 import Awards from "./pages/Awards";
 import Articles from "./pages/Articles";
+import Leaderboard from "./pages/Leaderboard";
 import Access from "./pages/Access";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -28,6 +29,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/awards" element={<Awards />} />
           <Route path="/articles" element={<Articles />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/register" element={<Access />} />
           <Route path="/signin" element={<Access />} />
           <Route path="/reset-password" element={<ResetPassword />} />

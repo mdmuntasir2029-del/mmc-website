@@ -679,7 +679,9 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .lineup-card,
-  .lineup-card.is-in {
+  .lineup-card.is-in,
+  .session-photo,
+  .session-photo.is-in {
     transition: none;
     opacity: 1;
     transform: none;
@@ -729,7 +731,7 @@ button {
   }
 
   .pi-intro-row .session-photos {
-    flex: 0 0 clamp(150px, 15vw, 230px);
+    flex: 0 0 clamp(200px, 22vw, 340px);
     align-self: center;
   }
 
@@ -790,11 +792,11 @@ button {
 
 .session-photos-grid {
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
 .session-photos--full .session-photos-grid {
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
 .session-photos--left .session-photos-grid,
@@ -802,12 +804,22 @@ button {
   grid-template-columns: 1fr;
 }
 
-.session-photos figure {
+.session-photo {
   margin: 0;
   border-radius: var(--radius-md);
   overflow: hidden;
   background: rgba(14, 40, 25, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Pop in one by one as the pi wave (or, on mobile, nothing — they
+     start already revealed there) reaches each photo's turn. */
+  opacity: 0;
+  transform: translateY(22px) scale(0.94);
+  transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.session-photo.is-in {
+  opacity: 1;
+  transform: none;
 }
 
 .session-photos img {
@@ -818,8 +830,8 @@ button {
 }
 
 .session-photos figcaption {
-  padding: 7px 10px;
-  font-size: 0.78rem;
+  padding: 8px 11px;
+  font-size: 0.82rem;
   color: var(--text-on-dark-soft);
 }
 
@@ -1033,6 +1045,15 @@ button {
   background: rgba(9, 42, 24, 0.34);
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+/* ===================== Leaderboard page ===================== */
+
+.leaderboard-page {
+  background: rgba(9, 42, 24, 0.34);
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: 24px;
 }
 
 .articles-page .empty-state {

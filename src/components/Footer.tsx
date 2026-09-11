@@ -44,6 +44,9 @@ export default function Footer() {
                 <Link to="/articles">Articles</Link>
               </li>
               <li>
+                <Link to="/leaderboard">Leaderboard</Link>
+              </li>
+              <li>
                 <Link to="/register">Register</Link>
               </li>
             </ul>
