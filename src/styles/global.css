@@ -1125,6 +1125,15 @@ button {
   height: 100%;
 }
 
+.awards-empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  width: 80%;
+}
+
 .grid-line {
   stroke: var(--green-dark);
   stroke-opacity: 0.08;
@@ -1636,6 +1645,27 @@ button {
   margin-top: 2px;
   accent-color: var(--purple-btn-1);
   cursor: pointer;
+}
+
+.section-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-toggle-row {
+  display: block;
+  cursor: pointer;
+}
+
+.section-toggle-title {
+  font-weight: 600;
+}
+
+.section-toggle-desc {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-top: 2px;
 }
 
 /* ===================== Admin layout ===================== */

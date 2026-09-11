@@ -1,24 +1,43 @@
+import { useEffect, useState } from "react";
+import * as db from "../lib/db";
+import type { Award } from "../lib/types";
 import RevealOnScroll from "./RevealOnScroll";
 
-interface AwardSlot {
-  name: string;
-  achievement: string;
-  initials: string;
-  left: number;
-  bottom: number;
+// The diagonal drawn in the chart runs from (60,520) to (940,70) in the
+// 1000x560 viewBox — these percentages (of the chart's own box) are
+// chosen to sit right on that same line, so winners always plot along
+// y = x no matter how many there are.
+const DIAGONAL_START = { left: 10, bottom: 8 };
+const DIAGONAL_END = { left: 82, bottom: 86 };
+
+function slotPosition(i: number, count: number) {
+  const t = count <= 1 ? 0.5 : i / (count - 1);
+  return {
+    left: DIAGONAL_START.left + t * (DIAGONAL_END.left - DIAGONAL_START.left),
+    bottom: DIAGONAL_START.bottom + t * (DIAGONAL_END.bottom - DIAGONAL_START.bottom),
+  };
 }
 
-// Placeholder slots — swap name/achievement/initials with real winners as
-// results come in. Positions sit on the y = x line drawn below.
-const AWARDS: AwardSlot[] = [
-  { name: "Add a Winner", achievement: "National Olympiad — Gold", initials: "★", left: 12, bottom: 10 },
-  { name: "Add a Winner", achievement: "Regional Meet — 1st Place", initials: "★", left: 28, bottom: 28 },
-  { name: "Add a Winner", achievement: "Inter-School Contest", initials: "★", left: 44, bottom: 46 },
-  { name: "Add a Winner", achievement: "Club Championship", initials: "★", left: 60, bottom: 64 },
-  { name: "Add a Winner", achievement: "Rising Mathlete Award", initials: "★", left: 76, bottom: 82 },
-];
+function autoInitials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "★";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+}
 
 export default function AwardsPanel() {
+  const [awards, setAwards] = useState<Award[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    db.getAwards()
+      .then(setAwards)
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, []);
+
+  const slots = awards.map((a, i) => ({ award: a, ...slotPosition(i, awards.length) }));
+
   return (
     <section className="section section-awards" id="awards">
       <div className="container">
@@ -55,28 +74,32 @@ export default function AwardsPanel() {
             <line x1="60" y1="520" x2="940" y2="70" className="diagonal-line" />
             <text x="815" y="60" className="diagonal-label">y = x</text>
 
-            {AWARDS.map((a, i) => (
+            {slots.map((s) => (
               <circle
-                key={i}
-                cx={a.left * 10}
-                cy={(100 - a.bottom) * 5.6}
+                key={s.award.id}
+                cx={s.left * 10}
+                cy={(100 - s.bottom) * 5.6}
                 r="7"
                 className="point-marker"
               />
             ))}
           </svg>
 
-          {AWARDS.map((a, i) => (
+          {slots.map((s) => (
             <RevealOnScroll
-              key={i}
+              key={s.award.id}
               className="award-slot"
-              style={{ left: `${a.left}%`, top: `${100 - a.bottom}%` }}
+              style={{ left: `${s.left}%`, top: `${100 - s.bottom}%` }}
             >
-              <div className="award-avatar">{a.initials}</div>
-              <div className="award-name">{a.name}</div>
-              <div className="award-achievement">{a.achievement}</div>
+              <div className="award-avatar">{s.award.initials || autoInitials(s.award.name)}</div>
+              <div className="award-name">{s.award.name}</div>
+              <div className="award-achievement">{s.award.achievement}</div>
             </RevealOnScroll>
           ))}
+
+          {loaded && awards.length === 0 && (
+            <p className="empty-state awards-empty">No award winners added yet.</p>
+          )}
         </div>
       </div>
     </section>

@@ -18,6 +18,8 @@ import Forum from "./pages/admin/Forum";
 import AdminArticles from "./pages/admin/Articles";
 import AdminSessionPhotos from "./pages/admin/SessionPhotos";
 import AdminLeaderboards from "./pages/admin/Leaderboards";
+import AdminAwards from "./pages/admin/Awards";
+import AdminSiteSections from "./pages/admin/SiteSections";
 
 function App() {
   return (
@@ -47,8 +49,10 @@ function App() {
             <Route path="articles" element={<AdminArticles />} />
             <Route path="session-photos" element={<AdminSessionPhotos />} />
             <Route path="leaderboards" element={<AdminLeaderboards />} />
+            <Route path="awards" element={<AdminAwards />} />
             <Route path="members" element={<Members />} />
             <Route path="forum" element={<Forum />} />
+            <Route path="site-sections" element={<AdminSiteSections />} />
           </Route>
         </Routes>
       </main>

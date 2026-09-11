@@ -14,6 +14,8 @@ import type {
   Article,
   SessionPhoto,
   Leaderboard,
+  Award,
+  SectionKey,
 } from "./types";
 
 const SIGNED_URL_TTL_SECONDS = 60 * 10;
@@ -608,5 +610,87 @@ export async function deleteLeaderboardEntry(id: string): Promise<void> {
     .from("leaderboard_entries")
     .delete()
     .eq("id", id);
+  if (error) throw error;
+}
+
+// ---------- Awards ----------
+
+interface AwardRow {
+  id: string;
+  name: string;
+  achievement: string;
+  initials: string | null;
+  created_at: string;
+}
+
+function fromAwardRow(row: AwardRow): Award {
+  return {
+    id: row.id,
+    name: row.name,
+    achievement: row.achievement,
+    initials: row.initials,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getAwards(): Promise<Award[]> {
+  const { data, error } = await supabase
+    .from("awards")
+    .select("*")
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data as AwardRow[]).map(fromAwardRow);
+}
+
+export async function addAward(data: {
+  name: string;
+  achievement: string;
+  initials: string | null;
+}): Promise<Award> {
+  const { data: row, error } = await supabase
+    .from("awards")
+    .insert({
+      name: data.name,
+      achievement: data.achievement,
+      initials: data.initials,
+    })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return fromAwardRow(row as AwardRow);
+}
+
+export async function deleteAward(id: string): Promise<void> {
+  const { error } = await supabase.from("awards").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ---------- Site sections (admin show/hide) ----------
+
+interface SiteSectionRow {
+  key: SectionKey;
+  visible: boolean;
+}
+
+/** Only returns the keys the DB actually has rows for — callers should
+ *  merge this over their own "everything visible" defaults, so a key
+ *  the schema hasn't seeded yet still renders instead of vanishing. */
+export async function getSiteSections(): Promise<Partial<Record<SectionKey, boolean>>> {
+  const { data, error } = await supabase.from("site_sections").select("*");
+  if (error) throw error;
+  const result: Partial<Record<SectionKey, boolean>> = {};
+  for (const row of data as SiteSectionRow[]) {
+    result[row.key] = row.visible;
+  }
+  return result;
+}
+
+export async function setSectionVisible(
+  key: SectionKey,
+  visible: boolean
+): Promise<void> {
+  const { error } = await supabase
+    .from("site_sections")
+    .upsert({ key, visible, updated_at: new Date().toISOString() }, { onConflict: "key" });
   if (error) throw error;
 }

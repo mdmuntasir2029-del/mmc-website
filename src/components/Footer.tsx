@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useSiteSections } from "../hooks/useSiteSections";
 
 export default function Footer() {
+  const { sections } = useSiteSections();
+
   return (
     <footer className="footer">
       <div className="container">
@@ -34,18 +37,26 @@ export default function Footer() {
               <li>
                 <Link to="/">Home</Link>
               </li>
-              <li>
-                <Link to="/#about">About</Link>
-              </li>
-              <li>
-                <Link to="/awards">Awards</Link>
-              </li>
-              <li>
-                <Link to="/articles">Articles</Link>
-              </li>
-              <li>
-                <Link to="/leaderboard">Leaderboard</Link>
-              </li>
+              {sections.about && (
+                <li>
+                  <Link to="/#about">About</Link>
+                </li>
+              )}
+              {sections.awards && (
+                <li>
+                  <Link to="/awards">Awards</Link>
+                </li>
+              )}
+              {sections.articles && (
+                <li>
+                  <Link to="/articles">Articles</Link>
+                </li>
+              )}
+              {sections.leaderboard && (
+                <li>
+                  <Link to="/leaderboard">Leaderboard</Link>
+                </li>
+              )}
               <li>
                 <Link to="/register">Register</Link>
               </li>

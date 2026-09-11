@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useSiteSections } from "../hooks/useSiteSections";
 
 export default function Navbar() {
   const { isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const { sections } = useSiteSections();
 
   async function handleSignOut() {
     await signOut();
@@ -27,18 +29,26 @@ export default function Navbar() {
             <li>
               <Link to="/">Home</Link>
             </li>
-            <li>
-              <Link to="/#about">About</Link>
-            </li>
-            <li>
-              <Link to="/awards">Awards</Link>
-            </li>
-            <li>
-              <Link to="/articles">Articles</Link>
-            </li>
-            <li>
-              <Link to="/leaderboard">Leaderboard</Link>
-            </li>
+            {sections.about && (
+              <li>
+                <Link to="/#about">About</Link>
+              </li>
+            )}
+            {sections.awards && (
+              <li>
+                <Link to="/awards">Awards</Link>
+              </li>
+            )}
+            {sections.articles && (
+              <li>
+                <Link to="/articles">Articles</Link>
+              </li>
+            )}
+            {sections.leaderboard && (
+              <li>
+                <Link to="/leaderboard">Leaderboard</Link>
+              </li>
+            )}
             {isAdmin && (
               <li>
                 <Link to="/admin">Admin Panel</Link>

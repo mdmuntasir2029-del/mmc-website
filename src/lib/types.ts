@@ -74,3 +74,38 @@ export interface Leaderboard {
   createdAt: string;
   entries: LeaderboardEntry[];
 }
+
+export interface Award {
+  id: string;
+  name: string;
+  achievement: string;
+  initials: string | null;
+  createdAt: string;
+}
+
+/** Major site sections/pages the admin can show or hide. */
+export type SectionKey =
+  | "about"
+  | "session_photos"
+  | "lineup"
+  | "awards"
+  | "articles"
+  | "leaderboard";
+
+export const SECTION_KEYS: SectionKey[] = [
+  "about",
+  "session_photos",
+  "lineup",
+  "awards",
+  "articles",
+  "leaderboard",
+];
+
+export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }> = {
+  about: { title: "About the Club", desc: "Home page — \"Where mathletes are made\" section." },
+  session_photos: { title: "Photos From Last Session", desc: "Home page — the pi-wave photo panels." },
+  lineup: { title: "How We Meet & Compete", desc: "Home page — the weekly sessions / contests cards." },
+  awards: { title: "Awards Page", desc: "The /awards page and its navbar/footer link." },
+  articles: { title: "Articles Page", desc: "The /articles page and its navbar/footer link." },
+  leaderboard: { title: "Leaderboard Page", desc: "The /leaderboard page and its navbar/footer link." },
+};

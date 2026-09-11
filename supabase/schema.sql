@@ -153,6 +153,30 @@ create table if not exists leaderboard_entries (
 create index if not exists leaderboard_entries_board_idx
   on leaderboard_entries (leaderboard_id);
 
+-- Award-winning mathletes, shown on the /awards page's y = x scatter.
+-- Ordered by created_at so newer winners plot further up the diagonal.
+create table if not exists awards (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  achievement text not null,
+  initials text,
+  created_at timestamptz not null default now()
+);
+
+-- Which major site sections/pages are currently shown. Rows are
+-- upserted from the admin "Site Sections" page, so this seed just makes
+-- sure every key exists (and defaults to visible) the first time the
+-- schema runs — it's fine if the app later adds keys not listed here.
+create table if not exists site_sections (
+  key text primary key,
+  visible boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+insert into site_sections (key) values
+  ('about'), ('session_photos'), ('lineup'), ('awards'), ('articles'), ('leaderboard')
+on conflict (key) do nothing;
+
 -- ========== Row Level Security ==========
 
 alter table members enable row level security;
@@ -163,6 +187,8 @@ alter table articles enable row level security;
 alter table session_photos enable row level security;
 alter table leaderboards enable row level security;
 alter table leaderboard_entries enable row level security;
+alter table awards enable row level security;
+alter table site_sections enable row level security;
 
 drop policy if exists "members_public_insert" on members;
 create policy "members_public_insert" on members
@@ -228,6 +254,24 @@ create policy "leaderboard_entries_public_select" on leaderboard_entries
 
 drop policy if exists "leaderboard_entries_admin_write" on leaderboard_entries;
 create policy "leaderboard_entries_admin_write" on leaderboard_entries
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "awards_public_select" on awards;
+create policy "awards_public_select" on awards
+  for select to anon, authenticated using (true);
+
+drop policy if exists "awards_admin_write" on awards;
+create policy "awards_admin_write" on awards
+  for all using (is_admin()) with check (is_admin());
+
+-- Section visibility is read by every visitor (it decides what renders)
+-- but only admins can flip it.
+drop policy if exists "site_sections_public_select" on site_sections;
+create policy "site_sections_public_select" on site_sections
+  for select to anon, authenticated using (true);
+
+drop policy if exists "site_sections_admin_write" on site_sections;
+create policy "site_sections_admin_write" on site_sections
   for all using (is_admin()) with check (is_admin());
 
 -- ========== Storage (activity log docs, resource files, articles) ==========

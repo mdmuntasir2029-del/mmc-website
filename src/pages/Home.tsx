@@ -5,6 +5,7 @@ import CurvedPiTrail from "../components/CurvedPiTrail";
 import SineWave from "../components/SineWave";
 import SessionPhotoPanel from "../components/SessionPhotoPanel";
 import { useScrollScrub, usePinnedScrollEnabled } from "../hooks/useScrollScrub";
+import { useSiteSections } from "../hooks/useSiteSections";
 import { IconTrophy, IconBook, IconUsers } from "../components/icons";
 
 const HIGHLIGHTS = [
@@ -44,6 +45,7 @@ const revealAt = (i: number, count: number) => (i + 0.35) / count;
 export default function Home() {
   const navigate = useNavigate();
   const pinned = usePinnedScrollEnabled();
+  const { sections } = useSiteSections();
 
   const piScrub = useScrollScrub(pinned);
   const lineupScrub = useScrollScrub(pinned);
@@ -92,27 +94,29 @@ export default function Home() {
         </div>
       </section>
 
-      {pinned ? (
-        <div className="pin-outer pi-intro-outer" ref={piScrub.outerRef}>
-          <div className="pin-sticky">
-            <div className="pi-intro-row">
-              <SessionPhotoPanel variant="left" progress={piScrub.progress} />
-              <CurvedPiTrail progress={piScrub.progress} />
-              <SessionPhotoPanel variant="right" progress={piScrub.progress} />
+      {sections.session_photos &&
+        (pinned ? (
+          <div className="pin-outer pi-intro-outer" ref={piScrub.outerRef}>
+            <div className="pin-sticky">
+              <div className="pi-intro-row">
+                <SessionPhotoPanel variant="left" progress={piScrub.progress} />
+                <CurvedPiTrail progress={piScrub.progress} />
+                <SessionPhotoPanel variant="right" progress={piScrub.progress} />
+              </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <section className="section pi-intro-static">
-          <div className="container">
-            <SessionPhotoPanel variant="full" />
-            <div className="pi-intro-wave-mobile" aria-hidden="true">
-              <CurvedPiTrail progress={1} />
+        ) : (
+          <section className="section pi-intro-static">
+            <div className="container">
+              <SessionPhotoPanel variant="full" />
+              <div className="pi-intro-wave-mobile" aria-hidden="true">
+                <CurvedPiTrail progress={1} />
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        ))}
 
+      {sections.about && (
       <section className="section section-about" id="about">
         <div className="container about-grid">
           <div className="about-text">
@@ -149,7 +153,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
+      {sections.lineup && (
       <div className="pin-outer lineup-outer" ref={lineupScrub.outerRef}>
         <div className="pin-sticky">
           <section className="section section-lineup" id="lineup">
@@ -193,6 +199,7 @@ export default function Home() {
           </section>
         </div>
       </div>
+      )}
 
       <section className="cta-banner">
         <div className="container cta-banner-inner">

@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import * as db from "../lib/db";
 import type { Article } from "../lib/types";
+import SectionUnavailable from "../components/SectionUnavailable";
+import { useSiteSections } from "../hooks/useSiteSections";
 
 export default function Articles() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const { sections, loaded } = useSiteSections();
 
   useEffect(() => {
     (async () => {
@@ -24,6 +27,10 @@ export default function Articles() {
     } finally {
       setDownloadingId(null);
     }
+  }
+
+  if (loaded && !sections.articles) {
+    return <SectionUnavailable />;
   }
 
   return (
