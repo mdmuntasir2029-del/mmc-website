@@ -3,6 +3,13 @@ import * as db from "../../lib/db";
 import { SECTION_KEYS, SECTION_LABELS } from "../../lib/types";
 import type { SectionKey } from "../../lib/types";
 
+function errorMessage(err: unknown): string {
+  if (err && typeof err === "object" && "message" in err) {
+    return String((err as { message: unknown }).message);
+  }
+  return String(err);
+}
+
 export default function SiteSections() {
   const [visible, setVisible] = useState<Record<SectionKey, boolean>>(
     () =>
@@ -13,22 +20,34 @@ export default function SiteSections() {
   );
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<SectionKey | null>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     db.getSiteSections()
       .then((data) => setVisible((v) => ({ ...v, ...data })))
+      .catch((err) =>
+        setError(
+          `Could not load current settings (${errorMessage(err)}). Showing defaults — ` +
+            `has supabase/schema.sql been run since the Site Sections feature was added?`
+        )
+      )
       .finally(() => setLoading(false));
   }, []);
 
   async function toggle(key: SectionKey) {
+    setError("");
     const next = !visible[key];
     setVisible((v) => ({ ...v, [key]: next }));
     setSavingKey(key);
     try {
       await db.setSectionVisible(key, next);
-    } catch {
+    } catch (err) {
       // Roll back on failure.
       setVisible((v) => ({ ...v, [key]: !next }));
+      setError(
+        `Could not save this change (${errorMessage(err)}). Has supabase/schema.sql ` +
+          `been run since the Site Sections feature was added?`
+      );
     } finally {
       setSavingKey(null);
     }
@@ -44,6 +63,7 @@ export default function SiteSections() {
       </div>
 
       <div className="panel">
+        {error && <div className="form-msg error">{error}</div>}
         {loading ? (
           <p>Loading...</p>
         ) : (
