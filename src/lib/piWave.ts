@@ -3,25 +3,25 @@
  * sine curve (not a hand-drawn bezier), so every crest and trough has
  * exactly the same amplitude — and a set of "slots" at each crest/trough
  * for the session photos to sit beside, alternating sides.
+ *
+ * The curve's viewBox is sized to match its *actual rendered container's*
+ * aspect ratio (measured at runtime — see CurvedPiTrail), not a fixed
+ * guess. That's what keeps the pi digits looking like normal text
+ * instead of stretched: preserveAspectRatio="none" scales x and y
+ * independently, so if the viewBox aspect doesn't match the container's,
+ * glyphs get squashed or stretched. Matching them makes scaleX === scaleY
+ * by construction, everywhere, at every screen size.
  */
 
 export const VIEW_W = 600;
-// Vertical space (in viewBox units) one full sine period occupies. Note
-// this only affects digit-density calibration, *not* the wave's visual
-// proportions — the SVG always fills its (fixed-height) pinned box
-// regardless, so the rendered period per cycle is really
-// containerHeight / cycles. The thing that actually controls how
-// "elongated"/spiral-y vs. gently-sine-shaped it looks is the amplitude
-// below, relative to that fixed per-cycle height.
-export const PX_PER_CYCLE = 480;
 export const DEFAULT_CYCLES = 2;
 // Caps how far the wave (and the pinned scroll distance) grows for a
 // big photo count — beyond this, extra photos just don't get a slot.
 export const MAX_CYCLES = 4;
-// A gentle swing, not a tight coil — keeps the rendered peak-to-peak
-// width well under the rendered per-cycle height so it reads as an
-// actual sine wave rather than an elongated spiral.
-const MARGIN_X = 220;
+// Amplitude as a fraction of one cycle's own height — keeps the
+// period:amplitude ratio (and so how "spiral" vs. "gentle sine" it
+// looks) constant no matter how tall/short a cycle ends up being.
+const AMPLITUDE_RATIO = 0.32;
 
 // .pi-wave-area's own top/bottom padding (px) — the wave/photo layer
 // fills the *whole* padded box (padding included), but the SVG's
@@ -36,24 +36,32 @@ export function cyclesForPhotoCount(count: number): number {
   return Math.min(MAX_CYCLES, Math.max(DEFAULT_CYCLES, needed));
 }
 
-export function waveHeight(cycles: number): number {
-  return cycles * PX_PER_CYCLE;
+export interface WavePath {
+  d: string;
+  viewBoxHeight: number;
+  amplitude: number;
 }
 
-/** A smooth vertical sine path, sampled densely enough to look curved. */
-export function buildWavePath(cycles: number): string {
-  const height = waveHeight(cycles);
+/**
+ * A smooth vertical sine path sized to fill a container of the given
+ * aspect ratio (renderedHeight / renderedWidth) without any non-uniform
+ * stretch once drawn with preserveAspectRatio="none".
+ */
+export function buildWavePath(cycles: number, containerAspect: number): WavePath {
+  const aspect = Number.isFinite(containerAspect) && containerAspect > 0 ? containerAspect : 1;
+  const viewBoxHeight = VIEW_W * aspect;
+  const perCycle = viewBoxHeight / cycles;
+  const amplitude = perCycle * AMPLITUDE_RATIO;
   const midX = VIEW_W / 2;
-  const amplitude = VIEW_W / 2 - MARGIN_X;
   const steps = Math.round(60 * cycles);
   const parts: string[] = [];
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
-    const y = t * height;
+    const y = t * viewBoxHeight;
     const x = midX + amplitude * Math.sin(t * cycles * Math.PI * 2);
     parts.push(`${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`);
   }
-  return parts.join(" ");
+  return { d: parts.join(" "), viewBoxHeight, amplitude };
 }
 
 export interface WaveSlot {

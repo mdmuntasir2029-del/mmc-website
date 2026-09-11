@@ -748,7 +748,7 @@ button {
        full width/height to place photos in these gutters without ever
        overlapping the wave. Vertical padding keeps the top/bottom-most
        photo from clipping against the pinned viewport's edge. */
-    padding: 70px clamp(120px, 13vw, 190px);
+    padding: 70px clamp(180px, 19vw, 270px);
   }
 
   .pi-wave-photos {
@@ -759,7 +759,7 @@ button {
 
   .session-photo.pi-wave-photo {
     position: absolute;
-    width: clamp(140px, 15vw, 230px);
+    width: clamp(170px, 18vw, 250px);
     margin: 0;
     transform: translateY(-50%) translateY(18px) scale(0.94);
   }
@@ -836,7 +836,7 @@ button {
 }
 
 .session-photos--full .session-photos-grid {
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
 .session-photo {
