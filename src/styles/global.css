@@ -748,7 +748,7 @@ button {
        full width/height to place photos in these gutters without ever
        overlapping the wave. Vertical padding keeps the top/bottom-most
        photo from clipping against the pinned viewport's edge. */
-    padding: 70px clamp(170px, 18vw, 260px);
+    padding: 70px clamp(120px, 13vw, 190px);
   }
 
   .pi-wave-photos {

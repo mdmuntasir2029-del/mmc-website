@@ -6,13 +6,22 @@
  */
 
 export const VIEW_W = 600;
-// Vertical space (in viewBox units) one full sine period occupies.
+// Vertical space (in viewBox units) one full sine period occupies. Note
+// this only affects digit-density calibration, *not* the wave's visual
+// proportions — the SVG always fills its (fixed-height) pinned box
+// regardless, so the rendered period per cycle is really
+// containerHeight / cycles. The thing that actually controls how
+// "elongated"/spiral-y vs. gently-sine-shaped it looks is the amplitude
+// below, relative to that fixed per-cycle height.
 export const PX_PER_CYCLE = 480;
 export const DEFAULT_CYCLES = 2;
 // Caps how far the wave (and the pinned scroll distance) grows for a
 // big photo count — beyond this, extra photos just don't get a slot.
 export const MAX_CYCLES = 4;
-const MARGIN_X = 60;
+// A gentle swing, not a tight coil — keeps the rendered peak-to-peak
+// width well under the rendered per-cycle height so it reads as an
+// actual sine wave rather than an elongated spiral.
+const MARGIN_X = 220;
 
 // .pi-wave-area's own top/bottom padding (px) — the wave/photo layer
 // fills the *whole* padded box (padding included), but the SVG's
