@@ -4,10 +4,7 @@ import poster from "../assets/regposter.jpg";
 import CurvedPiTrail from "../components/CurvedPiTrail";
 import SineWave from "../components/SineWave";
 import SessionPhotoPanel from "../components/SessionPhotoPanel";
-import PiPhotoWave from "../components/PiPhotoWave";
 import { useScrollScrub, usePinnedScrollEnabled } from "../hooks/useScrollScrub";
-import { useLatestSessionPhotos } from "../hooks/useLatestSessionPhotos";
-import { cyclesForPhotoCount, DEFAULT_CYCLES } from "../lib/piWave";
 import { IconTrophy, IconBook, IconUsers } from "../components/icons";
 
 const HIGHLIGHTS = [
@@ -56,14 +53,6 @@ export default function Home() {
   // stuck invisible if an observer never fires.
   const lineupProgress = pinned ? lineupScrub.progress : 1;
 
-  // One fetch shared by both the wave (needs the count, to size itself —
-  // more photos than the default crest/trough slots hold means more
-  // wave cycles) and the photo layer (needs the photos themselves).
-  const { label: photoLabel, photos, loaded: photosLoaded } =
-    useLatestSessionPhotos();
-  const piCycles = cyclesForPhotoCount(photos.length);
-  const piPinVh = Math.round((260 * piCycles) / DEFAULT_CYCLES);
-
   return (
     <div className={pinned ? "home-page home-page--pinned" : "home-page"}>
       <section className="hero">
@@ -104,31 +93,21 @@ export default function Home() {
       </section>
 
       {pinned ? (
-        <div
-          className="pin-outer pi-intro-outer"
-          ref={piScrub.outerRef}
-          style={{ height: `${piPinVh}vh` }}
-        >
+        <div className="pin-outer pi-intro-outer" ref={piScrub.outerRef}>
           <div className="pin-sticky">
-            <PiPhotoWave
-              progress={piScrub.progress}
-              cycles={piCycles}
-              photos={photos}
-              label={photoLabel}
-              loaded={photosLoaded}
-            />
+            <div className="pi-intro-row">
+              <SessionPhotoPanel variant="left" progress={piScrub.progress} />
+              <CurvedPiTrail progress={piScrub.progress} />
+              <SessionPhotoPanel variant="right" progress={piScrub.progress} />
+            </div>
           </div>
         </div>
       ) : (
         <section className="section pi-intro-static">
           <div className="container">
-            <SessionPhotoPanel
-              label={photoLabel}
-              photos={photos}
-              loaded={photosLoaded}
-            />
+            <SessionPhotoPanel variant="full" />
             <div className="pi-intro-wave-mobile" aria-hidden="true">
-              <CurvedPiTrail progress={1} cycles={DEFAULT_CYCLES} />
+              <CurvedPiTrail progress={1} />
             </div>
           </div>
         </section>
