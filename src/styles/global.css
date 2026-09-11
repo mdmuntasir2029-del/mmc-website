@@ -675,6 +675,12 @@ button {
   .lineup-card.is-in {
     --rest-y: 0px;
   }
+
+  /* Tighter gutter just for the session-photos section so the (usually
+     single-column, full-width) photos get more of the screen. */
+  .pi-intro-static .container {
+    padding: 0 14px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -731,7 +737,7 @@ button {
   }
 
   .pi-intro-row .session-photos {
-    flex: 0 0 clamp(200px, 22vw, 340px);
+    flex: 0 0 clamp(240px, 26vw, 420px);
     align-self: center;
   }
 
@@ -796,7 +802,7 @@ button {
 }
 
 .session-photos--full .session-photos-grid {
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .session-photos--left .session-photos-grid,
