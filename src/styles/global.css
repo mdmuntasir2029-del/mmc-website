@@ -29,6 +29,12 @@
   --radius-md: 14px;
   --radius-sm: 8px;
 
+  /* Rendered navbar height (desktop) with a little safety margin — the
+     sticky pinned sections below use this so their content can never
+     end up vertically centered/pinned underneath the (also sticky,
+     higher z-index) navbar. */
+  --navbar-h: 70px;
+
   --font-heading: "Cambria Math", Cambria, "Times New Roman", serif;
   --font-body: "Cambria Math", Cambria, "Times New Roman", serif;
   --font-brick: "Cambria Math", Cambria, "Times New Roman", serif;
@@ -711,9 +717,14 @@ button {
 @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
   .pin-sticky {
     position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100dvh;
+    /* Sticks just below the (also-sticky, higher z-index) navbar instead
+       of at the very top of the viewport — otherwise content that ends
+       up vertically centered here (e.g. the session photos panel with a
+       short viewport or several photos) can render partly or fully
+       underneath the navbar instead of just being covered by it. */
+    top: var(--navbar-h);
+    height: calc(100vh - var(--navbar-h));
+    height: calc(100dvh - var(--navbar-h));
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -733,12 +744,18 @@ button {
     align-items: stretch;
     gap: 24px;
     height: 100%;
-    padding: 0 24px;
+    padding: 24px 24px 0;
   }
 
   .pi-intro-row .session-photos {
     flex: 0 0 clamp(240px, 26vw, 420px);
-    align-self: center;
+    /* Anchored to the top (right after the navbar clearance above),
+       never centered — a centered panel taller than the available
+       height (a short window, or several photos) would overflow
+       equally at the top and bottom, pushing its "Photos From Last
+       Session" heading up underneath the navbar instead of just
+       trimming extra photos off the bottom. */
+    align-self: flex-start;
   }
 
   .pi-intro-row .pi-trail--inline {
