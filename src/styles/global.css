@@ -831,8 +831,18 @@ button {
   gap: 16px;
 }
 
+/* Flexbox, not grid: with an odd photo count, a trailing item alone in
+   the last row of a CSS Grid auto-fill track just sits at one column's
+   width with an empty gap beside it — easy to misread as a cropped/
+   cut-off photo. Flexbox's per-row free-space distribution instead
+   grows a lone last item to fill the rest of its row. */
 .session-photos--full .session-photos-grid {
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.session-photos--full .session-photos-grid .session-photo {
+  flex: 1 1 300px;
 }
 
 .session-photos--left .session-photos-grid,
