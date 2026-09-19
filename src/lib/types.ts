@@ -83,30 +83,47 @@ export interface Award {
   createdAt: string;
 }
 
+/** A photo in the About page's activity slideshow — its own set,
+ *  independent of the homepage's Session Photos, also organized by week. */
+export interface ActivitySlideshowPhoto {
+  id: string;
+  weekLabel: string;
+  photoDate: string;
+  imagePath: string;
+  imageUrl: string;
+  caption: string | null;
+  createdAt: string;
+}
+
 /** Major site sections/pages the admin can show or hide. */
 export type SectionKey =
   | "about"
   | "session_photos"
   | "lineup"
+  | "activity_slideshow"
   | "awards"
   | "articles"
   | "leaderboard"
-  | "register";
+  | "register"
+  | "hall_of_fame";
 
 export const SECTION_KEYS: SectionKey[] = [
   "about",
   "session_photos",
   "lineup",
+  "activity_slideshow",
   "awards",
   "articles",
   "leaderboard",
   "register",
+  "hall_of_fame",
 ];
 
 export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }> = {
-  about: { title: "About the Club", desc: "Home page — \"Where mathletes are made\" section." },
+  about: { title: "About Page", desc: "The /about page and its navbar/footer link — the whole page, including the sub-sections below." },
   session_photos: { title: "Some Recent Photos of Our Activities", desc: "Home page — the pi-wave photo panels." },
-  lineup: { title: "How We Meet & Compete", desc: "Home page — the weekly sessions / contests cards." },
+  lineup: { title: "How We Meet & Compete", desc: "About page — the weekly sessions / contests cards." },
+  activity_slideshow: { title: "Activity Slideshow", desc: "About page — the admin-managed photo slideshow, organized by week." },
   awards: { title: "Awards Page", desc: "The /awards page and its navbar/footer link." },
   articles: { title: "Articles Page", desc: "The /articles page and its navbar/footer link." },
   leaderboard: { title: "Leaderboard Page", desc: "The /leaderboard page and its navbar/footer link." },
@@ -114,22 +131,26 @@ export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }>
     title: "Member Registration",
     desc: "The /register page, its nav/footer/hero links, and the hero \"registrations open\" line. Sign-in is unaffected.",
   },
+  hall_of_fame: { title: "Hall of Fame Page", desc: "The /hall-of-fame page and its navbar/footer link. Content TBD — stays off until there's something to show." },
 };
 
 /**
  * Client-side fallback used before the DB responds (and for any key the
  * DB has no row for yet, e.g. schema.sql hasn't been re-run). Every
- * section defaults to visible except registration, which was
- * deliberately paused site-wide — it should read as hidden immediately
- * on deploy rather than depending on an admin remembering to also flip
- * a DB toggle (or re-run a migration) at the same time.
+ * section defaults to visible except registration (deliberately paused
+ * site-wide) and Hall of Fame (no content yet) — both should read as
+ * hidden immediately on deploy rather than depending on an admin
+ * remembering to also flip a DB toggle (or re-run a migration) at the
+ * same time.
  */
 export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   about: true,
   session_photos: true,
   lineup: true,
+  activity_slideshow: true,
   awards: true,
   articles: true,
   leaderboard: true,
   register: false,
+  hall_of_fame: false,
 };

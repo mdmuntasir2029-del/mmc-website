@@ -15,6 +15,7 @@ import type {
   SessionPhoto,
   Leaderboard,
   Award,
+  ActivitySlideshowPhoto,
   SectionKey,
 } from "./types";
 
@@ -538,6 +539,90 @@ export async function deleteSessionPhoto(id: string): Promise<void> {
     .eq("id", id)
     .single();
   const { error } = await supabase.from("session_photos").delete().eq("id", id);
+  if (error) throw error;
+  const path = (row as { image_path: string } | null)?.image_path;
+  if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
+}
+
+// ---------- Activity Slideshow (About page — separate from Session Photos) ----------
+
+interface ActivitySlideshowPhotoRow {
+  id: string;
+  week_label: string;
+  photo_date: string;
+  image_path: string;
+  caption: string | null;
+  created_at: string;
+}
+
+function fromActivitySlideshowPhotoRow(
+  row: ActivitySlideshowPhotoRow
+): ActivitySlideshowPhoto {
+  return {
+    id: row.id,
+    weekLabel: row.week_label,
+    photoDate: row.photo_date,
+    imagePath: row.image_path,
+    imageUrl: supabase.storage.from(PUBLIC_BUCKET).getPublicUrl(row.image_path)
+      .data.publicUrl,
+    caption: row.caption,
+    createdAt: row.created_at,
+  };
+}
+
+/** All slideshow photos, newest week first — the About page cycles
+ *  through every one of these (unlike Session Photos, which is
+ *  latest-week-only). */
+export async function getActivitySlideshowPhotos(): Promise<
+  ActivitySlideshowPhoto[]
+> {
+  const { data, error } = await supabase
+    .from("activity_slideshow_photos")
+    .select("*")
+    .order("photo_date", { ascending: false })
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data as ActivitySlideshowPhotoRow[]).map(fromActivitySlideshowPhotoRow);
+}
+
+export async function addActivitySlideshowPhoto(
+  data: { weekLabel: string; photoDate: string; caption: string | null },
+  file: File
+): Promise<ActivitySlideshowPhoto> {
+  const imagePath = `activity-slideshow/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+  const { error: uploadError } = await supabase.storage
+    .from(PUBLIC_BUCKET)
+    .upload(imagePath, file, { upsert: false });
+  if (uploadError) throw uploadError;
+
+  const { data: row, error } = await supabase
+    .from("activity_slideshow_photos")
+    .insert({
+      week_label: data.weekLabel,
+      photo_date: data.photoDate,
+      image_path: imagePath,
+      caption: data.caption,
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    await supabase.storage.from(PUBLIC_BUCKET).remove([imagePath]);
+    throw error;
+  }
+  return fromActivitySlideshowPhotoRow(row as ActivitySlideshowPhotoRow);
+}
+
+export async function deleteActivitySlideshowPhoto(id: string): Promise<void> {
+  const { data: row } = await supabase
+    .from("activity_slideshow_photos")
+    .select("image_path")
+    .eq("id", id)
+    .single();
+  const { error } = await supabase
+    .from("activity_slideshow_photos")
+    .delete()
+    .eq("id", id);
   if (error) throw error;
   const path = (row as { image_path: string } | null)?.image_path;
   if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);

@@ -31,7 +31,7 @@ export default function Navbar() {
             </li>
             {sections.about && (
               <li>
-                <Link to="/#about">About</Link>
+                <Link to="/about">About</Link>
               </li>
             )}
             {sections.awards && (
@@ -47,6 +47,11 @@ export default function Navbar() {
             {sections.leaderboard && (
               <li>
                 <Link to="/leaderboard">Leaderboard</Link>
+              </li>
+            )}
+            {sections.hall_of_fame && (
+              <li>
+                <Link to="/hall-of-fame">Hall of Fame</Link>
               </li>
             )}
             {isAdmin && (

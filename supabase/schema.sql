@@ -163,6 +163,19 @@ create table if not exists awards (
   created_at timestamptz not null default now()
 );
 
+-- The About page's activity slideshow — its own photo set, independent
+-- of the homepage's session_photos, also organized by week. Images live
+-- in the same public mmc-public bucket (existing storage policies are
+-- bucket-wide, not table-specific) under "activity-slideshow/".
+create table if not exists activity_slideshow_photos (
+  id uuid primary key default gen_random_uuid(),
+  week_label text not null,
+  photo_date date not null,
+  image_path text not null,
+  caption text,
+  created_at timestamptz not null default now()
+);
+
 -- Which major site sections/pages are currently shown. Rows are
 -- upserted from the admin "Site Sections" page, so this seed just makes
 -- sure every key exists (and defaults to visible) the first time the
@@ -174,14 +187,17 @@ create table if not exists site_sections (
 );
 
 insert into site_sections (key) values
-  ('about'), ('session_photos'), ('lineup'), ('awards'), ('articles'), ('leaderboard')
+  ('about'), ('session_photos'), ('lineup'), ('activity_slideshow'),
+  ('awards'), ('articles'), ('leaderboard')
 on conflict (key) do nothing;
 
--- Registration was deliberately paused site-wide — seed it hidden
--- rather than at the visible default (the app's own client-side
--- fallback already hides it even before this row exists, but this
--- keeps the DB's state consistent with that from the start).
-insert into site_sections (key, visible) values ('register', false)
+-- Registration was deliberately paused site-wide, and Hall of Fame has
+-- no content yet — seed both hidden rather than at the visible default
+-- (the app's own client-side fallback already hides them even before
+-- these rows exist, but this keeps the DB's state consistent with that
+-- from the start).
+insert into site_sections (key, visible) values
+  ('register', false), ('hall_of_fame', false)
 on conflict (key) do nothing;
 
 -- ========== Row Level Security ==========
@@ -196,6 +212,7 @@ alter table leaderboards enable row level security;
 alter table leaderboard_entries enable row level security;
 alter table awards enable row level security;
 alter table site_sections enable row level security;
+alter table activity_slideshow_photos enable row level security;
 
 drop policy if exists "members_public_insert" on members;
 create policy "members_public_insert" on members
@@ -245,6 +262,14 @@ create policy "session_photos_public_select" on session_photos
 
 drop policy if exists "session_photos_admin_write" on session_photos;
 create policy "session_photos_admin_write" on session_photos
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "activity_slideshow_photos_public_select" on activity_slideshow_photos;
+create policy "activity_slideshow_photos_public_select" on activity_slideshow_photos
+  for select to anon, authenticated using (true);
+
+drop policy if exists "activity_slideshow_photos_admin_write" on activity_slideshow_photos;
+create policy "activity_slideshow_photos_admin_write" on activity_slideshow_photos
   for all using (is_admin()) with check (is_admin());
 
 drop policy if exists "leaderboards_public_select" on leaderboards;
