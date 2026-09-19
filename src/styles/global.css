@@ -54,6 +54,14 @@ body {
 html {
   /* Matches the digital-rain canvas so overscroll / edges stay seamless. */
   background: #0a0a0a;
+  /* Reserves the vertical scrollbar's width up front. Without this, the
+     page's real height (and so whether a scrollbar shows at all) isn't
+     settled until images/canvases/late content finish mounting, so
+     centered content — the pi wave especially, since a curve makes any
+     horizontal shift obvious — visibly nudges sideways by the
+     scrollbar's width right after first paint as it toggles in/out. */
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
 }
 
 body {
@@ -404,9 +412,8 @@ button {
 
 .hero-inner {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 48px;
-  align-items: center;
+  grid-template-columns: 1fr;
+  max-width: 760px;
 }
 
 .hero-eyebrow {
@@ -445,30 +452,6 @@ button {
   gap: 14px;
   margin-top: 26px;
   flex-wrap: wrap;
-}
-
-.hero-poster {
-  position: relative;
-  display: block;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-soft);
-  cursor: pointer;
-  border: none;
-  padding: 0;
-  background: none;
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
-}
-
-.hero-poster:hover {
-  transform: translateY(-8px) rotate(-0.6deg) scale(1.015);
-  box-shadow: 0 24px 50px rgba(12, 77, 38, 0.28);
-}
-
-.hero-poster img {
-  width: 100%;
-  height: auto;
-  display: block;
 }
 
 /* ===================== Sections (green) ===================== */
@@ -785,6 +768,11 @@ button {
 
 .pi-intro-static {
   background: rgba(10, 32, 20, 0.5);
+}
+
+.pi-articles-link {
+  padding: 4px 24px 40px;
+  text-align: center;
 }
 
 /* Non-pinned (mobile / reduced-motion) layout for the pi intro: the
@@ -2061,10 +2049,6 @@ tr:hover td {
 /* ===================== Responsive ===================== */
 
 @media (max-width: 860px) {
-  .hero-inner {
-    grid-template-columns: 1fr;
-  }
-
   .about-grid {
     grid-template-columns: 1fr;
   }

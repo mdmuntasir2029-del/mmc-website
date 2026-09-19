@@ -90,7 +90,8 @@ export type SectionKey =
   | "lineup"
   | "awards"
   | "articles"
-  | "leaderboard";
+  | "leaderboard"
+  | "register";
 
 export const SECTION_KEYS: SectionKey[] = [
   "about",
@@ -99,13 +100,36 @@ export const SECTION_KEYS: SectionKey[] = [
   "awards",
   "articles",
   "leaderboard",
+  "register",
 ];
 
 export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }> = {
   about: { title: "About the Club", desc: "Home page — \"Where mathletes are made\" section." },
-  session_photos: { title: "Photos From Last Session", desc: "Home page — the pi-wave photo panels." },
+  session_photos: { title: "Some Recent Photos of Our Activities", desc: "Home page — the pi-wave photo panels." },
   lineup: { title: "How We Meet & Compete", desc: "Home page — the weekly sessions / contests cards." },
   awards: { title: "Awards Page", desc: "The /awards page and its navbar/footer link." },
   articles: { title: "Articles Page", desc: "The /articles page and its navbar/footer link." },
   leaderboard: { title: "Leaderboard Page", desc: "The /leaderboard page and its navbar/footer link." },
+  register: {
+    title: "Member Registration",
+    desc: "The /register page, its nav/footer/hero links, and the hero \"registrations open\" line. Sign-in is unaffected.",
+  },
+};
+
+/**
+ * Client-side fallback used before the DB responds (and for any key the
+ * DB has no row for yet, e.g. schema.sql hasn't been re-run). Every
+ * section defaults to visible except registration, which was
+ * deliberately paused site-wide — it should read as hidden immediately
+ * on deploy rather than depending on an admin remembering to also flip
+ * a DB toggle (or re-run a migration) at the same time.
+ */
+export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
+  about: true,
+  session_photos: true,
+  lineup: true,
+  awards: true,
+  articles: true,
+  leaderboard: true,
+  register: false,
 };

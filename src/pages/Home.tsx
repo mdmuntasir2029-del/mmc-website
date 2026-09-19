@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import poster from "../assets/regposter.jpg";
 import CurvedPiTrail from "../components/CurvedPiTrail";
 import SineWave from "../components/SineWave";
 import SessionPhotoPanel from "../components/SessionPhotoPanel";
@@ -67,54 +66,59 @@ export default function Home() {
             <p className="hero-desc">
               A student-run club for anyone who wants to think in numbers,
               patterns, and proofs &mdash; from casual puzzle-solvers to
-              olympiad hopefuls. Member registrations for the
-              2026&ndash;2027 session are open now. Boys from Classes 3-A2
-              are welcome to register and find their love for math!
+              olympiad hopefuls.
+              {sections.register &&
+                " Member registrations for the 2026–2027 session are open now. Boys from Classes 3-A2 are welcome to register and find their love for math!"}
             </p>
             <div className="hero-cta-row">
-              <button
-                className="btn-shine"
-                onClick={() => navigate("/register")}
-              >
-                Register
-              </button>
+              {sections.register && (
+                <button
+                  className="btn-shine"
+                  onClick={() => navigate("/register")}
+                >
+                  Register
+                </button>
+              )}
               <a href="#about" className="btn-ghost-light">
                 Learn More
               </a>
             </div>
           </div>
-
-          <button
-            className="hero-poster"
-            onClick={() => navigate("/register")}
-            aria-label="Click to register for Manarat Mathletes Club"
-          >
-            <img src={poster} alt="Manarat Mathletes Club member registrations are open" />
-          </button>
         </div>
       </section>
 
-      {sections.session_photos &&
-        (pinned ? (
-          <div className="pin-outer pi-intro-outer" ref={piScrub.outerRef}>
-            <div className="pin-sticky">
-              <div className="pi-intro-row">
-                <SessionPhotoPanel variant="left" progress={piScrub.progress} />
-                <CurvedPiTrail progress={piScrub.progress} />
-                <SessionPhotoPanel variant="right" progress={piScrub.progress} />
+      {sections.session_photos && (
+        <>
+          {pinned ? (
+            <div className="pin-outer pi-intro-outer" ref={piScrub.outerRef}>
+              <div className="pin-sticky">
+                <div className="pi-intro-row">
+                  <SessionPhotoPanel variant="left" progress={piScrub.progress} />
+                  <CurvedPiTrail progress={piScrub.progress} />
+                  <SessionPhotoPanel variant="right" progress={piScrub.progress} />
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <section className="section pi-intro-static">
-            <div className="container">
-              <SessionPhotoPanel variant="full" />
-              <div className="pi-intro-wave-mobile" aria-hidden="true">
-                <CurvedPiTrail progress={1} />
+          ) : (
+            <section className="section pi-intro-static">
+              <div className="container">
+                <SessionPhotoPanel variant="full" />
+                <div className="pi-intro-wave-mobile" aria-hidden="true">
+                  <CurvedPiTrail progress={1} />
+                </div>
               </div>
+            </section>
+          )}
+
+          {sections.articles && (
+            <div className="container pi-articles-link">
+              <Link to="/articles" className="text-link">
+                Read some of our articles &rarr;
+              </Link>
             </div>
-          </section>
-        ))}
+          )}
+        </>
+      )}
 
       {sections.about && (
       <section className="section section-about" id="about">
@@ -201,18 +205,20 @@ export default function Home() {
       </div>
       )}
 
-      <section className="cta-banner">
-        <div className="container cta-banner-inner">
-          <h2>Ready to find your love for math?</h2>
-          <p>
-            Member registrations for the 2026&ndash;2027 session are open
-            now.
-          </p>
-          <button className="btn-shine" onClick={() => navigate("/register")}>
-            Register Now
-          </button>
-        </div>
-      </section>
+      {sections.register && (
+        <section className="cta-banner">
+          <div className="container cta-banner-inner">
+            <h2>Ready to find your love for math?</h2>
+            <p>
+              Member registrations for the 2026&ndash;2027 session are open
+              now.
+            </p>
+            <button className="btn-shine" onClick={() => navigate("/register")}>
+              Register Now
+            </button>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -9,16 +9,25 @@ import {
   validatePhone,
   validateStudentCode,
 } from "../lib/validation";
+import SectionUnavailable from "../components/SectionUnavailable";
+import { useSiteSections } from "../hooks/useSiteSections";
 
 /**
  * One route per purpose, no tab bar: `/register` is member registration
- * (public), `/signin` is the admin sign-in (only linked from the "Admin"
- * corner of the footer, so it isn't surfaced to visitors).
+ * (public, gated by the "register" site section), `/signin` is the admin
+ * sign-in (only linked from the "Admin" corner of the footer, and never
+ * gated — admins still need to be able to sign in while registration is
+ * paused).
  */
 export default function Access() {
   const location = useLocation();
   const navigate = useNavigate();
   const isSignIn = location.pathname === "/signin";
+  const { sections, loaded } = useSiteSections();
+
+  if (!isSignIn && loaded && !sections.register) {
+    return <SectionUnavailable />;
+  }
 
   return (
     <section className="access-wrap">

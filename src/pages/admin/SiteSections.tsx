@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import * as db from "../../lib/db";
-import { SECTION_KEYS, SECTION_LABELS } from "../../lib/types";
+import { SECTION_DEFAULT_VISIBLE, SECTION_KEYS, SECTION_LABELS } from "../../lib/types";
 import type { SectionKey } from "../../lib/types";
 
 function errorMessage(err: unknown): string {
@@ -11,13 +11,7 @@ function errorMessage(err: unknown): string {
 }
 
 export default function SiteSections() {
-  const [visible, setVisible] = useState<Record<SectionKey, boolean>>(
-    () =>
-      SECTION_KEYS.reduce(
-        (acc, key) => ({ ...acc, [key]: true }),
-        {} as Record<SectionKey, boolean>
-      )
-  );
+  const [visible, setVisible] = useState<Record<SectionKey, boolean>>(SECTION_DEFAULT_VISIBLE);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<SectionKey | null>(null);
   const [error, setError] = useState("");

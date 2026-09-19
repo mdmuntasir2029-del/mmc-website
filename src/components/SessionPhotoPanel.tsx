@@ -9,7 +9,8 @@ type Variant = "left" | "right" | "full";
 const revealAt = (i: number, count: number) => (i + 0.4) / count;
 
 /**
- * "Photos From Last Session" — the most recent session's photos.
+ * "Some recent photos of our activities" — the most recent session's
+ * photos, shown beside the homepage pi wave.
  * "left" / "full" always show the heading (so it's present beside the pi
  * trail even before any photos are uploaded); "right" is overflow only
  * (the odd-indexed photos, no heading) and renders nothing when there
@@ -59,7 +60,7 @@ export default function SessionPhotoPanel({
     <aside className={`session-photos session-photos--${variant}`}>
       {!isOverflow && (
         <div className="session-photos-head">
-          <span className="eyebrow">Photos From Last Session</span>
+          <span className="eyebrow">Some recent photos of our activities</span>
           {label && <span className="session-photos-label">{label}</span>}
         </div>
       )}

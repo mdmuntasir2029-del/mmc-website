@@ -63,9 +63,11 @@ export default function Navbar() {
               Sign Out
             </button>
           ) : (
-            <Link to="/register" className="btn-shine">
-              Register
-            </Link>
+            sections.register && (
+              <Link to="/register" className="btn-shine">
+                Register
+              </Link>
+            )
           )}
         </div>
       </div>

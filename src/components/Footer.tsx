@@ -57,9 +57,11 @@ export default function Footer() {
                   <Link to="/leaderboard">Leaderboard</Link>
                 </li>
               )}
-              <li>
-                <Link to="/register">Register</Link>
-              </li>
+              {sections.register && (
+                <li>
+                  <Link to="/register">Register</Link>
+                </li>
+              )}
             </ul>
           </div>
 

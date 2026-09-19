@@ -177,6 +177,13 @@ insert into site_sections (key) values
   ('about'), ('session_photos'), ('lineup'), ('awards'), ('articles'), ('leaderboard')
 on conflict (key) do nothing;
 
+-- Registration was deliberately paused site-wide — seed it hidden
+-- rather than at the visible default (the app's own client-side
+-- fallback already hides it even before this row exists, but this
+-- keeps the DB's state consistent with that from the start).
+insert into site_sections (key, visible) values ('register', false)
+on conflict (key) do nothing;
+
 -- ========== Row Level Security ==========
 
 alter table members enable row level security;
