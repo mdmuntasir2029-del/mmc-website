@@ -99,6 +99,17 @@ body {
   z-index: 1;
 }
 
+/* Briefly shown while Site Sections loads, before Navbar/Routes/Footer
+   mount — so a section the admin has hidden can't flash visible for a
+   moment on reload (nothing that depends on it renders until the real
+   answer is in). Just the digital-rain background underneath; no
+   spinner/text, since this normally resolves within a fraction of a
+   second. */
+.app-loading {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 h1,
 h2,
 h3,

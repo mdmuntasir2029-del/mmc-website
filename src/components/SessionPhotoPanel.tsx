@@ -54,7 +54,17 @@ export default function SessionPhotoPanel({
       ? indexed.filter((_, i) => i % 2 === 1)
       : indexed;
 
-  if (isOverflow && shown.length === 0) return null;
+  // The overflow panel used to render nothing at all until there was
+  // something to show it — but since that depends on an async fetch,
+  // the pinned layout briefly has one fewer flex sibling on first paint
+  // than it does a moment later, so the pi trail (which fills the
+  // remaining flex space) starts wider/more off-centre and visibly
+  // snaps narrower the instant the photos arrive. Keeping this element
+  // in the layout (just empty) reserves its flex space from the very
+  // first render, so the trail's size never changes after that.
+  if (isOverflow && shown.length === 0) {
+    return <aside className={`session-photos session-photos--${variant}`} aria-hidden="true" />;
+  }
 
   return (
     <aside className={`session-photos session-photos--${variant}`}>
