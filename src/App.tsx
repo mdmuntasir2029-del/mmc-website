@@ -3,7 +3,6 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import DigitalRain from "./components/DigitalRain";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
-import { useSiteSections } from "./hooks/useSiteSections";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Awards from "./pages/Awards";
@@ -26,17 +25,6 @@ import AdminAwards from "./pages/admin/Awards";
 import AdminSiteSections from "./pages/admin/SiteSections";
 
 function App() {
-  const { loaded } = useSiteSections();
-
-  if (!loaded) {
-    return (
-      <>
-        <DigitalRain />
-        <div className="app-loading" aria-hidden="true" />
-      </>
-    );
-  }
-
   return (
     <>
       <DigitalRain />

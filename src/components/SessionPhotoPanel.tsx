@@ -83,7 +83,7 @@ export default function SessionPhotoPanel({
         </div>
       ) : shown.length > 0 ? (
         <div className="session-photos-grid">
-          {shown.map(({ photo: p, i }) => {
+          {shown.map(({ photo: p, i }, shownIndex) => {
             const revealed =
               progress === undefined || progress >= revealAt(i, photos.length);
             return (
@@ -98,7 +98,8 @@ export default function SessionPhotoPanel({
                   width={800}
                   height={600}
                   alt={p.caption ?? "Club session photo"}
-                  loading="lazy"
+                  loading={shownIndex === 0 ? "eager" : "lazy"}
+                  fetchPriority={shownIndex === 0 ? "high" : undefined}
                   decoding="async"
                 />
                 {p.caption && <figcaption>{p.caption}</figcaption>}
