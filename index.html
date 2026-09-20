@@ -10,6 +10,14 @@
       type="font/woff2"
       crossorigin
     />
+    <!-- The homepage's LCP element is a photo whose URL is only known
+         after a client-side Supabase fetch resolves — this can't start
+         the DNS/TCP/TLS handshake to a brand-new origin early like it
+         would for a same-origin resource. Preconnecting lets that
+         handshake happen in parallel with the JS bundle downloading,
+         instead of only starting once the fetch actually fires. -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+    <link rel="dns-prefetch" href="%VITE_SUPABASE_URL%" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
