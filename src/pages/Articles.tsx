@@ -78,6 +78,7 @@ export default function Articles() {
                         href={a.link}
                         target="_blank"
                         rel="noreferrer"
+                        aria-label={`Visit external link for ${a.title}`}
                       >
                         Visit Link
                       </a>

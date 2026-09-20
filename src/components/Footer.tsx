@@ -80,6 +80,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noreferrer"
                 className="footer-contact-link"
+                aria-label="Message Club In-Charge Md. Shariful Islam on WhatsApp at 01921044564"
               >
                 01921044564
               </a>
@@ -92,6 +93,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noreferrer"
                 className="footer-contact-link"
+                aria-label="Message developer Muntasir Zaman on WhatsApp at 01402455560"
               >
                 01402455560
               </a>
@@ -104,9 +106,7 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Manarat Mathletes Club &mdash;
             to infinity unbound.
           </span>
-          <span>
-            Developed by <a href="#">Muntasir B28</a>
-          </span>
+          <span>Developed by Muntasir B28</span>
           <Link to="/signin" className="footer-admin-link">
             Admin
           </Link>
