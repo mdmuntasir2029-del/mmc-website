@@ -55,7 +55,7 @@ export default function ResetPassword() {
       <div className="container">
         <div className="access-card">
           <div className="access-body">
-            <h2>Reset Your Password</h2>
+            <h1>Reset Your Password</h1>
 
             {success ? (
               <>

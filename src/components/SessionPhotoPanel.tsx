@@ -70,8 +70,8 @@ export default function SessionPhotoPanel({
     <aside className={`session-photos session-photos--${variant}`}>
       {!isOverflow && (
         <div className="session-photos-head">
-          <span className="eyebrow">Some recent photos of our activities</span>
-          {label && <span className="session-photos-label">{label}</span>}
+          <h2 className="eyebrow">Some recent photos of our activities</h2>
+          {label && <h3 className="session-photos-label">{label}</h3>}
         </div>
       )}
 

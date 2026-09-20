@@ -616,6 +616,7 @@ button {
   margin: 0 auto 44px;
 }
 
+.section-heading h1,
 .section-heading h2 {
   color: var(--text-on-dark);
 }
@@ -643,10 +644,12 @@ button {
   letter-spacing: 0.1em;
   font-size: 0.78rem;
   font-weight: 700;
+  line-height: normal;
   color: var(--purple-btn-3);
   margin-bottom: 10px;
 }
 
+.about-text h1,
 .about-text h2 {
   color: var(--text-on-dark);
   font-size: clamp(1.7rem, 3vw, 2.3rem);
@@ -724,6 +727,7 @@ button {
   margin-bottom: 36px;
 }
 
+.lineup-head h1,
 .lineup-head h2 {
   color: var(--text-on-dark);
   margin-bottom: 0;
@@ -928,6 +932,8 @@ button {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.05rem;
+  line-height: normal;
+  margin: 0;
 }
 
 .session-photos-grid {
@@ -1125,8 +1131,12 @@ button {
   margin-bottom: 14px;
 }
 
-.leaderboard-card-head h3 {
+.leaderboard-card-head h2 {
   margin: 0;
+  /* Was a plain <h3> with no explicit size (browser-default 1.17em) —
+     promoted a level to fix a heading-order skip, kept the same size
+     explicitly so the promotion is purely semantic. */
+  font-size: 1.17em;
   color: var(--text-on-dark);
 }
 
@@ -1345,8 +1355,12 @@ button {
   margin-bottom: 10px;
 }
 
-.article-card-head h3 {
+.article-card-head h2 {
   margin-bottom: 4px;
+  /* Was a plain <h3> with no explicit size (browser-default 1.17em) —
+     promoted a level to fix a heading-order skip, kept the same size
+     explicitly so the promotion is purely semantic. */
+  font-size: 1.17em;
 }
 
 .article-meta {
@@ -1769,6 +1783,7 @@ button {
   padding: 34px 32px 40px;
 }
 
+.access-body h1,
 .access-body h2 {
   margin-bottom: 6px;
 }

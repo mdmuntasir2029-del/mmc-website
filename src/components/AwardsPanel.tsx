@@ -42,7 +42,7 @@ export default function AwardsPanel() {
     <section className="section section-awards" id="awards">
       <div className="container">
         <div className="section-heading">
-          <h2>Award-Winning Mathletes</h2>
+          <h1>Award-Winning Mathletes</h1>
           <p>
             Every point on this line is a member who made the club proud
             &mdash; hover to take a closer look.

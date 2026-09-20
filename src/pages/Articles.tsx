@@ -38,7 +38,7 @@ export default function Articles() {
       <section className="section">
         <div className="container">
           <div className="section-heading">
-            <h2>Research Articles</h2>
+            <h1>Research Articles</h1>
             <p>Write-ups and research from the club, published by the admin.</p>
           </div>
 
@@ -51,7 +51,7 @@ export default function Articles() {
               {articles.map((a) => (
                 <article className="article-card" key={a.id}>
                   <div className="article-card-head">
-                    <h3>{a.title}</h3>
+                    <h2>{a.title}</h2>
                     <span className="article-meta">
                       {a.author} &middot;{" "}
                       {new Date(a.publishedDate + "T00:00:00").toLocaleDateString(undefined, {

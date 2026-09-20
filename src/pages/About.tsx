@@ -63,7 +63,7 @@ export default function About() {
         <div className="container about-grid">
           <div className="about-text">
             <span className="eyebrow">About the club</span>
-            <h2>Where mathletes are made</h2>
+            <h1>Where mathletes are made</h1>
             <p>
               Manarat Mathletes Club (MMC) brings together students who see
               math as more than a subject &mdash; a way of thinking. We run

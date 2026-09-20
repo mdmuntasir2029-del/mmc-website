@@ -32,7 +32,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="footer-col-title">Quick Links</h3>
+            <h2 className="footer-col-title">Quick Links</h2>
             <ul className="footer-quicklinks">
               <li>
                 <Link to="/">Home</Link>
@@ -71,7 +71,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="footer-col-title">Contact Us</h3>
+            <h2 className="footer-col-title">Contact Us</h2>
             <div className="footer-contact-item">
               <span className="footer-contact-label">Club In-Charge</span>
               <div className="footer-contact-name">Md. Shariful Islam</div>

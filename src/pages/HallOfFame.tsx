@@ -13,7 +13,7 @@ export default function HallOfFame() {
       <section className="section">
         <div className="container">
           <div className="section-heading">
-            <h2>Hall of Fame</h2>
+            <h1>Hall of Fame</h1>
             <p>Content coming soon.</p>
           </div>
         </div>

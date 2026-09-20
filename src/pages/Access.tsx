@@ -130,7 +130,7 @@ function RegisterForm() {
 
   return (
     <>
-      <h2>Member Registration</h2>
+      <h1>Member Registration</h1>
       <p className="access-subtitle">
         Session 2026&ndash;2027 &mdash; fields marked * are required.
       </p>
@@ -394,7 +394,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
   if (pendingConfirmation) {
     return (
       <>
-        <h2>Check Your Email</h2>
+        <h1>Check Your Email</h1>
         <div className="form-msg success">
           We've sent a confirmation link to {email.trim()}. Click it, then come back and sign in.
         </div>
@@ -408,7 +408,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
   if (mode === "forgot") {
     return (
       <>
-        <h2>Reset Your Password</h2>
+        <h1>Reset Your Password</h1>
         <p className="access-subtitle">Enter your admin email and we'll send you a reset link.</p>
 
         {error && <div className="form-msg error">{error}</div>}
@@ -446,7 +446,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <>
-      <h2>{mode === "signin" ? "Sign In" : "Set Up Your Admin Account"}</h2>
+      <h1>{mode === "signin" ? "Sign In" : "Set Up Your Admin Account"}</h1>
       <p className="access-subtitle">
         {mode === "signin"
           ? "Admin panel access only — member sign-in is on the way."

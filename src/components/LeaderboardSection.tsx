@@ -19,7 +19,7 @@ export default function LeaderboardSection() {
         <div className="lineup-head">
           <div>
             <span className="eyebrow">Club games</span>
-            <h2>Leaderboard</h2>
+            <h1>Leaderboard</h1>
           </div>
         </div>
 
@@ -36,7 +36,7 @@ export default function LeaderboardSection() {
             {boards.map((b) => (
               <div className="leaderboard-card" key={b.id}>
                 <div className="leaderboard-card-head">
-                  <h3>{b.game}</h3>
+                  <h2>{b.game}</h2>
                   <span>
                     {new Date(b.playedOn + "T00:00:00").toLocaleDateString(
                       undefined,
