@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Site-wide animated background: falling katakana / digits / math symbols
- * dropping into a rippling water surface (ported from the standalone
+ * Site-wide animated background: falling math content — digits, math
+ * variables/constants, Greek letters, operator glyphs, and a minority of
+ * columns that scroll real π digits or the Fibonacci sequence — dropping
+ * into a rippling water surface (ported from the standalone
  * digital-rain.html the project ships). Rendered once, fixed behind all
  * content, non-interactive. Honors prefers-reduced-motion by freezing.
  */
@@ -28,15 +30,49 @@ export default function DigitalRain() {
     let lastH = -1;
     let resizeTimer: ReturnType<typeof setTimeout> | undefined;
 
-    // Numbers and algebraic letters only (Latin variables + the Greek
-    // letters that stand in for them in maths) — no katakana.
+    // Purely mathematical content — no katakana, no generic alphabet
+    // filler. Digits, the handful of Latin letters actually used as math
+    // variables/constants, Greek letters, and real math-operator glyphs.
     const numbers = "0123456789";
-    const latin = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const greek =
-      "αβγδεζθλμνξπρστφχψω";
-    const allChars = numbers + latin + greek;
+    const mathVars = "xyzntie";
+    const greek = "αβγδεζθλμνξπρστφχψω";
+    const mathSymbols = "√∞±≈≠≤≥×÷∑∫∂ΔΣ∈⊂∪∩∅";
+    const allChars = numbers + mathVars + greek + mathSymbols;
     const randomChar = () =>
       allChars[Math.floor(Math.random() * allChars.length)];
+
+    // A minority of columns scroll through an actual, real sequence
+    // (π's decimal digits, or the Fibonacci sequence) instead of
+    // independently-cycling random glyphs, so the rain occasionally
+    // reads as recognizable math rather than pure noise.
+    const PI_DIGITS =
+      "314159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823378678316527120190914564856692346034861045432664821339360726024914127372458700660631558817488152092096282925409171536436789259036001133053054882046652138414695194151160943305727036575959195309218611738193261179310511854807446237996274956735188575272489122793818301194912983367336244065664308602139494639522473719070217986094370277053921717629317675238467481846766940513200056812714526356082778577134275778960917363717872";
+
+    const FIB_DIGITS = (() => {
+      let a = 1;
+      let b = 1;
+      let s = "11";
+      while (s.length < 400) {
+        const c = a + b;
+        s += String(c);
+        a = b;
+        b = c;
+      }
+      return s;
+    })();
+
+    type ColumnTheme = "random" | "pi" | "fibonacci";
+    function rollTheme(): ColumnTheme {
+      const r = Math.random();
+      if (r < 0.12) return "pi";
+      if (r < 0.22) return "fibonacci";
+      return "random";
+    }
+    function themedChar(theme: ColumnTheme, seqOffset: number, j: number): string | null {
+      if (theme === "pi") return PI_DIGITS[(seqOffset + j) % PI_DIGITS.length];
+      if (theme === "fibonacci") return FIB_DIGITS[(seqOffset + j) % FIB_DIGITS.length];
+      return null;
+    }
 
     const FALL_SPEED = 1.0;
     const COLUMN_DENSITY = 0.7;
@@ -59,6 +95,8 @@ export default function DigitalRain() {
       restartDelay: number;
       opacity: number;
       hitWater: boolean;
+      theme: ColumnTheme;
+      seqOffset: number;
     }
     interface Ripple {
       x: number;
@@ -111,6 +149,8 @@ export default function DigitalRain() {
         restartDelay: 0,
         opacity: 0.6 + Math.random() * 0.4,
         hitWater: false,
+        theme: rollTheme(),
+        seqOffset: Math.floor(Math.random() * 300),
       };
     }
 
@@ -174,6 +214,8 @@ export default function DigitalRain() {
               col.length = 12 + Math.floor(Math.random() * 20);
               col.opacity = 0.6 + Math.random() * 0.4;
               col.hitWater = false;
+              col.theme = rollTheme();
+              col.seqOffset = Math.floor(Math.random() * 300);
               for (const cell of col.chars) cell.char = randomChar();
             } else {
               col.restartDelay = 0.3 + Math.random() * 1.5;
@@ -250,7 +292,7 @@ export default function DigitalRain() {
             ctx!.shadowBlur = 8;
           }
           ctx!.fillText(
-            col.chars[charIndex].char,
+            themedChar(col.theme, col.seqOffset, j) ?? col.chars[charIndex].char,
             col.x + FONT_SIZE * 0.5,
             charY
           );
@@ -292,7 +334,7 @@ export default function DigitalRain() {
           if (reflectAlpha < 0.01) continue;
           ctx!.fillStyle = "rgba(200, 149, 108, " + reflectAlpha + ")";
           ctx!.fillText(
-            col.chars[charIndex].char,
+            themedChar(col.theme, col.seqOffset, j) ?? col.chars[charIndex].char,
             col.x + FONT_SIZE * 0.5 + Math.sin(depthBelow * 0.05) * 3,
             reflectY + waveOffset
           );
