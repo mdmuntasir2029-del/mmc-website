@@ -37,7 +37,11 @@ export default function Home() {
                 </button>
               )}
               {sections.about && (
-                <Link to="/about" className="btn-ghost-light">
+                <Link
+                  to="/about"
+                  className="btn-ghost-light"
+                  aria-label="Learn more about Manarat Mathletes Club"
+                >
                   Learn More
                 </Link>
               )}

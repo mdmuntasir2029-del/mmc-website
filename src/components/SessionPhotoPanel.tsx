@@ -75,7 +75,13 @@ export default function SessionPhotoPanel({
         </div>
       )}
 
-      {shown.length > 0 ? (
+      {!loaded ? (
+        <div className="session-photos-grid" aria-hidden="true">
+          {Array.from({ length: variant === "full" ? 4 : 2 }).map((_, i) => (
+            <figure className="session-photo session-photo--skeleton" key={i} />
+          ))}
+        </div>
+      ) : shown.length > 0 ? (
         <div className="session-photos-grid">
           {shown.map(({ photo: p, i }) => {
             const revealed =
@@ -101,8 +107,7 @@ export default function SessionPhotoPanel({
           })}
         </div>
       ) : (
-        !isOverflow &&
-        loaded && (
+        !isOverflow && (
           <p className="session-photos-empty">
             No photos from the last session yet.
           </p>

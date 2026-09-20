@@ -995,6 +995,19 @@ button {
   transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Shown in place of real <figure>s while the photos fetch is pending,
+   at the same box shape (the <img> inside a real one is what normally
+   supplies this via aspect-ratio) — so the grid already occupies close
+   to its final height on first paint instead of jumping from empty to
+   full-of-photos the instant the fetch resolves, which was the site's
+   single biggest layout-shift source. */
+.session-photo--skeleton {
+  aspect-ratio: 4 / 3;
+  opacity: 1;
+  transform: none;
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .session-photo.is-in {
   opacity: 1;
   transform: none;
