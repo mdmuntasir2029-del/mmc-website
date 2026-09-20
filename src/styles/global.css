@@ -1004,6 +1004,13 @@ button {
 
 .session-photos img {
   width: 100%;
+  /* The width/height *attributes* (added so the browser can reserve
+     space before the image loads) carry an implied 800x600 sizing hint
+     that otherwise wins over aspect-ratio once width is overridden to
+     100% — without this explicit height: auto, every photo rendered at
+     a literal 600px tall regardless of its actual on-screen width,
+     wildly distorting anything narrower than 800px (i.e. everywhere). */
+  height: auto;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
@@ -1246,6 +1253,9 @@ button {
 
 .admin-photo img {
   width: 100%;
+  /* See the matching comment on .session-photos img — same width/height
+     attribute vs. aspect-ratio conflict, same fix. */
+  height: auto;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: var(--radius-sm);
