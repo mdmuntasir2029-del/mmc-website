@@ -178,7 +178,13 @@ export default function ActivitySlideshow() {
             <div className="admin-photo-grid">
               {g.items.map((p) => (
                 <figure className="admin-photo" key={p.id}>
-                  <img src={p.imageUrl} alt={p.caption ?? "Activity photo"} />
+                  <img
+                    src={p.imageUrl}
+                    width={800}
+                    height={600}
+                    loading="lazy"
+                    alt={p.caption ?? "Activity photo"}
+                  />
                   <button
                     className="btn btn-danger btn-sm"
                     onClick={() => handleDelete(p.id)}

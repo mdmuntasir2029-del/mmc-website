@@ -87,8 +87,13 @@ export default function SessionPhotoPanel({
               >
                 <img
                   src={p.imageUrl}
+                  srcSet={p.imageSrcSet}
+                  sizes="(max-width: 900px) 100vw, 420px"
+                  width={800}
+                  height={600}
                   alt={p.caption ?? "Club session photo"}
                   loading="lazy"
+                  decoding="async"
                 />
                 {p.caption && <figcaption>{p.caption}</figcaption>}
               </figure>

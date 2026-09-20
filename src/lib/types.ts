@@ -57,6 +57,8 @@ export interface SessionPhoto {
   sessionDate: string;
   imagePath: string;
   imageUrl: string;
+  /** srcset value covering several widths, for responsive <img> sizing. */
+  imageSrcSet: string;
   caption: string | null;
   createdAt: string;
 }
@@ -91,6 +93,8 @@ export interface ActivitySlideshowPhoto {
   photoDate: string;
   imagePath: string;
   imageUrl: string;
+  /** srcset value covering several widths, for responsive <img> sizing. */
+  imageSrcSet: string;
   caption: string | null;
   createdAt: string;
 }

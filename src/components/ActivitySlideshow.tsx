@@ -51,7 +51,16 @@ export default function ActivitySlideshow() {
                   key={p.id}
                   className={`slideshow-slide${i === index ? " is-active" : ""}`}
                 >
-                  <img src={p.imageUrl} alt={p.caption ?? "Club activity photo"} />
+                  <img
+                    src={p.imageUrl}
+                    srcSet={p.imageSrcSet}
+                    sizes="(max-width: 1180px) 100vw, 1180px"
+                    width={1280}
+                    height={720}
+                    alt={p.caption ?? "Club activity photo"}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                  />
                   <figcaption>
                     <span className="slideshow-week">{p.weekLabel}</span>
                     {p.caption && <span className="slideshow-caption">{p.caption}</span>}

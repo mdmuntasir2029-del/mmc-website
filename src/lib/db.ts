@@ -49,6 +49,29 @@ export async function getFileUrl(path: string): Promise<string> {
   return data.signedUrl;
 }
 
+// Widths offered in every gallery photo's srcset — covers a phone at
+// 1x/2x DPR up through a full-width desktop slideshow frame, so no
+// visitor downloads more pixels than their layout actually shows.
+const GALLERY_WIDTHS = [320, 480, 640, 960, 1280];
+const GALLERY_TRANSFORM_QUALITY = 75;
+
+function publicImageUrl(path: string, width?: number): string {
+  return supabase.storage
+    .from(PUBLIC_BUCKET)
+    .getPublicUrl(
+      path,
+      width ? { transform: { width, quality: GALLERY_TRANSFORM_QUALITY } } : undefined
+    ).data.publicUrl;
+}
+
+/** srcset covering GALLERY_WIDTHS via Supabase's on-the-fly image
+ *  transform/render endpoint — it also content-negotiates WebP for any
+ *  browser that asks for it (Accept: image/webp), so this alone covers
+ *  "responsive sizes" and "modern format" without a <picture> element. */
+function gallerySrcSet(path: string): string {
+  return GALLERY_WIDTHS.map((w) => `${publicImageUrl(path, w)} ${w}w`).join(", ");
+}
+
 // ---------- Members ----------
 
 interface MemberRow {
@@ -474,8 +497,8 @@ function fromSessionPhotoRow(row: SessionPhotoRow): SessionPhoto {
     sessionLabel: row.session_label,
     sessionDate: row.session_date,
     imagePath: row.image_path,
-    imageUrl: supabase.storage.from(PUBLIC_BUCKET).getPublicUrl(row.image_path)
-      .data.publicUrl,
+    imageUrl: publicImageUrl(row.image_path, 640),
+    imageSrcSet: gallerySrcSet(row.image_path),
     caption: row.caption,
     createdAt: row.created_at,
   };
@@ -563,8 +586,8 @@ function fromActivitySlideshowPhotoRow(
     weekLabel: row.week_label,
     photoDate: row.photo_date,
     imagePath: row.image_path,
-    imageUrl: supabase.storage.from(PUBLIC_BUCKET).getPublicUrl(row.image_path)
-      .data.publicUrl,
+    imageUrl: publicImageUrl(row.image_path, 960),
+    imageSrcSet: gallerySrcSet(row.image_path),
     caption: row.caption,
     createdAt: row.created_at,
   };
