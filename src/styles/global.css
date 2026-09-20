@@ -87,6 +87,21 @@
   --shadow-soft: 0 10px 30px rgba(12, 77, 38, 0.15);
   --shadow-btn: 0 8px 20px rgba(95, 61, 196, 0.45);
 
+  /* ---- Semantic roles ----
+     One rule for the whole site: purple is the interaction/accent
+     colour — links, focus states, active/selected indicators, buttons,
+     and exactly one deliberate emphasis word in the hero. Everything
+     structural or decorative (section eyebrows, badges, chart
+     accents, footer labels) is green. Nothing else is ever purple. */
+  --color-accent: var(--purple-btn-3);
+  --color-accent-strong: var(--purple-btn-1);
+  --color-accent-mid: var(--purple-btn-2);
+  --color-accent-soft: rgba(208, 166, 255, 0.14);
+  --color-accent-border: rgba(208, 166, 255, 0.4);
+  --color-surface: var(--green-dark-2);
+  --color-text: var(--text-on-dark);
+  --color-text-soft: var(--text-on-dark-soft);
+
   --radius-lg: 22px;
   --radius-md: 14px;
   --radius-sm: 8px;
@@ -119,7 +134,7 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--purple-btn-3);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -335,10 +350,10 @@ button {
   color: var(--white);
   background: linear-gradient(
     135deg,
-    var(--purple-btn-1),
-    var(--purple-btn-2),
-    var(--purple-btn-3),
-    var(--purple-btn-2)
+    var(--color-accent-strong),
+    var(--color-accent-mid),
+    var(--color-accent),
+    var(--color-accent-mid)
   );
   background-size: 300% 300%;
   border: none;
@@ -548,8 +563,8 @@ button {
 .hero-eyebrow {
   display: inline-block;
   font-weight: 700;
-  color: var(--purple-btn-3);
-  background: rgba(208, 166, 255, 0.14);
+  color: var(--green-light);
+  background: rgba(143, 217, 138, 0.14);
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 0.85rem;
@@ -561,8 +576,11 @@ button {
   color: var(--text-on-dark);
 }
 
+/* The one deliberate emphasis word per Option A (see the "Semantic
+   roles" note in :root) — everywhere else that used to be purple is
+   green now. */
 .hero-title span {
-  color: var(--purple-btn-3);
+  color: var(--color-accent);
 }
 
 .hero-tagline {
@@ -638,6 +656,10 @@ button {
   align-items: center;
 }
 
+/* Every section "kicker" label on the site uses this class — purely a
+   decorative/structural label, not a link or emphasis word, so it's
+   green (see the "Semantic roles" note in :root for the rule this
+   follows). */
 .eyebrow {
   display: block;
   text-transform: uppercase;
@@ -645,7 +667,7 @@ button {
   font-size: 0.78rem;
   font-weight: 700;
   line-height: normal;
-  color: var(--purple-btn-3);
+  color: var(--green-light);
   margin-bottom: 10px;
 }
 
@@ -663,14 +685,14 @@ button {
 .text-link {
   display: inline-block;
   font-weight: 700;
-  color: var(--purple-btn-3);
-  border-bottom: 2px solid rgba(208, 166, 255, 0.4);
+  color: var(--color-accent);
+  border-bottom: 2px solid var(--color-accent-border);
   padding-bottom: 2px;
   transition: border-color 0.2s ease;
 }
 
 .text-link:hover {
-  border-color: var(--purple-btn-3);
+  border-color: var(--color-accent);
 }
 
 .info-grid {
@@ -778,7 +800,7 @@ button {
 
 .sine-wave-draw {
   fill: none;
-  stroke: var(--purple-btn-3);
+  stroke: var(--green-light);
   stroke-width: 3.5;
   stroke-linecap: round;
   opacity: 0.95;
@@ -1098,7 +1120,7 @@ button {
 }
 
 .slideshow-dot.is-active {
-  background: var(--purple-btn-3);
+  background: var(--color-accent);
 }
 
 /* ===================== Leaderboard ===================== */
@@ -1166,7 +1188,7 @@ button {
 }
 
 .leaderboard-list li[data-rank="1"] {
-  background: rgba(208, 166, 255, 0.16);
+  background: rgba(143, 217, 138, 0.16);
 }
 
 .leaderboard-list .rank {
@@ -1182,7 +1204,10 @@ button {
 }
 
 .leaderboard-list li[data-rank="1"] .rank {
-  background: var(--purple-btn-2);
+  background: var(--green-mid);
+  /* --ink, not --green-dark-2 — needs the full 4.5:1 for this bold but
+     not "large" (13px) text, and --green-dark-2 only cleared 4.25:1. */
+  color: var(--ink);
 }
 
 .leaderboard-list .who {
@@ -1282,9 +1307,13 @@ button {
   stroke-linecap: round;
 }
 
+/* Kept purple deliberately: this traces how far the visitor has
+   scrolled through the pi trail, so — unlike the site's other
+   decorative strokes, now green — it's live interactive feedback,
+   the same category as a progress indicator. */
 .pi-trail-progress {
   fill: none;
-  stroke: var(--purple-btn-3);
+  stroke: var(--color-accent);
   stroke-width: 5;
   stroke-linecap: round;
   opacity: 1;
@@ -1427,15 +1456,17 @@ button {
   opacity: 0.7;
 }
 
+/* This chart sits on a light card (.cartesian-frame), so it uses the
+   dark end of the green scale rather than --green-light. */
 .diagonal-line {
-  stroke: var(--purple-btn-1);
+  stroke: var(--green-dark);
   stroke-width: 4;
   stroke-dasharray: 10 8;
   stroke-opacity: 0.55;
 }
 
 .diagonal-label {
-  fill: var(--purple-btn-1);
+  fill: var(--green-dark);
   font-size: 24px;
   font-weight: 700;
   font-family: var(--font-heading);
@@ -1443,7 +1474,7 @@ button {
 }
 
 .point-marker {
-  fill: var(--purple-btn-1);
+  fill: var(--green-dark);
   stroke: #fff;
   stroke-width: 2;
 }
@@ -1489,7 +1520,7 @@ button {
   font-weight: 700;
   font-size: 1.3rem;
   color: #fff;
-  background: linear-gradient(135deg, var(--purple-btn-1), var(--green-mid));
+  background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
 }
 
 .award-name {
@@ -1644,7 +1675,7 @@ button {
 }
 
 .footer-col-title {
-  color: var(--purple-btn-3);
+  color: var(--green-light);
   font-size: 1rem;
   margin-bottom: 16px;
 }
@@ -1776,7 +1807,7 @@ button {
 .access-tab.active {
   background: var(--white);
   color: var(--green-dark);
-  border-bottom-color: var(--purple-btn-1);
+  border-bottom-color: var(--color-accent-strong);
 }
 
 .access-body {
@@ -1799,7 +1830,7 @@ button {
   margin: 16px auto 0;
   background: none;
   border: none;
-  color: var(--purple-btn-1);
+  color: var(--color-accent-strong);
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
@@ -1847,7 +1878,7 @@ button {
 .form-field textarea:focus,
 .form-field select:focus {
   outline: none;
-  border-color: var(--purple-btn-1);
+  border-color: var(--color-accent-strong);
   box-shadow: 0 0 0 3px rgba(95, 61, 196, 0.15);
 }
 
@@ -1912,7 +1943,7 @@ button {
   height: 18px;
   min-width: 18px;
   margin-top: 2px;
-  accent-color: var(--purple-btn-1);
+  accent-color: var(--color-accent-strong);
   cursor: pointer;
 }
 
@@ -2178,8 +2209,8 @@ tr:hover td {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(95, 61, 196, 0.12);
-  color: var(--purple-btn-1);
+  background: rgba(21, 122, 61, 0.12);
+  color: var(--green-dark);
   font-size: 0.75rem;
   font-weight: 700;
   padding: 4px 10px;
