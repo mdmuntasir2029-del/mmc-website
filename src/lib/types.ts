@@ -129,6 +129,17 @@ export interface Testimonial {
   createdAt: string;
 }
 
+/** A club announcement — an image post shown on the Home page. */
+export interface Announcement {
+  id: string;
+  imagePath: string;
+  imageUrl: string;
+  /** srcset value covering several widths, for responsive <img> sizing. */
+  imageSrcSet: string;
+  caption: string | null;
+  createdAt: string;
+}
+
 /**
  * Admin-panel areas that can be granted to individual admins by the
  * super admin (see AdminRoles.tsx / grant_admin_section in schema.sql).
@@ -179,7 +190,8 @@ export type SectionKey =
   | "leaderboard"
   | "hall_of_fame"
   | "current_lineup"
-  | "testimonials";
+  | "testimonials"
+  | "announcements";
 
 export const SECTION_KEYS: SectionKey[] = [
   "about",
@@ -192,6 +204,7 @@ export const SECTION_KEYS: SectionKey[] = [
   "hall_of_fame",
   "current_lineup",
   "testimonials",
+  "announcements",
 ];
 
 export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }> = {
@@ -205,6 +218,7 @@ export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }>
   hall_of_fame: { title: "Hall of Fame Page", desc: "The /hall-of-fame page and its navbar/footer link — hosts the pi-wave and the full roster." },
   current_lineup: { title: "Current Year Lineup", desc: "About page — this session's Hall of Fame entries, shown as cards." },
   testimonials: { title: "What People Say", desc: "About page — testimonials from club personnel." },
+  announcements: { title: "Announcements", desc: "Home page — admin-posted announcement images." },
 };
 
 /**
@@ -227,4 +241,5 @@ export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   hall_of_fame: true,
   current_lineup: true,
   testimonials: true,
+  announcements: true,
 };

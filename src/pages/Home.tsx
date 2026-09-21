@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import HeroSlideshow from "../components/HeroSlideshow";
+import AnnouncementsPanel from "../components/AnnouncementsPanel";
 import SineWave from "../components/SineWave";
 import { useScrollScrub, usePinnedScrollEnabled } from "../hooks/useScrollScrub";
 import { useSiteSections } from "../hooks/useSiteSections";
@@ -118,6 +119,8 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {sections.announcements && <AnnouncementsPanel />}
 
       {sections.articles && (
         <div className="container pi-articles-link">

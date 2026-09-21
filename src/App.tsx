@@ -29,6 +29,7 @@ import AdminSiteSections from "./pages/admin/SiteSections";
 import AdminRoles from "./pages/admin/AdminRoles";
 import AdminHallOfFame from "./pages/admin/HallOfFame";
 import AdminTestimonials from "./pages/admin/Testimonials";
+import AdminAnnouncements from "./pages/admin/Announcements";
 
 function App() {
   return (
@@ -150,6 +151,14 @@ function App() {
               element={
                 <RequireAdminSection section="testimonials">
                   <AdminTestimonials />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="announcements"
+              element={
+                <RequireAdminSection section="announcements">
+                  <AdminAnnouncements />
                 </RequireAdminSection>
               }
             />

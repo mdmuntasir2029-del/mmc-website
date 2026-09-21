@@ -18,6 +18,7 @@ import type {
   ActivitySlideshowPhoto,
   HallOfFameEntry,
   Testimonial,
+  Announcement,
   SectionKey,
 } from "./types";
 
@@ -982,6 +983,70 @@ export async function addTestimonial(data: {
 export async function deleteTestimonial(id: string): Promise<void> {
   const { error } = await supabase.from("testimonials").delete().eq("id", id);
   if (error) throw error;
+}
+
+// ---------- Announcements ----------
+
+interface AnnouncementRow {
+  id: string;
+  image_path: string;
+  caption: string | null;
+  created_at: string;
+}
+
+function fromAnnouncementRow(row: AnnouncementRow): Announcement {
+  return {
+    id: row.id,
+    imagePath: row.image_path,
+    imageUrl: publicImageUrl(row.image_path, 960),
+    imageSrcSet: gallerySrcSet(row.image_path),
+    caption: row.caption,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getAnnouncements(): Promise<Announcement[]> {
+  const { data, error } = await supabase
+    .from("announcements")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as AnnouncementRow[]).map(fromAnnouncementRow);
+}
+
+export async function addAnnouncement(
+  data: { caption: string | null },
+  file: File
+): Promise<Announcement> {
+  const imagePath = `announcements/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+  const { error: uploadError } = await supabase.storage
+    .from(PUBLIC_BUCKET)
+    .upload(imagePath, file, { upsert: false });
+  if (uploadError) throw uploadError;
+
+  const { data: row, error } = await supabase
+    .from("announcements")
+    .insert({ image_path: imagePath, caption: data.caption })
+    .select("*")
+    .single();
+
+  if (error) {
+    await supabase.storage.from(PUBLIC_BUCKET).remove([imagePath]);
+    throw error;
+  }
+  return fromAnnouncementRow(row as AnnouncementRow);
+}
+
+export async function deleteAnnouncement(id: string): Promise<void> {
+  const { data: row } = await supabase
+    .from("announcements")
+    .select("image_path")
+    .eq("id", id)
+    .single();
+  const { error } = await supabase.from("announcements").delete().eq("id", id);
+  if (error) throw error;
+  const path = (row as { image_path: string } | null)?.image_path;
+  if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
 }
 
 // ---------- Site sections (admin show/hide) ----------

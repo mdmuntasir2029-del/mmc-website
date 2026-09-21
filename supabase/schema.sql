@@ -334,6 +334,15 @@ create table if not exists testimonials (
   created_at timestamptz not null default now()
 );
 
+-- Club announcements — image-only posts shown on the Home page, newest
+-- first. Images live under "announcements/" in the same public bucket.
+create table if not exists announcements (
+  id uuid primary key default gen_random_uuid(),
+  image_path text not null,
+  caption text,
+  created_at timestamptz not null default now()
+);
+
 -- Which major site sections/pages are currently shown. Rows are
 -- upserted from the admin "Site Sections" page, so this seed just makes
 -- sure every key exists (and defaults to visible) the first time the
@@ -347,7 +356,7 @@ create table if not exists site_sections (
 insert into site_sections (key) values
   ('about'), ('session_photos'), ('lineup'), ('activity_slideshow'),
   ('awards'), ('articles'), ('leaderboard'), ('hall_of_fame'),
-  ('current_lineup'), ('testimonials')
+  ('current_lineup'), ('testimonials'), ('announcements')
 on conflict (key) do nothing;
 
 -- Note: if your site_sections table already has a `hall_of_fame` row
@@ -373,6 +382,7 @@ alter table site_sections enable row level security;
 alter table activity_slideshow_photos enable row level security;
 alter table hall_of_fame_entries enable row level security;
 alter table testimonials enable row level security;
+alter table announcements enable row level security;
 
 drop policy if exists "olympiad_registrations_public_insert" on olympiad_registrations;
 create policy "olympiad_registrations_public_insert" on olympiad_registrations
@@ -466,6 +476,14 @@ create policy "testimonials_public_select" on testimonials
 
 drop policy if exists "testimonials_admin_write" on testimonials;
 create policy "testimonials_admin_write" on testimonials
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "announcements_public_select" on announcements;
+create policy "announcements_public_select" on announcements
+  for select to anon, authenticated using (true);
+
+drop policy if exists "announcements_admin_write" on announcements;
+create policy "announcements_admin_write" on announcements
   for all using (is_admin()) with check (is_admin());
 
 -- Section visibility is read by every visitor (it decides what renders)

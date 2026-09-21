@@ -37,6 +37,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Home",
     items: [
       { to: "/admin/session-photos", label: "Session Photos (Hero)", Icon: IconImage, section: "session_photos" },
+      { to: "/admin/announcements", label: "Announcements", Icon: IconImage, section: "announcements" },
     ],
   },
   {

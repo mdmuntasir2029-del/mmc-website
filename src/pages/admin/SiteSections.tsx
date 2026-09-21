@@ -14,8 +14,8 @@ function errorMessage(err: unknown): string {
 // flat list — see item 5 of the redesign brief ("organize the site
 // section controls better... according to each page").
 const SECTION_GROUPS: { label: string; keys: SectionKey[] }[] = [
-  { label: "Home", keys: ["session_photos", "lineup"] },
-  { label: "About", keys: ["about", "activity_slideshow"] },
+  { label: "Home", keys: ["session_photos", "lineup", "announcements"] },
+  { label: "About", keys: ["about", "activity_slideshow", "current_lineup", "testimonials"] },
   { label: "Hall of Fame", keys: ["hall_of_fame"] },
   { label: "Awards", keys: ["awards"] },
   { label: "Articles", keys: ["articles"] },

@@ -2940,3 +2940,33 @@ tr:hover td {
   color: var(--text-on-dark-soft);
 }
 
+/* ===================== Announcements ===================== */
+
+.announcement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.announcement-card {
+  margin: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: rgba(14, 40, 25, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.announcement-card img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.announcement-card figcaption {
+  padding: 14px 16px;
+  color: var(--text-on-dark-soft);
+  font-size: 0.9rem;
+}
+
