@@ -77,34 +77,22 @@ export default function Navbar() {
             )}
           </ul>
 
-          <div className="navbar-menu-actions">
-            {isAdmin ? (
+          {isAdmin && (
+            <div className="navbar-menu-actions">
               <button className="btn-ghost" onClick={handleSignOut}>
                 Sign Out
               </button>
-            ) : (
-              sections.register && (
-                <Link to="/register" className="btn-shine">
-                  Register
-                </Link>
-              )
-            )}
-          </div>
+            </div>
+          )}
         </nav>
 
-        <div className="navbar-actions">
-          {isAdmin ? (
+        {isAdmin && (
+          <div className="navbar-actions">
             <button className="btn-ghost" onClick={handleSignOut}>
               Sign Out
             </button>
-          ) : (
-            sections.register && (
-              <Link to="/register" className="btn-shine">
-                Register
-              </Link>
-            )
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </header>
   );

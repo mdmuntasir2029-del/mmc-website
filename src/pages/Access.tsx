@@ -1,256 +1,26 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import * as db from "../lib/db";
+import { useNavigate } from "react-router-dom";
 import * as auth from "../lib/auth";
-import {
-  STUDENT_CODE_MAX_YEAR,
-  validateEmail,
-  validatePhone,
-  validateStudentCode,
-} from "../lib/validation";
-import SectionUnavailable from "../components/SectionUnavailable";
-import { useSiteSections } from "../hooks/useSiteSections";
 
 /**
- * One route per purpose, no tab bar: `/register` is member registration
- * (public, gated by the "register" site section), `/signin` is the admin
- * sign-in (only linked from the "Admin" corner of the footer, and never
- * gated — admins still need to be able to sign in while registration is
- * paused).
+ * The admin sign-in page — reachable only by direct URL (no visible link
+ * anywhere on the public site), never gated by site_sections since
+ * admins still need to be able to sign in regardless of what's toggled.
  */
 export default function Access() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const isSignIn = location.pathname === "/signin";
-  const { sections, loaded } = useSiteSections();
-
-  if (!isSignIn && loaded && !sections.register) {
-    return <SectionUnavailable />;
-  }
 
   return (
     <section className="access-wrap">
       <div className="container">
         <div className="access-card">
           <div className="access-body">
-            {isSignIn ? (
-              <SignInForm onSuccess={() => navigate("/admin")} />
-            ) : (
-              <RegisterForm />
-            )}
+            <SignInForm onSuccess={() => navigate("/admin")} />
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function RegisterForm() {
-  const [name, setName] = useState("");
-  const [className, setClassName] = useState("");
-  const [section, setSection] = useState("");
-  const [roll, setRoll] = useState("");
-  const [studentCode, setStudentCode] = useState("");
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [declared, setDeclared] = useState(false);
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setStatus("idle");
-
-    if (!name.trim() || !className.trim() || !section.trim() || !roll.trim() || !studentCode.trim()) {
-      setError("All required fields must be filled in.");
-      setStatus("error");
-      return;
-    }
-
-    const phoneError = validatePhone(phone);
-    if (phoneError) {
-      setError(phoneError);
-      setStatus("error");
-      return;
-    }
-
-    const emailError = validateEmail(email);
-    if (emailError) {
-      setError(emailError);
-      setStatus("error");
-      return;
-    }
-
-    const codeError = validateStudentCode(studentCode);
-    if (codeError) {
-      setError(codeError);
-      setStatus("error");
-      return;
-    }
-
-    if (!declared) {
-      setError('You must confirm the declaration checkbox before submitting.');
-      setStatus("error");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await db.addMember({
-        name: name.trim(),
-        className: className.trim(),
-        section: section.trim(),
-        roll: roll.trim(),
-        studentCode: studentCode.trim(),
-        phone: phone.trim(),
-        email: email.trim() || null,
-      });
-      setStatus("success");
-      setName("");
-      setClassName("");
-      setSection("");
-      setRoll("");
-      setStudentCode("");
-      setPhone("");
-      setEmail("");
-      setDeclared(false);
-    } catch (err) {
-      setError(
-        err instanceof db.DuplicateMemberError
-          ? err.message
-          : "Something went wrong. Please try again."
-      );
-      setStatus("error");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <>
-      <h1>Member Registration</h1>
-      <p className="access-subtitle">
-        Session 2026&ndash;2027 &mdash; fields marked * are required.
-      </p>
-
-      {status === "success" && (
-        <div className="form-msg success">
-          You're registered! Welcome to Manarat Mathletes Club.
-        </div>
-      )}
-      {status === "error" && <div className="form-msg error">{error}</div>}
-
-      <form onSubmit={handleSubmit}>
-        <div className="form-field">
-          <label>
-            Name <span className="required">*</span>
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Full name"
-          />
-        </div>
-
-        <div className="form-row">
-          <div className="form-field">
-            <label>
-              Class <span className="required">*</span>
-            </label>
-            <input
-              type="text"
-              value={className}
-              onChange={(e) => setClassName(e.target.value)}
-              placeholder="e.g. 9"
-            />
-          </div>
-          <div className="form-field">
-            <label>
-              Section <span className="required">*</span>
-            </label>
-            <input
-              type="text"
-              value={section}
-              onChange={(e) => setSection(e.target.value)}
-              placeholder="e.g. A"
-            />
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-field">
-            <label>
-              Roll <span className="required">*</span>
-            </label>
-            <input
-              type="text"
-              value={roll}
-              onChange={(e) => setRoll(e.target.value)}
-              placeholder="Roll number"
-            />
-          </div>
-          <div className="form-field">
-            <label>
-              Student Code <span className="required">*</span>
-            </label>
-            <input
-              type="text"
-              value={studentCode}
-              onChange={(e) => setStudentCode(e.target.value)}
-              placeholder="e.g. 202600123"
-              maxLength={9}
-            />
-          </div>
-        </div>
-        <p className="form-hint">
-          9 digits total &mdash; first 4 are a year up to {STUDENT_CODE_MAX_YEAR}, followed by your 5-digit sequence.
-        </p>
-
-        <div className="form-row">
-          <div className="form-field">
-            <label>
-              Phone Number <span className="required">*</span>
-            </label>
-            <input
-              type="text"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="e.g. 01XXXXXXXXX"
-            />
-          </div>
-          <div className="form-field">
-            <label>Email (optional)</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-            />
-          </div>
-        </div>
-
-        <div className="form-field checkbox-field">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={declared}
-              onChange={(e) => setDeclared(e.target.checked)}
-            />
-            <span>
-              I declare all information hereby are accurate and absolute
-              <span className="required"> *</span>
-            </span>
-          </label>
-        </div>
-
-        <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%" }}>
-          {submitting ? "Submitting..." : "Submit Registration"}
-        </button>
-      </form>
-    </>
   );
 }
 

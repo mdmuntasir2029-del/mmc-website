@@ -4,7 +4,7 @@ import * as db from "../../lib/db";
 
 export default function Dashboard() {
   const [counts, setCounts] = useState({
-    members: 0,
+    olympiadRegistrations: 0,
     logEntries: 0,
     resources: 0,
     articles: 0,
@@ -13,8 +13,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     (async () => {
-      const [members, log, pres, quizzes, questions, articles, posts] = await Promise.all([
-        db.getMembers(),
+      const [registrations, log, pres, quizzes, questions, articles, posts] = await Promise.all([
+        db.getOlympiadRegistrations(),
         db.getActivityLog(),
         db.getResources("presentations"),
         db.getResources("quizzes"),
@@ -23,7 +23,7 @@ export default function Dashboard() {
         db.getForumPosts(),
       ]);
       setCounts({
-        members: members.length,
+        olympiadRegistrations: registrations.length,
         logEntries: log.length,
         resources: pres.length + quizzes.length + questions.length,
         articles: articles.length,
@@ -42,9 +42,9 @@ export default function Dashboard() {
       </div>
 
       <div className="stat-grid">
-        <Link to="/admin/members" className="stat-card">
-          <div className="num">{counts.members}</div>
-          <div className="label">Registered Members</div>
+        <Link to="/admin/olympiad-registrations" className="stat-card">
+          <div className="num">{counts.olympiadRegistrations}</div>
+          <div className="label">Olympiad Registrations</div>
         </Link>
         <Link to="/admin/activity-log" className="stat-card">
           <div className="num">{counts.logEntries}</div>

@@ -10,12 +10,13 @@ import Articles from "./pages/Articles";
 import Leaderboard from "./pages/Leaderboard";
 import HallOfFame from "./pages/HallOfFame";
 import Access from "./pages/Access";
+import OlympiadRegister from "./pages/OlympiadRegister";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import ActivityLog from "./pages/admin/ActivityLog";
 import Resources from "./pages/admin/Resources";
-import Members from "./pages/admin/Members";
+import AdminOlympiadRegistrations from "./pages/admin/OlympiadRegistrations";
 import Forum from "./pages/admin/Forum";
 import AdminArticles from "./pages/admin/Articles";
 import AdminSessionPhotos from "./pages/admin/SessionPhotos";
@@ -37,9 +38,11 @@ function App() {
           <Route path="/articles" element={<Articles />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/hall-of-fame" element={<HallOfFame />} />
-          <Route path="/register" element={<Access />} />
           <Route path="/signin" element={<Access />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          {/* Intra Math Olympiad registration — not linked from anywhere
+              in the UI, reachable only by this exact URL. */}
+          <Route path="/intra-olympiad-registration-2027" element={<OlympiadRegister />} />
           <Route
             path="/admin"
             element={
@@ -56,7 +59,7 @@ function App() {
             <Route path="activity-slideshow" element={<AdminActivitySlideshow />} />
             <Route path="leaderboards" element={<AdminLeaderboards />} />
             <Route path="awards" element={<AdminAwards />} />
-            <Route path="members" element={<Members />} />
+            <Route path="olympiad-registrations" element={<AdminOlympiadRegistrations />} />
             <Route path="forum" element={<Forum />} />
             <Route path="site-sections" element={<AdminSiteSections />} />
           </Route>

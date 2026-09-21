@@ -1978,6 +1978,87 @@ button {
   color: var(--green-dark);
 }
 
+/* ===================== Intra Math Olympiad registration ===================== */
+/* Deliberately its own dark, numbered-step look (see OlympiadRegister.tsx)
+   rather than the light .access-card sign-in style — this page is only
+   ever reached by a direct link, not discovered through the site's own
+   navigation, so it doesn't need to match the rest of the chrome. */
+
+.olympiad-register {
+  background: rgba(6, 20, 12, 0.55);
+  padding: 72px 0 100px;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.olympiad-register-inner {
+  max-width: 560px;
+}
+
+.olympiad-register-step {
+  display: block;
+  font-family: var(--font-heading-modern);
+  font-size: clamp(3rem, 8vw, 4.5rem);
+  line-height: 1;
+  color: var(--color-accent);
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.olympiad-register-subtitle {
+  color: var(--text-on-dark-soft);
+  margin-bottom: 32px;
+}
+
+.olympiad-field {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.olympiad-field label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: var(--text-on-dark);
+}
+
+.olympiad-field .required {
+  color: var(--color-accent);
+}
+
+.olympiad-field input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.25);
+  padding: 8px 2px;
+  font-size: 1.05rem;
+  font-family: inherit;
+  color: var(--text-on-dark);
+  transition: border-color 0.2s ease;
+}
+
+.olympiad-field input::placeholder {
+  color: rgba(243, 247, 239, 0.35);
+}
+
+.olympiad-field input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.olympiad-field-hint {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: rgba(243, 247, 239, 0.5);
+}
+
+.olympiad-register-form .btn-primary {
+  margin-top: 12px;
+}
+
 .form-field {
   margin-bottom: 18px;
 }

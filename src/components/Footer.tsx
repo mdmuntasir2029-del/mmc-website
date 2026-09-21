@@ -62,11 +62,6 @@ export default function Footer() {
                   <Link to="/hall-of-fame">Hall of Fame</Link>
                 </li>
               )}
-              {sections.register && (
-                <li>
-                  <Link to="/register">Register</Link>
-                </li>
-              )}
             </ul>
           </div>
 

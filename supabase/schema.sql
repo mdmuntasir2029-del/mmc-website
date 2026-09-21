@@ -62,24 +62,24 @@ grant execute on function is_email_admin(text) to anon, authenticated;
 
 -- ========== Tables ==========
 
-create table if not exists members (
+-- General member registration (and Member Management in the admin panel)
+-- was removed entirely — it's no longer used. The `members` table itself
+-- is left in place rather than dropped here automatically; once you've
+-- confirmed nothing else needs it, drop it yourself with:
+--   drop table if exists members cascade;
+
+-- Replaces general member registration: submissions from the (unlinked,
+-- URL-only) Intra Math Olympiad registration page.
+create table if not exists olympiad_registrations (
   id uuid primary key default gen_random_uuid(),
-  name text not null,
+  full_name text not null,
+  school text not null,
   class_name text not null,
-  section text not null,
-  roll text not null,
-  student_code text not null unique,
+  gender text not null,
   phone text not null,
   email text,
-  registered_at timestamptz not null default now()
+  created_at timestamptz not null default now()
 );
-
--- A phone number (always given) or an email (when given) should only be
--- able to register once. If this fails with "could not create unique
--- index" / "duplicate key", there are already-duplicate rows in the table
--- — remove the extras in Member Management first, then re-run this file.
-create unique index if not exists members_phone_unique_idx on members (phone);
-create unique index if not exists members_email_unique_idx on members (lower(email)) where email is not null;
 
 create table if not exists activity_log (
   id uuid primary key default gen_random_uuid(),
@@ -188,21 +188,20 @@ create table if not exists site_sections (
 
 insert into site_sections (key) values
   ('about'), ('session_photos'), ('lineup'), ('activity_slideshow'),
-  ('awards'), ('articles'), ('leaderboard')
+  ('awards'), ('articles'), ('leaderboard'), ('hall_of_fame')
 on conflict (key) do nothing;
 
--- Registration was deliberately paused site-wide, and Hall of Fame has
--- no content yet — seed both hidden rather than at the visible default
--- (the app's own client-side fallback already hides them even before
--- these rows exist, but this keeps the DB's state consistent with that
--- from the start).
-insert into site_sections (key, visible) values
-  ('register', false), ('hall_of_fame', false)
-on conflict (key) do nothing;
+-- Note: if your site_sections table already has a `hall_of_fame` row
+-- seeded `false` from back when that page was an empty placeholder, this
+-- `on conflict do nothing` won't touch it — flip it on yourself from the
+-- admin's Site Sections page now that the page has real content (the
+-- pi-wave). The `register` key (member registration, now removed
+-- entirely) is no longer seeded; its row is safe to delete manually:
+--   delete from site_sections where key = 'register';
 
 -- ========== Row Level Security ==========
 
-alter table members enable row level security;
+alter table olympiad_registrations enable row level security;
 alter table activity_log enable row level security;
 alter table resources enable row level security;
 alter table forum_posts enable row level security;
@@ -214,21 +213,17 @@ alter table awards enable row level security;
 alter table site_sections enable row level security;
 alter table activity_slideshow_photos enable row level security;
 
-drop policy if exists "members_public_insert" on members;
-create policy "members_public_insert" on members
+drop policy if exists "olympiad_registrations_public_insert" on olympiad_registrations;
+create policy "olympiad_registrations_public_insert" on olympiad_registrations
   for insert to anon, authenticated
   with check (true);
 
-drop policy if exists "members_admin_select" on members;
-create policy "members_admin_select" on members
+drop policy if exists "olympiad_registrations_admin_select" on olympiad_registrations;
+create policy "olympiad_registrations_admin_select" on olympiad_registrations
   for select using (is_admin());
 
-drop policy if exists "members_admin_update" on members;
-create policy "members_admin_update" on members
-  for update using (is_admin()) with check (is_admin());
-
-drop policy if exists "members_admin_delete" on members;
-create policy "members_admin_delete" on members
+drop policy if exists "olympiad_registrations_admin_delete" on olympiad_registrations;
+create policy "olympiad_registrations_admin_delete" on olympiad_registrations
   for delete using (is_admin());
 
 drop policy if exists "activity_log_admin_all" on activity_log;

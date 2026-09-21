@@ -1,11 +1,10 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ActivitySlideshow from "../components/ActivitySlideshow";
 import SectionUnavailable from "../components/SectionUnavailable";
 import { usePinnedScrollEnabled } from "../hooks/useScrollScrub";
 import { useSiteSections } from "../hooks/useSiteSections";
 
 export default function About() {
-  const navigate = useNavigate();
   const pinned = usePinnedScrollEnabled();
   const { sections, loaded } = useSiteSections();
 
@@ -55,21 +54,6 @@ export default function About() {
       </section>
 
       {sections.activity_slideshow && <ActivitySlideshow />}
-
-      {sections.register && (
-        <section className="cta-banner">
-          <div className="container cta-banner-inner">
-            <h2>Ready to find your love for math?</h2>
-            <p>
-              Member registrations for the 2026&ndash;2027 session are open
-              now.
-            </p>
-            <button className="btn-shine" onClick={() => navigate("/register")}>
-              Register Now
-            </button>
-          </div>
-        </section>
-      )}
     </div>
   );
 }

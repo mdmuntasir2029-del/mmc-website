@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import * as db from "../../lib/db";
-import type { Member } from "../../lib/types";
+import type { OlympiadRegistration } from "../../lib/types";
 
-export default function Members() {
-  const [members, setMembers] = useState<Member[]>([]);
+export default function OlympiadRegistrations() {
+  const [registrations, setRegistrations] = useState<OlympiadRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
 
   async function load() {
     setLoading(true);
-    setMembers(await db.getMembers());
+    setRegistrations(await db.getOlympiadRegistrations());
     setLoading(false);
   }
 
@@ -19,32 +19,31 @@ export default function Members() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return members;
-    return members.filter((m) =>
-      [m.name, m.className, m.section, m.roll, m.studentCode, m.phone, m.email ?? ""]
+    if (!q) return registrations;
+    return registrations.filter((r) =>
+      [r.fullName, r.school, r.className, r.gender, r.phone, r.email ?? ""]
         .join(" ")
         .toLowerCase()
         .includes(q)
     );
-  }, [members, query]);
+  }, [registrations, query]);
 
   async function handleDelete(id: string) {
-    if (!confirm("Remove this member from the list?")) return;
-    await db.deleteMember(id);
+    if (!confirm("Remove this registration?")) return;
+    await db.deleteOlympiadRegistration(id);
     load();
   }
 
   function exportCsv() {
-    const header = ["Name", "Class", "Section", "Roll", "Student Code", "Phone", "Email", "Registered At"];
-    const rows = filtered.map((m) => [
-      m.name,
-      m.className,
-      m.section,
-      m.roll,
-      m.studentCode,
-      m.phone,
-      m.email ?? "",
-      new Date(m.registeredAt).toLocaleString(),
+    const header = ["Full Name", "School", "Class", "Gender", "Phone", "Email", "Registered At"];
+    const rows = filtered.map((r) => [
+      r.fullName,
+      r.school,
+      r.className,
+      r.gender,
+      r.phone,
+      r.email ?? "",
+      new Date(r.createdAt).toLocaleString(),
     ]);
     const csv = [header, ...rows]
       .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
@@ -53,7 +52,7 @@ export default function Members() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "mmc-members.csv";
+    a.download = "mmc-olympiad-registrations.csv";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -62,8 +61,11 @@ export default function Members() {
     <>
       <div className="admin-content-header">
         <div>
-          <h2>Member Management</h2>
-          <p>Everyone who has registered for the club.</p>
+          <h2>Olympiad Registrations</h2>
+          <p>
+            Everyone who has registered for the Intra Math Olympiad via its
+            unlinked registration page.
+          </p>
         </div>
         <button className="btn btn-secondary" onClick={exportCsv} disabled={filtered.length === 0}>
           Export CSV
@@ -73,7 +75,7 @@ export default function Members() {
       <div className="panel">
         <input
           type="text"
-          placeholder="Search by name, class, roll, student code, phone, or email..."
+          placeholder="Search by name, school, class, gender, phone, or email..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           style={{
@@ -88,17 +90,16 @@ export default function Members() {
         {loading ? (
           <p>Loading...</p>
         ) : filtered.length === 0 ? (
-          <div className="empty-state">No members found.</div>
+          <div className="empty-state">No registrations found.</div>
         ) : (
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>Full Name</th>
+                  <th>School</th>
                   <th>Class</th>
-                  <th>Section</th>
-                  <th>Roll</th>
-                  <th>Student Code</th>
+                  <th>Gender</th>
                   <th>Phone</th>
                   <th>Email</th>
                   <th>Registered</th>
@@ -106,18 +107,17 @@ export default function Members() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((m) => (
-                  <tr key={m.id}>
-                    <td>{m.name}</td>
-                    <td>{m.className}</td>
-                    <td>{m.section}</td>
-                    <td>{m.roll}</td>
-                    <td>{m.studentCode}</td>
-                    <td>{m.phone}</td>
-                    <td>{m.email ?? "—"}</td>
-                    <td>{new Date(m.registeredAt).toLocaleDateString()}</td>
+                {filtered.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.fullName}</td>
+                    <td>{r.school}</td>
+                    <td>{r.className}</td>
+                    <td>{r.gender}</td>
+                    <td>{r.phone}</td>
+                    <td>{r.email ?? "—"}</td>
+                    <td>{new Date(r.createdAt).toLocaleDateString()}</td>
                     <td>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(m.id)}>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(r.id)}>
                         Remove
                       </button>
                     </td>

@@ -6,7 +6,7 @@
  */
 import { supabase, FILES_BUCKET, PUBLIC_BUCKET } from "./supabaseClient";
 import type {
-  Member,
+  OlympiadRegistration,
   ActivityLogEntry,
   ResourceCategory,
   ResourceItem,
@@ -20,9 +20,6 @@ import type {
 } from "./types";
 
 const SIGNED_URL_TTL_SECONDS = 60 * 10;
-const POSTGRES_UNIQUE_VIOLATION = "23505";
-
-export class DuplicateMemberError extends Error {}
 
 function sanitizeFileName(name: string): string {
   return name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
@@ -72,76 +69,71 @@ function gallerySrcSet(path: string): string {
   return GALLERY_WIDTHS.map((w) => `${publicImageUrl(path, w)} ${w}w`).join(", ");
 }
 
-// ---------- Members ----------
+// ---------- Intra Math Olympiad registrations ----------
+// Deliberately not linked from anywhere in the UI (see OlympiadRegister.tsx
+// and its route in App.tsx) — this replaced general member registration,
+// which was removed entirely (including Member Management in the admin
+// panel) as it was no longer in use.
 
-interface MemberRow {
+interface OlympiadRegistrationRow {
   id: string;
-  name: string;
+  full_name: string;
+  school: string;
   class_name: string;
-  section: string;
-  roll: string;
-  student_code: string;
+  gender: string;
   phone: string;
   email: string | null;
-  registered_at: string;
+  created_at: string;
 }
 
-function fromMemberRow(row: MemberRow): Member {
+function fromOlympiadRegistrationRow(
+  row: OlympiadRegistrationRow
+): OlympiadRegistration {
   return {
     id: row.id,
-    name: row.name,
+    fullName: row.full_name,
+    school: row.school,
     className: row.class_name,
-    section: row.section,
-    roll: row.roll,
-    studentCode: row.student_code,
+    gender: row.gender,
     phone: row.phone,
     email: row.email,
-    registeredAt: row.registered_at,
+    createdAt: row.created_at,
   };
 }
 
-export async function getMembers(): Promise<Member[]> {
+export async function getOlympiadRegistrations(): Promise<
+  OlympiadRegistration[]
+> {
   const { data, error } = await supabase
-    .from("members")
+    .from("olympiad_registrations")
     .select("*")
-    .order("registered_at", { ascending: false });
+    .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data as MemberRow[]).map(fromMemberRow);
+  return (data as OlympiadRegistrationRow[]).map(fromOlympiadRegistrationRow);
 }
 
-export async function addMember(
-  data: Omit<Member, "id" | "registeredAt">
-): Promise<Member> {
+export async function addOlympiadRegistration(
+  data: Omit<OlympiadRegistration, "id" | "createdAt">
+): Promise<void> {
   // No .select() after this insert: the public registration policy only
   // grants anon INSERT, not SELECT, so asking PostgREST to return the row
-  // would fail RLS even though the insert itself succeeded. The caller
-  // (the registration form) doesn't need the DB-assigned id back anyway.
-  const { error } = await supabase.from("members").insert({
-    name: data.name,
+  // would fail RLS even though the insert itself succeeded.
+  const { error } = await supabase.from("olympiad_registrations").insert({
+    full_name: data.fullName,
+    school: data.school,
     class_name: data.className,
-    section: data.section,
-    roll: data.roll,
-    student_code: data.studentCode,
+    gender: data.gender,
     phone: data.phone,
     email: data.email,
   });
-  if (error) {
-    if (error.code === POSTGRES_UNIQUE_VIOLATION) {
-      throw new DuplicateMemberError(
-        "This student code, phone number, or email is already registered."
-      );
-    }
-    throw error;
-  }
-  return {
-    ...data,
-    id: crypto.randomUUID(),
-    registeredAt: new Date().toISOString(),
-  };
+  if (error) throw error;
 }
 
-export async function deleteMember(id: string): Promise<void> {
-  const { error } = await supabase.from("members").delete().eq("id", id);
+export async function deleteOlympiadRegistration(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("olympiad_registrations")
+    .delete()
+    .eq("id", id);
   if (error) throw error;
 }
 

@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   { to: "/admin/activity-slideshow", label: "Activity Slideshow", Icon: IconImage, end: false },
   { to: "/admin/leaderboards", label: "Leaderboards", Icon: IconTrophy, end: false },
   { to: "/admin/awards", label: "Awards", Icon: IconStar, end: false },
-  { to: "/admin/members", label: "Member Management", Icon: IconUsers, end: false },
+  { to: "/admin/olympiad-registrations", label: "Olympiad Registrations", Icon: IconUsers, end: false },
   { to: "/admin/forum", label: "Executive Forum", Icon: IconChat, end: false },
   { to: "/admin/site-sections", label: "Site Sections", Icon: IconEye, end: false },
 ];

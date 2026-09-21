@@ -1,13 +1,14 @@
-export interface Member {
+/** A submission to the (unlinked, URL-only) intra math olympiad
+ *  registration form — see OlympiadRegister.tsx. */
+export interface OlympiadRegistration {
   id: string;
-  name: string;
+  fullName: string;
+  school: string;
   className: string;
-  section: string;
-  roll: string;
-  studentCode: string;
+  gender: string;
   phone: string;
   email: string | null;
-  registeredAt: string;
+  createdAt: string;
 }
 
 export interface ActivityLogEntry {
@@ -108,7 +109,6 @@ export type SectionKey =
   | "awards"
   | "articles"
   | "leaderboard"
-  | "register"
   | "hall_of_fame";
 
 export const SECTION_KEYS: SectionKey[] = [
@@ -119,7 +119,6 @@ export const SECTION_KEYS: SectionKey[] = [
   "awards",
   "articles",
   "leaderboard",
-  "register",
   "hall_of_fame",
 ];
 
@@ -131,25 +130,17 @@ export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }>
   awards: { title: "Awards Page", desc: "The /awards page and its navbar/footer link." },
   articles: { title: "Articles Page", desc: "The /articles page and its navbar/footer link." },
   leaderboard: { title: "Leaderboard Page", desc: "The /leaderboard page and its navbar/footer link." },
-  register: {
-    title: "Member Registration",
-    desc: "The /register page, its nav/footer/hero links, and the hero \"registrations open\" line. Sign-in is unaffected.",
-  },
   hall_of_fame: { title: "Hall of Fame Page", desc: "The /hall-of-fame page and its navbar/footer link — now hosts the pi-wave." },
 };
 
 /**
  * Client-side fallback used before the DB responds (and for any key the
- * DB has no row for yet, e.g. schema.sql hasn't been re-run). Every
- * section defaults to visible except registration (deliberately paused
- * site-wide) — that should read as hidden immediately on deploy rather
- * than depending on an admin remembering to also flip a DB toggle (or
- * re-run a migration) at the same time. Note this fallback only applies
- * before schema.sql's seed row exists for a key (or before the DB
- * responds) — once a `site_sections` row exists for `hall_of_fame`
- * (seeded `false` back when the page was a placeholder), the admin
- * needs to flip it on themselves from the Site Sections page now that
- * it has real content; changing this default alone won't do it.
+ * DB has no row for yet, e.g. schema.sql hasn't been re-run). Note this
+ * fallback only applies before schema.sql's seed row exists for a key
+ * (or before the DB responds) — once a `site_sections` row exists for
+ * `hall_of_fame` (seeded `false` back when the page was a placeholder),
+ * the admin needs to flip it on themselves from the Site Sections page
+ * now that it has real content; changing this default alone won't do it.
  */
 export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   about: true,
@@ -159,6 +150,5 @@ export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   awards: true,
   articles: true,
   leaderboard: true,
-  register: false,
   hall_of_fame: true,
 };
