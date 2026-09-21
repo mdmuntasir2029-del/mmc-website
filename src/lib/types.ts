@@ -100,6 +100,39 @@ export interface ActivitySlideshowPhoto {
   createdAt: string;
 }
 
+/**
+ * Admin-panel areas that can be granted to individual admins by the
+ * super admin (see AdminRoles.tsx / grant_admin_section in schema.sql).
+ * Distinct from SectionKey below — that controls what VISITORS see;
+ * this controls what a given ADMIN can reach in /admin. The super admin
+ * always has every section regardless of what's granted here. Dashboard
+ * isn't listed since every admin can see it.
+ */
+export type AdminSection =
+  | "activity_log"
+  | "resources"
+  | "articles"
+  | "session_photos"
+  | "activity_slideshow"
+  | "leaderboards"
+  | "awards"
+  | "olympiad_registrations"
+  | "forum"
+  | "site_sections";
+
+export const ADMIN_SECTION_LABELS: Record<AdminSection, string> = {
+  activity_log: "Club Activity Log",
+  resources: "Resources",
+  articles: "Articles",
+  session_photos: "Session Photos (Home hero)",
+  activity_slideshow: "Activity Slideshow (About)",
+  leaderboards: "Leaderboards",
+  awards: "Awards",
+  olympiad_registrations: "Olympiad Registrations",
+  forum: "Executive Forum",
+  site_sections: "Site Sections",
+};
+
 /** Major site sections/pages the admin can show or hide. */
 export type SectionKey =
   | "about"

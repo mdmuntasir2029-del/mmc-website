@@ -3,6 +3,8 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import DigitalRain from "./components/DigitalRain";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import RequireAdminSection from "./components/RequireAdminSection";
+import RequireSuperAdmin from "./components/RequireSuperAdmin";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Awards from "./pages/Awards";
@@ -24,6 +26,7 @@ import AdminActivitySlideshow from "./pages/admin/ActivitySlideshow";
 import AdminLeaderboards from "./pages/admin/Leaderboards";
 import AdminAwards from "./pages/admin/Awards";
 import AdminSiteSections from "./pages/admin/SiteSections";
+import AdminRoles from "./pages/admin/AdminRoles";
 
 function App() {
   return (
@@ -52,16 +55,94 @@ function App() {
             }
           >
             <Route index element={<Dashboard />} />
-            <Route path="activity-log" element={<ActivityLog />} />
-            <Route path="resources" element={<Resources />} />
-            <Route path="articles" element={<AdminArticles />} />
-            <Route path="session-photos" element={<AdminSessionPhotos />} />
-            <Route path="activity-slideshow" element={<AdminActivitySlideshow />} />
-            <Route path="leaderboards" element={<AdminLeaderboards />} />
-            <Route path="awards" element={<AdminAwards />} />
-            <Route path="olympiad-registrations" element={<AdminOlympiadRegistrations />} />
-            <Route path="forum" element={<Forum />} />
-            <Route path="site-sections" element={<AdminSiteSections />} />
+            <Route
+              path="activity-log"
+              element={
+                <RequireAdminSection section="activity_log">
+                  <ActivityLog />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="resources"
+              element={
+                <RequireAdminSection section="resources">
+                  <Resources />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="articles"
+              element={
+                <RequireAdminSection section="articles">
+                  <AdminArticles />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="session-photos"
+              element={
+                <RequireAdminSection section="session_photos">
+                  <AdminSessionPhotos />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="activity-slideshow"
+              element={
+                <RequireAdminSection section="activity_slideshow">
+                  <AdminActivitySlideshow />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="leaderboards"
+              element={
+                <RequireAdminSection section="leaderboards">
+                  <AdminLeaderboards />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="awards"
+              element={
+                <RequireAdminSection section="awards">
+                  <AdminAwards />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="olympiad-registrations"
+              element={
+                <RequireAdminSection section="olympiad_registrations">
+                  <AdminOlympiadRegistrations />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="forum"
+              element={
+                <RequireAdminSection section="forum">
+                  <Forum />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="site-sections"
+              element={
+                <RequireAdminSection section="site_sections">
+                  <AdminSiteSections />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="roles"
+              element={
+                <RequireSuperAdmin>
+                  <AdminRoles />
+                </RequireSuperAdmin>
+              }
+            />
           </Route>
         </Routes>
       </main>

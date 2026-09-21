@@ -60,6 +60,133 @@ $$;
 
 grant execute on function is_email_admin(text) to anon, authenticated;
 
+-- ========== Super admin / per-section admin permissions ==========
+-- One admin — hardcoded here, not a DB row — can manage which OTHER
+-- admins can access which admin-panel sections. Hardcoding the email
+-- (rather than e.g. an `is_super_admin` column on `admins`) means this
+-- one account can never accidentally lock itself out by editing its own
+-- row. Every RPC below re-checks is_super_admin() itself, so even if the
+-- client-side UI hiding these controls were bypassed, the writes still
+-- fail server-side for anyone else.
+
+create or replace function is_super_admin() returns boolean
+language sql security definer stable
+set search_path = public
+as $$
+  select lower(auth.jwt() ->> 'email') = 'mdmuntasir.2029@gmail.com';
+$$;
+
+grant execute on function is_super_admin() to anon, authenticated;
+
+-- Same "RLS enabled, zero policies" pattern as `admins` — only reachable
+-- through the SECURITY DEFINER functions below.
+create table if not exists admin_permissions (
+  email text not null,
+  section text not null,
+  granted_at timestamptz not null default now(),
+  primary key (email, section)
+);
+
+alter table admin_permissions enable row level security;
+
+-- What sections can the CALLING admin access? Any signed-in admin can
+-- call this for themselves (no is_super_admin check) — the super admin
+-- implicitly has every section regardless of what's in the table, which
+-- the app's AuthContext accounts for rather than this function.
+create or replace function my_admin_permissions() returns setof text
+language sql security definer stable
+set search_path = public
+as $$
+  select section from admin_permissions
+  where email = (auth.jwt() ->> 'email');
+$$;
+
+grant execute on function my_admin_permissions() to authenticated;
+
+-- Everything below is super-admin-only, enforced inside the function
+-- body (not just hidden in the UI).
+
+create or replace function list_admins() returns table (email text, added_at timestamptz)
+language sql security definer stable
+set search_path = public
+as $$
+  select a.email, a.added_at from admins a where is_super_admin();
+$$;
+
+grant execute on function list_admins() to authenticated;
+
+create or replace function list_admin_permissions() returns table (email text, section text)
+language sql security definer stable
+set search_path = public
+as $$
+  select p.email, p.section from admin_permissions p where is_super_admin();
+$$;
+
+grant execute on function list_admin_permissions() to authenticated;
+
+create or replace function add_admin(new_email text) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can add admins.';
+  end if;
+  insert into admins (email) values (lower(new_email))
+  on conflict (email) do nothing;
+end;
+$$;
+
+grant execute on function add_admin(text) to authenticated;
+
+create or replace function remove_admin(target_email text) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can remove admins.';
+  end if;
+  if lower(target_email) = 'mdmuntasir.2029@gmail.com' then
+    raise exception 'The super admin account cannot be removed.';
+  end if;
+  delete from admins where lower(email) = lower(target_email);
+  delete from admin_permissions where lower(email) = lower(target_email);
+end;
+$$;
+
+grant execute on function remove_admin(text) to authenticated;
+
+create or replace function grant_admin_section(target_email text, target_section text) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can grant admin sections.';
+  end if;
+  insert into admin_permissions (email, section) values (lower(target_email), target_section)
+  on conflict (email, section) do nothing;
+end;
+$$;
+
+grant execute on function grant_admin_section(text, text) to authenticated;
+
+create or replace function revoke_admin_section(target_email text, target_section text) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can revoke admin sections.';
+  end if;
+  delete from admin_permissions
+  where lower(email) = lower(target_email) and section = target_section;
+end;
+$$;
+
+grant execute on function revoke_admin_section(text, text) to authenticated;
+
 -- ========== Tables ==========
 
 -- General member registration (and Member Management in the admin panel)

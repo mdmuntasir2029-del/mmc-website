@@ -2164,6 +2164,23 @@ button {
   cursor: pointer;
 }
 
+.section-toggle-group {
+  margin-bottom: 26px;
+}
+
+.section-toggle-group:last-child {
+  margin-bottom: 0;
+}
+
+.section-toggle-group-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
 .section-toggle-list {
   display: flex;
   flex-direction: column;
@@ -2217,6 +2234,22 @@ button {
   opacity: 0.75;
   font-size: 0.75rem;
   margin-top: 2px;
+}
+
+.admin-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-nav-group-label {
+  font-family: var(--font-body-modern);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(234, 251, 238, 0.5);
+  padding: 14px 14px 4px;
 }
 
 .admin-nav-link {

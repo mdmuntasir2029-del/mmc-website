@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import * as db from "../../lib/db";
-import { SECTION_DEFAULT_VISIBLE, SECTION_KEYS, SECTION_LABELS } from "../../lib/types";
+import { SECTION_DEFAULT_VISIBLE, SECTION_LABELS } from "../../lib/types";
 import type { SectionKey } from "../../lib/types";
 
 function errorMessage(err: unknown): string {
@@ -9,6 +9,18 @@ function errorMessage(err: unknown): string {
   }
   return String(err);
 }
+
+// Grouped by which page each toggle actually affects, rather than one
+// flat list — see item 5 of the redesign brief ("organize the site
+// section controls better... according to each page").
+const SECTION_GROUPS: { label: string; keys: SectionKey[] }[] = [
+  { label: "Home", keys: ["session_photos", "lineup"] },
+  { label: "About", keys: ["about", "activity_slideshow"] },
+  { label: "Hall of Fame", keys: ["hall_of_fame"] },
+  { label: "Awards", keys: ["awards"] },
+  { label: "Articles", keys: ["articles"] },
+  { label: "Leaderboard", keys: ["leaderboard"] },
+];
 
 export default function SiteSections() {
   const [visible, setVisible] = useState<Record<SectionKey, boolean>>(SECTION_DEFAULT_VISIBLE);
@@ -61,28 +73,33 @@ export default function SiteSections() {
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <div className="section-toggle-list">
-            {SECTION_KEYS.map((key) => (
-              <label className="checkbox-field section-toggle-row" key={key}>
-                <div className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={visible[key]}
-                    disabled={savingKey === key}
-                    onChange={() => toggle(key)}
-                  />
-                  <div>
-                    <div className="section-toggle-title">
-                      {SECTION_LABELS[key].title}
+          SECTION_GROUPS.map((group) => (
+            <div className="section-toggle-group" key={group.label}>
+              <h3 className="section-toggle-group-title">{group.label}</h3>
+              <div className="section-toggle-list">
+                {group.keys.map((key) => (
+                  <label className="checkbox-field section-toggle-row" key={key}>
+                    <div className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={visible[key]}
+                        disabled={savingKey === key}
+                        onChange={() => toggle(key)}
+                      />
+                      <div>
+                        <div className="section-toggle-title">
+                          {SECTION_LABELS[key].title}
+                        </div>
+                        <div className="section-toggle-desc">
+                          {SECTION_LABELS[key].desc}
+                        </div>
+                      </div>
                     </div>
-                    <div className="section-toggle-desc">
-                      {SECTION_LABELS[key].desc}
-                    </div>
-                  </div>
-                </div>
-              </label>
-            ))}
-          </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))
         )}
       </div>
     </>

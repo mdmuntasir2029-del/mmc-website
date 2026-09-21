@@ -69,6 +69,65 @@ function gallerySrcSet(path: string): string {
   return GALLERY_WIDTHS.map((w) => `${publicImageUrl(path, w)} ${w}w`).join(", ");
 }
 
+// ---------- Admin roles / per-section permissions ----------
+// Every function here is enforced server-side by is_super_admin() inside
+// the RPC itself (see schema.sql) — hiding the admin's UI is a UX nicety,
+// not the actual access control.
+
+export interface AdminAccount {
+  email: string;
+  addedAt: string;
+}
+
+export async function listAdmins(): Promise<AdminAccount[]> {
+  const { data, error } = await supabase.rpc("list_admins");
+  if (error) throw error;
+  return (data as { email: string; added_at: string }[]).map((row) => ({
+    email: row.email,
+    addedAt: row.added_at,
+  }));
+}
+
+export async function addAdmin(email: string): Promise<void> {
+  const { error } = await supabase.rpc("add_admin", { new_email: email });
+  if (error) throw error;
+}
+
+export async function removeAdmin(email: string): Promise<void> {
+  const { error } = await supabase.rpc("remove_admin", { target_email: email });
+  if (error) throw error;
+}
+
+export async function listAdminPermissions(): Promise<
+  { email: string; section: string }[]
+> {
+  const { data, error } = await supabase.rpc("list_admin_permissions");
+  if (error) throw error;
+  return data as { email: string; section: string }[];
+}
+
+export async function grantAdminSection(
+  email: string,
+  section: string
+): Promise<void> {
+  const { error } = await supabase.rpc("grant_admin_section", {
+    target_email: email,
+    target_section: section,
+  });
+  if (error) throw error;
+}
+
+export async function revokeAdminSection(
+  email: string,
+  section: string
+): Promise<void> {
+  const { error } = await supabase.rpc("revoke_admin_section", {
+    target_email: email,
+    target_section: section,
+  });
+  if (error) throw error;
+}
+
 // ---------- Intra Math Olympiad registrations ----------
 // Deliberately not linked from anywhere in the UI (see OlympiadRegister.tsx
 // and its route in App.tsx) — this replaced general member registration,

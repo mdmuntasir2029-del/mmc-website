@@ -39,6 +39,24 @@ export async function checkIsAdmin(): Promise<boolean> {
 }
 
 /**
+ * True only for the one hardcoded super-admin account (see
+ * is_super_admin() in schema.sql) — the only admin allowed to manage
+ * other admins' accounts and per-section permissions.
+ */
+export async function checkIsSuperAdmin(): Promise<boolean> {
+  const { data, error } = await supabase.rpc("is_super_admin");
+  if (error) return false;
+  return data === true;
+}
+
+/** Which admin-panel sections the signed-in admin has been granted. */
+export async function getMyAdminPermissions(): Promise<string[]> {
+  const { data, error } = await supabase.rpc("my_admin_permissions");
+  if (error) return [];
+  return (data as string[] | null) ?? [];
+}
+
+/**
  * Checks whether a specific email is on the admin allowlist WITHOUT
  * signing anyone in or creating an account — used to reject a first-time
  * setup attempt before ever calling claimAccount(), so a non-admin email
