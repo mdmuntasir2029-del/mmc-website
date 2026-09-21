@@ -60,13 +60,12 @@
   line-gap-override: 19.44%;
 }
 
-/* ===================== "Modern" preview theme ===================== */
-/* An admin-only, personal-browser preview of an alternate look (toggle
-   in the admin panel — see DesignModeContext) — typography/design
-   language borrowed from bizfest.papro.me, NOT its colours: this site
-   keeps its own dark-green identity throughout, just under different
-   type. Bebas Neue (SIL OFL) + Barlow (SIL OFL), both self-hosted the
-   same way as STIX Two Text; licenses at /fonts/modern/OFL-*.txt. */
+/* ===================== Site typeface ===================== */
+/* Typography/design language borrowed from bizfest.papro.me, NOT its
+   colours: this site keeps its own dark-green identity throughout, just
+   under different type. Bebas Neue (SIL OFL) + Barlow (SIL OFL), both
+   self-hosted the same way as STIX Two Text; licenses at
+   /fonts/modern/OFL-*.txt. */
 @font-face {
   font-family: "Barlow";
   font-style: normal;
@@ -168,11 +167,10 @@
   --font-brick: "STIX Two Text", "STIX Two Text Fallback", Cambria, Georgia, serif;
   --font-math: "STIX Two Text", "STIX Two Text Fallback", Cambria, Georgia, serif;
 
-  /* "Modern" preview theme tokens — see the [data-theme="modern"]
-     block near the end of this file. --font-math (the pi-trail digits)
-     deliberately doesn't switch with the theme: Bebas Neue has no
-     Greek coverage (no π), and the curve's typography is closer to a
-     protected identity element than a themeable heading anyway. */
+  /* --font-math (the pi-trail digits) deliberately stays serif rather
+     than switching to Bebas Neue: Bebas Neue has no Greek coverage
+     (no π), and the curve's typography is closer to a protected
+     identity element than a themeable heading anyway. */
   --font-heading-modern: "Bebas Neue", "Barlow", sans-serif;
   --font-body-modern: "Barlow", sans-serif;
 }
@@ -218,7 +216,7 @@ html {
 }
 
 body {
-  font-family: var(--font-body);
+  font-family: var(--font-body-modern);
   color: var(--ink);
   background: transparent;
   -webkit-font-smoothing: antialiased;
@@ -256,10 +254,27 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-heading);
   margin: 0 0 0.5em;
   line-height: 1.15;
   color: var(--green-dark-2);
+}
+
+/* Big display headings get the condensed treatment; smaller ones (h3/
+   h4 — often longer card/list titles) stay in bold Barlow instead of
+   Bebas Neue, which is designed for short, large-scale text and gets
+   hard to read at small sizes or across multiple words. */
+h1,
+h2 {
+  font-family: var(--font-heading-modern);
+  font-weight: 400;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+}
+
+h3,
+h4 {
+  font-family: var(--font-body-modern);
+  font-weight: 700;
 }
 
 p {
@@ -324,9 +339,10 @@ button {
 }
 
 .navbar-brand-text {
-  font-family: var(--font-heading);
+  font-family: var(--font-body-modern);
   font-weight: 700;
   font-size: 1.1rem;
+  letter-spacing: 0.14em;
   color: var(--text-on-dark);
   line-height: 1.1;
 }
@@ -342,9 +358,12 @@ button {
 
 .navbar-links a {
   text-decoration: none;
-  font-weight: 600;
+  font-family: var(--font-body-modern);
+  font-weight: 700;
   color: var(--text-on-dark-soft);
-  font-size: 0.95rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   transition: color 0.2s ease;
 }
 
@@ -391,9 +410,10 @@ button {
 .btn-shine {
   position: relative;
   overflow: hidden;
-  font-family: var(--font-brick);
+  font-family: var(--font-body-modern);
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   font-size: 0.95rem;
   color: var(--white);
   background: linear-gradient(
@@ -405,7 +425,7 @@ button {
   );
   background-size: 300% 300%;
   border: none;
-  border-radius: 999px;
+  border-radius: 6px;
   padding: 0.65rem 1.5rem;
   cursor: pointer;
   box-shadow: var(--shadow-btn);
@@ -473,11 +493,14 @@ button {
 
 /* Light-background outline button (navbar sits on --cream now). */
 .btn-ghost {
-  font-weight: 600;
+  font-family: var(--font-body-modern);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--text-on-dark);
   background: transparent;
   border: 2px solid rgba(243, 247, 239, 0.3);
-  border-radius: 999px;
+  border-radius: 6px;
   padding: 0.55rem 1.3rem;
   cursor: pointer;
   text-decoration: none;
@@ -492,11 +515,14 @@ button {
 
 /* Dark-background outline button, e.g. a secondary CTA in the hero. */
 .btn-ghost-light {
-  font-weight: 600;
+  font-family: var(--font-body-modern);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--text-on-dark);
   background: transparent;
   border: 2px solid rgba(243, 247, 239, 0.35);
-  border-radius: 999px;
+  border-radius: 6px;
   padding: 0.65rem 1.5rem;
   cursor: pointer;
   text-decoration: none;
@@ -518,8 +544,11 @@ button {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-weight: 600;
-  border-radius: 999px;
+  font-family: var(--font-body-modern);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 6px;
   padding: 0.6rem 1.3rem;
   cursor: pointer;
   border: none;
@@ -610,7 +639,9 @@ button {
 
 .hero-eyebrow {
   display: inline-block;
+  font-family: var(--font-body-modern);
   font-weight: 700;
+  letter-spacing: 0.14em;
   color: var(--green-light);
   background: rgba(143, 217, 138, 0.14);
   padding: 6px 14px;
@@ -710,8 +741,9 @@ button {
    follows). */
 .eyebrow {
   display: block;
+  font-family: var(--font-body-modern);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   font-size: 0.78rem;
   font-weight: 700;
   line-height: normal;
@@ -732,7 +764,11 @@ button {
 
 .text-link {
   display: inline-block;
+  font-family: var(--font-body-modern);
   font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--color-accent);
   border-bottom: 2px solid var(--color-accent-border);
   padding-bottom: 2px;
@@ -1003,8 +1039,9 @@ button {
 .session-photos-label {
   display: block;
   color: var(--text-on-dark);
-  font-family: var(--font-heading);
+  font-family: var(--font-body-modern);
   font-weight: 700;
+  letter-spacing: 0.14em;
   font-size: 1.05rem;
   line-height: normal;
   margin: 0;
@@ -1750,6 +1787,8 @@ button {
 }
 
 .footer-col-title {
+  font-family: var(--font-body-modern);
+  letter-spacing: 0.14em;
   color: var(--green-light);
   font-size: 1rem;
   margin-bottom: 16px;
@@ -2098,53 +2137,8 @@ button {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.admin-design-toggle {
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.admin-design-toggle-label {
-  display: block;
-  font-weight: 700;
-  font-size: 0.85rem;
-  margin-bottom: 2px;
-}
-
-.admin-design-toggle-hint {
-  font-size: 0.72rem;
-  color: rgba(234, 251, 238, 0.65);
-  margin: 0 0 10px;
-  line-height: 1.4;
-}
-
-.admin-design-toggle-switch {
-  display: flex;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-  gap: 3px;
-}
-
-.admin-design-toggle-switch button {
-  flex: 1;
-  border: none;
-  background: transparent;
-  color: rgba(234, 251, 238, 0.75);
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 6px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.admin-design-toggle-switch button.is-active {
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
-}
-
 .admin-sidebar-footer {
+  margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -2614,85 +2608,3 @@ tr:hover td {
   }
 }
 
-/* ===================== "Modern" preview theme ===================== */
-/* Personal, admin-only preview (toggled from /admin, stored in that
-   browser's localStorage — see DesignModeContext) of an alternate
-   typographic/component skin, styled after bizfest.papro.me: a huge
-   condensed display face for big headings, a clean grotesque for
-   everything else, and uppercase/letter-spaced treatment on nav,
-   buttons, and labels. Page structure/content is untouched — this is
-   CSS only, scoped entirely under [data-theme="modern"] on <html>, so
-   it can't affect the default site for anyone who hasn't opted in.
-   Colour palette deliberately NOT touched — still this site's own
-   dark green, not bizfest's. */
-
-[data-theme="modern"] body {
-  font-family: var(--font-body-modern);
-}
-
-/* Big display headings get the condensed treatment; smaller ones (h3/
-   h4 — often longer card/list titles) stay in bold Barlow instead of
-   Bebas Neue, which is designed for short, large-scale text and gets
-   hard to read at small sizes or across multiple words. */
-[data-theme="modern"] h1,
-[data-theme="modern"] h2 {
-  font-family: var(--font-heading-modern);
-  font-weight: 400;
-  letter-spacing: 0.015em;
-  text-transform: uppercase;
-}
-
-[data-theme="modern"] h3,
-[data-theme="modern"] h4 {
-  font-family: var(--font-body-modern);
-  font-weight: 700;
-}
-
-[data-theme="modern"] p,
-[data-theme="modern"] .hero-desc,
-[data-theme="modern"] .access-subtitle,
-[data-theme="modern"] .article-abstract {
-  font-family: var(--font-body-modern);
-}
-
-[data-theme="modern"] .eyebrow,
-[data-theme="modern"] .hero-eyebrow,
-[data-theme="modern"] .footer-col-title,
-[data-theme="modern"] .navbar-brand-text,
-[data-theme="modern"] .session-photos-label {
-  font-family: var(--font-body-modern);
-  letter-spacing: 0.14em;
-}
-
-[data-theme="modern"] .navbar-links a {
-  font-family: var(--font-body-modern);
-  font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-[data-theme="modern"] .text-link {
-  font-family: var(--font-body-modern);
-  font-weight: 700;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-[data-theme="modern"] .btn-shine,
-[data-theme="modern"] .btn-ghost,
-[data-theme="modern"] .btn-ghost-light,
-[data-theme="modern"] .btn {
-  font-family: var(--font-body-modern);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border-radius: 6px;
-}
-
-[data-theme="modern"] .footer-admin-link {
-  font-family: var(--font-body-modern);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
