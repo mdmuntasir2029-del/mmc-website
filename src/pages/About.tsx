@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import ActivitySlideshow from "../components/ActivitySlideshow";
+import CurrentLineup from "../components/CurrentLineup";
+import TestimonialsPanel from "../components/TestimonialsPanel";
 import SectionUnavailable from "../components/SectionUnavailable";
 import { usePinnedScrollEnabled } from "../hooks/useScrollScrub";
 import { useSiteSections } from "../hooks/useSiteSections";
@@ -54,6 +56,8 @@ export default function About() {
       </section>
 
       {sections.activity_slideshow && <ActivitySlideshow />}
+      {sections.current_lineup && <CurrentLineup />}
+      {sections.testimonials && <TestimonialsPanel />}
     </div>
   );
 }

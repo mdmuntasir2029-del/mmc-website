@@ -2820,3 +2820,123 @@ tr:hover td {
   }
 }
 
+/* ===================== Hall of Fame roster ===================== */
+
+.section-hof-roster {
+  padding-top: 0;
+}
+
+.hof-year-group {
+  margin-bottom: 48px;
+}
+
+.hof-year-group:last-child {
+  margin-bottom: 0;
+}
+
+.hof-year-title {
+  color: var(--text-on-dark);
+  margin-bottom: 20px;
+}
+
+.hof-roster-grid,
+.lineup-cards-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 22px;
+}
+
+.hof-roster-card,
+.lineup-person-card {
+  margin: 0;
+  background: rgba(14, 40, 25, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  text-align: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hof-roster-card:hover,
+.lineup-person-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
+}
+
+.hof-roster-card img,
+.lineup-person-card img,
+.hof-roster-avatar,
+.lineup-person-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 14px;
+}
+
+.hof-roster-avatar,
+.lineup-person-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading-modern);
+  font-weight: 400;
+  font-size: 2rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+}
+
+.hof-roster-name,
+.lineup-person-name {
+  font-weight: 700;
+  color: var(--text-on-dark);
+}
+
+.hof-roster-role,
+.lineup-person-role {
+  font-size: 0.85rem;
+  color: var(--text-on-dark-soft);
+}
+
+/* ===================== Testimonials ===================== */
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.testimonial-card {
+  margin: 0;
+  background: rgba(14, 40, 25, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 26px;
+}
+
+.testimonial-quote {
+  color: var(--text-on-dark);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.testimonial-card footer {
+  display: flex;
+  flex-direction: column;
+}
+
+.testimonial-name {
+  font-weight: 700;
+  color: var(--text-on-dark);
+}
+
+.testimonial-role {
+  font-size: 0.85rem;
+  color: var(--text-on-dark-soft);
+}
+

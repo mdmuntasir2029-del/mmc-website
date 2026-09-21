@@ -27,6 +27,8 @@ import AdminLeaderboards from "./pages/admin/Leaderboards";
 import AdminAwards from "./pages/admin/Awards";
 import AdminSiteSections from "./pages/admin/SiteSections";
 import AdminRoles from "./pages/admin/AdminRoles";
+import AdminHallOfFame from "./pages/admin/HallOfFame";
+import AdminTestimonials from "./pages/admin/Testimonials";
 
 function App() {
   return (
@@ -132,6 +134,22 @@ function App() {
               element={
                 <RequireAdminSection section="site_sections">
                   <AdminSiteSections />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="hall-of-fame"
+              element={
+                <RequireAdminSection section="hall_of_fame_entries">
+                  <AdminHallOfFame />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="testimonials"
+              element={
+                <RequireAdminSection section="testimonials">
+                  <AdminTestimonials />
                 </RequireAdminSection>
               }
             />

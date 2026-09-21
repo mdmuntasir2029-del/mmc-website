@@ -16,6 +16,8 @@ import type {
   Leaderboard,
   Award,
   ActivitySlideshowPhoto,
+  HallOfFameEntry,
+  Testimonial,
   SectionKey,
 } from "./types";
 
@@ -849,6 +851,137 @@ export async function deleteAward(id: string): Promise<void> {
   if (error) throw error;
   const path = (row as { image_path: string | null } | null)?.image_path;
   if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
+}
+
+// ---------- Hall of Fame roster ----------
+
+interface HallOfFameEntryRow {
+  id: string;
+  name: string;
+  role_title: string;
+  session_year: string;
+  image_path: string | null;
+  display_order: number;
+  created_at: string;
+}
+
+function fromHallOfFameEntryRow(row: HallOfFameEntryRow): HallOfFameEntry {
+  return {
+    id: row.id,
+    name: row.name,
+    roleTitle: row.role_title,
+    sessionYear: row.session_year,
+    imagePath: row.image_path,
+    imageUrl: row.image_path ? publicImageUrl(row.image_path, 480) : null,
+    imageSrcSet: row.image_path ? gallerySrcSet(row.image_path) : null,
+    displayOrder: row.display_order,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getHallOfFameEntries(): Promise<HallOfFameEntry[]> {
+  const { data, error } = await supabase
+    .from("hall_of_fame_entries")
+    .select("*")
+    .order("session_year", { ascending: false })
+    .order("display_order", { ascending: true });
+  if (error) throw error;
+  return (data as HallOfFameEntryRow[]).map(fromHallOfFameEntryRow);
+}
+
+export async function addHallOfFameEntry(
+  data: { name: string; roleTitle: string; sessionYear: string; displayOrder: number },
+  file: File | null
+): Promise<HallOfFameEntry> {
+  let imagePath: string | null = null;
+  if (file) {
+    imagePath = `hall-of-fame/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+    const { error: uploadError } = await supabase.storage
+      .from(PUBLIC_BUCKET)
+      .upload(imagePath, file, { upsert: false });
+    if (uploadError) throw uploadError;
+  }
+
+  const { data: row, error } = await supabase
+    .from("hall_of_fame_entries")
+    .insert({
+      name: data.name,
+      role_title: data.roleTitle,
+      session_year: data.sessionYear,
+      display_order: data.displayOrder,
+      image_path: imagePath,
+    })
+    .select("*")
+    .single();
+  if (error) {
+    if (imagePath) await supabase.storage.from(PUBLIC_BUCKET).remove([imagePath]);
+    throw error;
+  }
+  return fromHallOfFameEntryRow(row as HallOfFameEntryRow);
+}
+
+export async function deleteHallOfFameEntry(id: string): Promise<void> {
+  const { data: row } = await supabase
+    .from("hall_of_fame_entries")
+    .select("image_path")
+    .eq("id", id)
+    .single();
+  const { error } = await supabase.from("hall_of_fame_entries").delete().eq("id", id);
+  if (error) throw error;
+  const path = (row as { image_path: string | null } | null)?.image_path;
+  if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
+}
+
+// ---------- Testimonials ----------
+
+interface TestimonialRow {
+  id: string;
+  quote: string;
+  person_name: string;
+  person_role: string;
+  created_at: string;
+}
+
+function fromTestimonialRow(row: TestimonialRow): Testimonial {
+  return {
+    id: row.id,
+    quote: row.quote,
+    personName: row.person_name,
+    personRole: row.person_role,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getTestimonials(): Promise<Testimonial[]> {
+  const { data, error } = await supabase
+    .from("testimonials")
+    .select("*")
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data as TestimonialRow[]).map(fromTestimonialRow);
+}
+
+export async function addTestimonial(data: {
+  quote: string;
+  personName: string;
+  personRole: string;
+}): Promise<Testimonial> {
+  const { data: row, error } = await supabase
+    .from("testimonials")
+    .insert({
+      quote: data.quote,
+      person_name: data.personName,
+      person_role: data.personRole,
+    })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return fromTestimonialRow(row as TestimonialRow);
+}
+
+export async function deleteTestimonial(id: string): Promise<void> {
+  const { error } = await supabase.from("testimonials").delete().eq("id", id);
+  if (error) throw error;
 }
 
 // ---------- Site sections (admin show/hide) ----------

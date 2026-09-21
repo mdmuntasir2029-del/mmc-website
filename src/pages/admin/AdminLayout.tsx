@@ -43,6 +43,13 @@ const NAV_GROUPS: NavGroup[] = [
     label: "About",
     items: [
       { to: "/admin/activity-slideshow", label: "Activity Slideshow", Icon: IconImage, section: "activity_slideshow" },
+      { to: "/admin/testimonials", label: "Testimonials", Icon: IconChat, section: "testimonials" },
+    ],
+  },
+  {
+    label: "Hall of Fame",
+    items: [
+      { to: "/admin/hall-of-fame", label: "Hall of Fame Roster", Icon: IconStar, section: "hall_of_fame_entries" },
     ],
   },
   {

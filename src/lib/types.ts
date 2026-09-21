@@ -104,6 +104,31 @@ export interface ActivitySlideshowPhoto {
   createdAt: string;
 }
 
+/** A Hall of Fame roster entry — a member/personnel photo tagged by
+ *  session year. The About page's "Current Year Lineup" pulls the
+ *  current year's rows from this same set (see CURRENT_SESSION_YEAR). */
+export interface HallOfFameEntry {
+  id: string;
+  name: string;
+  roleTitle: string;
+  sessionYear: string;
+  imagePath: string | null;
+  imageUrl: string | null;
+  /** srcset value covering several widths, for responsive <img> sizing. */
+  imageSrcSet: string | null;
+  displayOrder: number;
+  createdAt: string;
+}
+
+/** A "what people say about the club" testimonial from club personnel. */
+export interface Testimonial {
+  id: string;
+  quote: string;
+  personName: string;
+  personRole: string;
+  createdAt: string;
+}
+
 /**
  * Admin-panel areas that can be granted to individual admins by the
  * super admin (see AdminRoles.tsx / grant_admin_section in schema.sql).
@@ -122,7 +147,10 @@ export type AdminSection =
   | "awards"
   | "olympiad_registrations"
   | "forum"
-  | "site_sections";
+  | "site_sections"
+  | "hall_of_fame_entries"
+  | "testimonials"
+  | "announcements";
 
 export const ADMIN_SECTION_LABELS: Record<AdminSection, string> = {
   activity_log: "Club Activity Log",
@@ -135,6 +163,9 @@ export const ADMIN_SECTION_LABELS: Record<AdminSection, string> = {
   olympiad_registrations: "Olympiad Registrations",
   forum: "Executive Forum",
   site_sections: "Site Sections",
+  hall_of_fame_entries: "Hall of Fame Roster",
+  testimonials: "Testimonials (About)",
+  announcements: "Announcements (Home)",
 };
 
 /** Major site sections/pages the admin can show or hide. */
@@ -146,7 +177,9 @@ export type SectionKey =
   | "awards"
   | "articles"
   | "leaderboard"
-  | "hall_of_fame";
+  | "hall_of_fame"
+  | "current_lineup"
+  | "testimonials";
 
 export const SECTION_KEYS: SectionKey[] = [
   "about",
@@ -157,6 +190,8 @@ export const SECTION_KEYS: SectionKey[] = [
   "articles",
   "leaderboard",
   "hall_of_fame",
+  "current_lineup",
+  "testimonials",
 ];
 
 export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }> = {
@@ -167,7 +202,9 @@ export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }>
   awards: { title: "Awards Page", desc: "The /awards page and its navbar/footer link." },
   articles: { title: "Articles Page", desc: "The /articles page and its navbar/footer link." },
   leaderboard: { title: "Leaderboard Page", desc: "The /leaderboard page and its navbar/footer link." },
-  hall_of_fame: { title: "Hall of Fame Page", desc: "The /hall-of-fame page and its navbar/footer link — now hosts the pi-wave." },
+  hall_of_fame: { title: "Hall of Fame Page", desc: "The /hall-of-fame page and its navbar/footer link — hosts the pi-wave and the full roster." },
+  current_lineup: { title: "Current Year Lineup", desc: "About page — this session's Hall of Fame entries, shown as cards." },
+  testimonials: { title: "What People Say", desc: "About page — testimonials from club personnel." },
 };
 
 /**
@@ -188,4 +225,6 @@ export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   articles: true,
   leaderboard: true,
   hall_of_fame: true,
+  current_lineup: true,
+  testimonials: true,
 };

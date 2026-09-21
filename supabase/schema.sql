@@ -309,6 +309,31 @@ create table if not exists activity_slideshow_photos (
   created_at timestamptz not null default now()
 );
 
+-- Hall of Fame roster — a photo per member/personnel, tagged by session
+-- year. The About page's "Current Year Lineup" pulls the current year's
+-- rows from this same table (see CURRENT_SESSION_YEAR in
+-- src/lib/constants.ts). Images live under "hall-of-fame/" in the same
+-- public bucket.
+create table if not exists hall_of_fame_entries (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  role_title text not null,
+  session_year text not null,
+  image_path text,
+  display_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+-- "What people say about the club" — testimonials from club personnel,
+-- shown on the About page.
+create table if not exists testimonials (
+  id uuid primary key default gen_random_uuid(),
+  quote text not null,
+  person_name text not null,
+  person_role text not null,
+  created_at timestamptz not null default now()
+);
+
 -- Which major site sections/pages are currently shown. Rows are
 -- upserted from the admin "Site Sections" page, so this seed just makes
 -- sure every key exists (and defaults to visible) the first time the
@@ -321,7 +346,8 @@ create table if not exists site_sections (
 
 insert into site_sections (key) values
   ('about'), ('session_photos'), ('lineup'), ('activity_slideshow'),
-  ('awards'), ('articles'), ('leaderboard'), ('hall_of_fame')
+  ('awards'), ('articles'), ('leaderboard'), ('hall_of_fame'),
+  ('current_lineup'), ('testimonials')
 on conflict (key) do nothing;
 
 -- Note: if your site_sections table already has a `hall_of_fame` row
@@ -345,6 +371,8 @@ alter table leaderboard_entries enable row level security;
 alter table awards enable row level security;
 alter table site_sections enable row level security;
 alter table activity_slideshow_photos enable row level security;
+alter table hall_of_fame_entries enable row level security;
+alter table testimonials enable row level security;
 
 drop policy if exists "olympiad_registrations_public_insert" on olympiad_registrations;
 create policy "olympiad_registrations_public_insert" on olympiad_registrations
@@ -422,6 +450,22 @@ create policy "awards_public_select" on awards
 
 drop policy if exists "awards_admin_write" on awards;
 create policy "awards_admin_write" on awards
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "hall_of_fame_entries_public_select" on hall_of_fame_entries;
+create policy "hall_of_fame_entries_public_select" on hall_of_fame_entries
+  for select to anon, authenticated using (true);
+
+drop policy if exists "hall_of_fame_entries_admin_write" on hall_of_fame_entries;
+create policy "hall_of_fame_entries_admin_write" on hall_of_fame_entries
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "testimonials_public_select" on testimonials;
+create policy "testimonials_public_select" on testimonials
+  for select to anon, authenticated using (true);
+
+drop policy if exists "testimonials_admin_write" on testimonials;
+create policy "testimonials_admin_write" on testimonials
   for all using (is_admin()) with check (is_admin());
 
 -- Section visibility is read by every visitor (it decides what renders)
