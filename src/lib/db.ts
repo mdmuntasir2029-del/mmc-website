@@ -19,6 +19,7 @@ import type {
   HallOfFameEntry,
   Testimonial,
   Announcement,
+  IssueReport,
   SectionKey,
 } from "./types";
 
@@ -1047,6 +1048,55 @@ export async function deleteAnnouncement(id: string): Promise<void> {
   if (error) throw error;
   const path = (row as { image_path: string } | null)?.image_path;
   if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
+}
+
+// ---------- Issue reports (super-admin only) ----------
+
+interface IssueReportRow {
+  id: string;
+  kind: "bug" | "suggestion";
+  message: string;
+  reporter_email: string | null;
+  created_at: string;
+}
+
+function fromIssueReportRow(row: IssueReportRow): IssueReport {
+  return {
+    id: row.id,
+    kind: row.kind,
+    message: row.message,
+    reporterEmail: row.reporter_email,
+    createdAt: row.created_at,
+  };
+}
+
+/** Public — anyone can submit, no admin session required. */
+export async function addIssueReport(data: {
+  kind: "bug" | "suggestion";
+  message: string;
+  reporterEmail: string | null;
+}): Promise<void> {
+  const { error } = await supabase.from("issue_reports").insert({
+    kind: data.kind,
+    message: data.message,
+    reporter_email: data.reporterEmail,
+  });
+  if (error) throw error;
+}
+
+/** Super-admin only — enforced server-side by RLS, not just this call. */
+export async function getIssueReports(): Promise<IssueReport[]> {
+  const { data, error } = await supabase
+    .from("issue_reports")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as IssueReportRow[]).map(fromIssueReportRow);
+}
+
+export async function deleteIssueReport(id: string): Promise<void> {
+  const { error } = await supabase.from("issue_reports").delete().eq("id", id);
+  if (error) throw error;
 }
 
 // ---------- Site sections (admin show/hide) ----------

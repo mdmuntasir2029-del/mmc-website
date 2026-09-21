@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import DigitalRain from "./components/DigitalRain";
+import ReportIssueButton from "./components/ReportIssueButton";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import RequireAdminSection from "./components/RequireAdminSection";
 import RequireSuperAdmin from "./components/RequireSuperAdmin";
@@ -30,6 +31,7 @@ import AdminRoles from "./pages/admin/AdminRoles";
 import AdminHallOfFame from "./pages/admin/HallOfFame";
 import AdminTestimonials from "./pages/admin/Testimonials";
 import AdminAnnouncements from "./pages/admin/Announcements";
+import AdminIssueReports from "./pages/admin/IssueReports";
 
 function App() {
   return (
@@ -170,10 +172,19 @@ function App() {
                 </RequireSuperAdmin>
               }
             />
+            <Route
+              path="issue-reports"
+              element={
+                <RequireSuperAdmin>
+                  <AdminIssueReports />
+                </RequireSuperAdmin>
+              }
+            />
           </Route>
         </Routes>
       </main>
       <Footer />
+      <ReportIssueButton />
     </>
   );
 }

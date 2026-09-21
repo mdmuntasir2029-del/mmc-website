@@ -77,7 +77,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Super Admin",
-    items: [{ to: "/admin/roles", label: "Admin Roles", Icon: IconUsers, superAdminOnly: true }],
+    items: [
+      { to: "/admin/roles", label: "Admin Roles", Icon: IconUsers, superAdminOnly: true },
+      { to: "/admin/issue-reports", label: "Issue Reports", Icon: IconChat, superAdminOnly: true },
+    ],
   },
 ];
 

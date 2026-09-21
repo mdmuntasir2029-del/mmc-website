@@ -343,6 +343,17 @@ create table if not exists announcements (
   created_at timestamptz not null default now()
 );
 
+-- Bug reports / suggestions submitted via the sitewide "Report an
+-- issue" button. Visible only to the super admin (mdmuntasir.2029@
+-- gmail.com), not every admin — see is_super_admin() above.
+create table if not exists issue_reports (
+  id uuid primary key default gen_random_uuid(),
+  kind text not null check (kind in ('bug', 'suggestion')),
+  message text not null,
+  reporter_email text,
+  created_at timestamptz not null default now()
+);
+
 -- Which major site sections/pages are currently shown. Rows are
 -- upserted from the admin "Site Sections" page, so this seed just makes
 -- sure every key exists (and defaults to visible) the first time the
@@ -383,6 +394,7 @@ alter table activity_slideshow_photos enable row level security;
 alter table hall_of_fame_entries enable row level security;
 alter table testimonials enable row level security;
 alter table announcements enable row level security;
+alter table issue_reports enable row level security;
 
 drop policy if exists "olympiad_registrations_public_insert" on olympiad_registrations;
 create policy "olympiad_registrations_public_insert" on olympiad_registrations
@@ -485,6 +497,21 @@ create policy "announcements_public_select" on announcements
 drop policy if exists "announcements_admin_write" on announcements;
 create policy "announcements_admin_write" on announcements
   for all using (is_admin()) with check (is_admin());
+
+-- Anyone can report an issue; only the super admin can read or clear
+-- them (not every admin — see is_super_admin() above).
+drop policy if exists "issue_reports_public_insert" on issue_reports;
+create policy "issue_reports_public_insert" on issue_reports
+  for insert to anon, authenticated
+  with check (true);
+
+drop policy if exists "issue_reports_super_admin_select" on issue_reports;
+create policy "issue_reports_super_admin_select" on issue_reports
+  for select using (is_super_admin());
+
+drop policy if exists "issue_reports_super_admin_delete" on issue_reports;
+create policy "issue_reports_super_admin_delete" on issue_reports
+  for delete using (is_super_admin());
 
 -- Section visibility is read by every visitor (it decides what renders)
 -- but only admins can flip it.

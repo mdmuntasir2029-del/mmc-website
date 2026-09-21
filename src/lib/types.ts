@@ -129,6 +129,16 @@ export interface Testimonial {
   createdAt: string;
 }
 
+/** A bug report or suggestion submitted via the sitewide "Report an
+ *  issue" button — visible only to the super admin. */
+export interface IssueReport {
+  id: string;
+  kind: "bug" | "suggestion";
+  message: string;
+  reporterEmail: string | null;
+  createdAt: string;
+}
+
 /** A club announcement — an image post shown on the Home page. */
 export interface Announcement {
   id: string;
