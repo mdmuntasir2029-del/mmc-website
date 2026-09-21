@@ -280,15 +280,21 @@ create table if not exists leaderboard_entries (
 create index if not exists leaderboard_entries_board_idx
   on leaderboard_entries (leaderboard_id);
 
--- Award-winning mathletes, shown on the /awards page's y = x scatter.
--- Ordered by created_at so newer winners plot further up the diagonal.
+-- Award-winning mathletes, shown on the /awards page's scroll-revealed
+-- track. Ordered by created_at so newer winners appear further along.
+-- image_path is optional — falls back to an initials avatar when unset.
+-- Images live in the same public mmc-public bucket (existing storage
+-- policies are bucket-wide, not table-specific) under "awards/".
 create table if not exists awards (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   achievement text not null,
   initials text,
+  image_path text,
   created_at timestamptz not null default now()
 );
+
+alter table awards add column if not exists image_path text;
 
 -- The About page's activity slideshow — its own photo set, independent
 -- of the homepage's session_photos, also organized by week. Images live

@@ -779,6 +779,7 @@ interface AwardRow {
   name: string;
   achievement: string;
   initials: string | null;
+  image_path: string | null;
   created_at: string;
 }
 
@@ -788,6 +789,9 @@ function fromAwardRow(row: AwardRow): Award {
     name: row.name,
     achievement: row.achievement,
     initials: row.initials,
+    imagePath: row.image_path,
+    imageUrl: row.image_path ? publicImageUrl(row.image_path, 480) : null,
+    imageSrcSet: row.image_path ? gallerySrcSet(row.image_path) : null,
     createdAt: row.created_at,
   };
 }
@@ -801,27 +805,50 @@ export async function getAwards(): Promise<Award[]> {
   return (data as AwardRow[]).map(fromAwardRow);
 }
 
-export async function addAward(data: {
-  name: string;
-  achievement: string;
-  initials: string | null;
-}): Promise<Award> {
+export async function addAward(
+  data: {
+    name: string;
+    achievement: string;
+    initials: string | null;
+  },
+  file: File | null
+): Promise<Award> {
+  let imagePath: string | null = null;
+  if (file) {
+    imagePath = `awards/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+    const { error: uploadError } = await supabase.storage
+      .from(PUBLIC_BUCKET)
+      .upload(imagePath, file, { upsert: false });
+    if (uploadError) throw uploadError;
+  }
+
   const { data: row, error } = await supabase
     .from("awards")
     .insert({
       name: data.name,
       achievement: data.achievement,
       initials: data.initials,
+      image_path: imagePath,
     })
     .select("*")
     .single();
-  if (error) throw error;
+  if (error) {
+    if (imagePath) await supabase.storage.from(PUBLIC_BUCKET).remove([imagePath]);
+    throw error;
+  }
   return fromAwardRow(row as AwardRow);
 }
 
 export async function deleteAward(id: string): Promise<void> {
+  const { data: row } = await supabase
+    .from("awards")
+    .select("image_path")
+    .eq("id", id)
+    .single();
   const { error } = await supabase.from("awards").delete().eq("id", id);
   if (error) throw error;
+  const path = (row as { image_path: string | null } | null)?.image_path;
+  if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
 }
 
 // ---------- Site sections (admin show/hide) ----------

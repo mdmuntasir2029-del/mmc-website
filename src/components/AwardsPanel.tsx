@@ -1,33 +1,58 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import * as db from "../lib/db";
 import type { Award } from "../lib/types";
-import RevealOnScroll from "./RevealOnScroll";
+import { autoInitials } from "../lib/awardInitials";
+import AwardDetailModal from "./AwardDetailModal";
+import { useScrollScrub, usePinnedScrollEnabled } from "../hooks/useScrollScrub";
 
-// The diagonal drawn in the chart runs from (60,520) to (940,70) in the
-// 1000x560 viewBox — these percentages (of the chart's own box) are
-// chosen to sit right on that same line, so winners always plot along
-// y = x no matter how many there are.
-const DIAGONAL_START = { left: 10, bottom: 8 };
-const DIAGONAL_END = { left: 82, bottom: 86 };
+// A boustrophedon ("as the ox ploughs") track: two columns, alternating
+// direction each row — left to right, down, right to left, down, left
+// to right again — like the pi-wave but zig-zagging across the page
+// instead of weaving down a single column.
+const VIEWBOX_WIDTH = 600;
+const COL_X = [160, 440];
+const ROW_HEIGHT = 280;
+const PADDING_TOP = 110;
+const PADDING_BOTTOM = 110;
+// How much scroll distance the reveal plays out over, scaled by how
+// tall the track's own viewBox is (more rows = more scroll to scrub
+// through) — same idea as the pi-wave's fixed 260vh, just data-driven.
+const SCRUB_VH_PER_VIEWBOX_UNIT = 0.5;
+const MIN_SCRUB_VH = 180;
 
-function slotPosition(i: number, count: number) {
-  const t = count <= 1 ? 0.5 : i / (count - 1);
-  return {
-    left: DIAGONAL_START.left + t * (DIAGONAL_END.left - DIAGONAL_START.left),
-    bottom: DIAGONAL_START.bottom + t * (DIAGONAL_END.bottom - DIAGONAL_START.bottom),
-  };
+function pointFor(i: number) {
+  const row = Math.floor(i / COL_X.length);
+  const posInRow = i % COL_X.length;
+  const col = row % 2 === 0 ? posInRow : COL_X.length - 1 - posInRow;
+  return { x: COL_X[col], y: PADDING_TOP + row * ROW_HEIGHT };
 }
 
-function autoInitials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return "★";
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+function buildTrack(count: number) {
+  if (count === 0) return { d: "", height: PADDING_TOP + PADDING_BOTTOM };
+  const points = Array.from({ length: count }, (_, i) => pointFor(i));
+  const rows = Math.ceil(count / COL_X.length);
+  const height = PADDING_TOP + (rows - 1) * ROW_HEIGHT + PADDING_BOTTOM;
+  const d = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+    .join(" ");
+  return { d, height };
 }
+
+// Fraction of the pinned scrub each award waits for before it reveals —
+// spaced across the whole track, same pacing idea as the pi-wave digits.
+const revealAt = (i: number, count: number) => (i + 0.5) / count;
 
 export default function AwardsPanel() {
   const [awards, setAwards] = useState<Award[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [selected, setSelected] = useState<Award | null>(null);
+  const pathRef = useRef<SVGPathElement | null>(null);
+  const [pathLength, setPathLength] = useState(0);
+
+  const pinned = usePinnedScrollEnabled();
+  const scrub = useScrollScrub(pinned);
+  const progress = pinned ? scrub.progress : 1;
 
   useEffect(() => {
     db.getAwards()
@@ -36,7 +61,18 @@ export default function AwardsPanel() {
       .finally(() => setLoaded(true));
   }, []);
 
-  const slots = awards.map((a, i) => ({ award: a, ...slotPosition(i, awards.length) }));
+  const track = useMemo(() => buildTrack(awards.length), [awards.length]);
+
+  useEffect(() => {
+    if (pathRef.current) setPathLength(pathRef.current.getTotalLength());
+  }, [track.d]);
+
+  const dashOffset = pathLength * (1 - progress);
+  const outerStyle: CSSProperties | undefined = pinned
+    ? {
+        height: `${Math.max(MIN_SCRUB_VH, track.height * SCRUB_VH_PER_VIEWBOX_UNIT)}vh`,
+      }
+    : undefined;
 
   return (
     <section className="section section-awards" id="awards">
@@ -44,64 +80,80 @@ export default function AwardsPanel() {
         <div className="section-heading">
           <h1>Award-Winning Mathletes</h1>
           <p>
-            Every point on this line is a member who made the club proud
-            &mdash; hover to take a closer look.
+            Every stop on this track is a member who made the club proud
+            &mdash; hover for a closer look, click for the full story.
           </p>
         </div>
 
-        <div className="cartesian-frame">
-          <svg
-            className="cartesian-svg"
-            viewBox="0 0 1000 560"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            {Array.from({ length: 21 }).map((_, i) => (
-              <line key={`v${i}`} x1={i * 50} y1="0" x2={i * 50} y2="560" className="grid-line" />
-            ))}
-            {Array.from({ length: 12 }).map((_, i) => (
-              <line key={`h${i}`} x1="0" y1={i * 50} x2="1000" y2={i * 50} className="grid-line" />
-            ))}
+        {loaded && awards.length === 0 ? (
+          <p className="empty-state awards-empty-static">No award winners added yet.</p>
+        ) : (
+          <div className="award-track-outer" ref={scrub.outerRef} style={outerStyle}>
+            <div className="award-track-sticky">
+              <div
+                className="award-track-frame"
+                style={{ aspectRatio: `${VIEWBOX_WIDTH} / ${track.height}` }}
+              >
+                <svg
+                  className="award-track-svg"
+                  viewBox={`0 0 ${VIEWBOX_WIDTH} ${track.height}`}
+                  preserveAspectRatio="xMidYMid meet"
+                  aria-hidden="true"
+                >
+                  <path d={track.d} className="award-track-line" />
+                  <path
+                    ref={pathRef}
+                    d={track.d}
+                    className="award-track-line-progress"
+                    style={{
+                      strokeDasharray: pathLength || undefined,
+                      strokeDashoffset: dashOffset,
+                    }}
+                  />
+                </svg>
 
-            <line x1="60" y1="520" x2="970" y2="520" className="axis-line" />
-            <polygon points="970,520 952,511 952,529" className="axis-arrow" />
-            <line x1="60" y1="520" x2="60" y2="30" className="axis-line" />
-            <polygon points="60,30 51,48 69,48" className="axis-arrow" />
-            <text x="978" y="530" className="axis-label">x</text>
-            <text x="42" y="32" className="axis-label">y</text>
-            <text x="34" y="542" className="axis-label">O</text>
-
-            <line x1="60" y1="520" x2="940" y2="70" className="diagonal-line" />
-            <text x="815" y="60" className="diagonal-label">y = x</text>
-
-            {slots.map((s) => (
-              <circle
-                key={s.award.id}
-                cx={s.left * 10}
-                cy={(100 - s.bottom) * 5.6}
-                r="7"
-                className="point-marker"
-              />
-            ))}
-          </svg>
-
-          {slots.map((s) => (
-            <RevealOnScroll
-              key={s.award.id}
-              className="award-slot"
-              style={{ left: `${s.left}%`, top: `${100 - s.bottom}%` }}
-            >
-              <div className="award-avatar">{s.award.initials || autoInitials(s.award.name)}</div>
-              <div className="award-name">{s.award.name}</div>
-              <div className="award-achievement">{s.award.achievement}</div>
-            </RevealOnScroll>
-          ))}
-
-          {loaded && awards.length === 0 && (
-            <p className="empty-state awards-empty">No award winners added yet.</p>
-          )}
-        </div>
+                {awards.map((a, i) => {
+                  const p = pointFor(i);
+                  const revealed = progress >= revealAt(i, awards.length);
+                  return (
+                    <button
+                      type="button"
+                      key={a.id}
+                      className={`award-stop${revealed ? " is-in" : ""}`}
+                      style={{
+                        left: `${(p.x / VIEWBOX_WIDTH) * 100}%`,
+                        top: `${(p.y / track.height) * 100}%`,
+                      }}
+                      onClick={() => setSelected(a)}
+                    >
+                      {a.imageUrl ? (
+                        <img
+                          className="award-stop-image"
+                          src={a.imageUrl}
+                          srcSet={a.imageSrcSet ?? undefined}
+                          sizes="140px"
+                          alt=""
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="award-avatar">
+                          {a.initials || autoInitials(a.name)}
+                        </div>
+                      )}
+                      <div className="award-name">{a.name}</div>
+                      <div className="award-achievement">{a.achievement}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {selected && (
+        <AwardDetailModal award={selected} onClose={() => setSelected(null)} />
+      )}
     </section>
   );
 }

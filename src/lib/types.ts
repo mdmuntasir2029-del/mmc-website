@@ -83,6 +83,10 @@ export interface Award {
   name: string;
   achievement: string;
   initials: string | null;
+  imagePath: string | null;
+  imageUrl: string | null;
+  /** srcset value covering several widths, for responsive <img> sizing. */
+  imageSrcSet: string | null;
   createdAt: string;
 }
 

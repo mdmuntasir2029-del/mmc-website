@@ -10,6 +10,7 @@ export default function Awards() {
   const [name, setName] = useState("");
   const [achievement, setAchievement] = useState("");
   const [initials, setInitials] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -32,14 +33,18 @@ export default function Awards() {
     }
     setSubmitting(true);
     try {
-      await db.addAward({
-        name: name.trim(),
-        achievement: achievement.trim(),
-        initials: initials.trim() || null,
-      });
+      await db.addAward(
+        {
+          name: name.trim(),
+          achievement: achievement.trim(),
+          initials: initials.trim() || null,
+        },
+        file
+      );
       setName("");
       setAchievement("");
       setInitials("");
+      setFile(null);
       load();
     } catch {
       setError("Could not add this winner.");
@@ -58,7 +63,7 @@ export default function Awards() {
       <div className="admin-content-header">
         <div>
           <h2>Awards</h2>
-          <p>Winners shown on the /awards page's y = x scatter.</p>
+          <p>Winners shown on the /awards page's scroll-revealed track.</p>
         </div>
       </div>
 
@@ -102,6 +107,14 @@ export default function Awards() {
               />
             </div>
           </div>
+          <div className="form-field">
+            <label>Photo (optional — falls back to initials if left blank)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </div>
           <button
             className="btn btn-primary"
             type="submit"
@@ -123,6 +136,7 @@ export default function Awards() {
             <thead>
               <tr>
                 <th style={{ width: 60 }}>#</th>
+                <th style={{ width: 56 }} />
                 <th>Name</th>
                 <th>Achievement</th>
                 <th style={{ width: 90 }} />
@@ -132,6 +146,17 @@ export default function Awards() {
               {awards.map((a, i) => (
                 <tr key={a.id}>
                   <td>{i + 1}</td>
+                  <td>
+                    {a.imageUrl && (
+                      <img
+                        src={a.imageUrl}
+                        alt=""
+                        width={40}
+                        height={40}
+                        style={{ borderRadius: "50%", objectFit: "cover" }}
+                      />
+                    )}
+                  </td>
                   <td>{a.name}</td>
                   <td>{a.achievement}</td>
                   <td>
