@@ -2144,6 +2144,17 @@ button {
 }
 
 .admin-content {
+  /* Grid items default to `min-width: auto` (their content's intrinsic
+     width), not 0 — so a wide table inside (e.g. Member Management)
+     was forcing this 1fr track wider than the space actually available
+     next to the fixed 250px sidebar instead of respecting .table-wrap's
+     own overflow-x:auto, which only ever kicks in once its container
+     stops growing to fit it. That's what "zooming in" was triggering:
+     zooming shrinks the layout viewport's CSS-pixel width, and once it
+     dropped below the table's intrinsic width (well before the 860px
+     breakpoint that stacks the sidebar), the grid overflowed instead of
+     the table scrolling internally as intended. */
+  min-width: 0;
   padding: 34px 40px;
 }
 
