@@ -85,19 +85,23 @@
   --text-on-dark-soft: #a9c9ac;
 
   --shadow-soft: 0 10px 30px rgba(12, 77, 38, 0.15);
-  --shadow-btn: 0 8px 20px rgba(95, 61, 196, 0.45);
+  --shadow-btn: 0 8px 20px rgba(21, 122, 61, 0.45);
 
   /* ---- Semantic roles ----
-     One rule for the whole site: purple is the interaction/accent
-     colour — links, focus states, active/selected indicators, buttons,
-     and exactly one deliberate emphasis word in the hero. Everything
-     structural or decorative (section eyebrows, badges, chart
-     accents, footer labels) is green. Nothing else is ever purple. */
-  --color-accent: var(--purple-btn-3);
-  --color-accent-strong: var(--purple-btn-1);
-  --color-accent-mid: var(--purple-btn-2);
-  --color-accent-soft: rgba(208, 166, 255, 0.14);
-  --color-accent-border: rgba(208, 166, 255, 0.4);
+     One rule for the whole site: this token set is the interaction/
+     accent colour — links, focus states, active/selected indicators,
+     buttons, and exactly one deliberate emphasis word in the hero.
+     Was purple; now light green throughout, per request — every one
+     of those usages routes through these tokens (see git history),
+     so this is the only place that needed to change. --color-accent
+     itself now equals --green-light (used elsewhere for structural
+     labels too), so distinguishing "interactive" from "decorative" by
+     colour alone is intentionally no longer part of the system. */
+  --color-accent: var(--green-light);
+  --color-accent-strong: var(--green-dark);
+  --color-accent-mid: var(--green-mid);
+  --color-accent-soft: rgba(143, 217, 138, 0.14);
+  --color-accent-border: rgba(143, 217, 138, 0.4);
   --color-surface: var(--green-dark-2);
   --color-text: var(--text-on-dark);
   --color-text-soft: var(--text-on-dark-soft);
@@ -123,10 +127,10 @@
 }
 
 /* One visible, high-contrast keyboard-focus treatment for the whole
-   site (purple — the site's single interaction/accent colour — against
-   the dark green background comfortably clears WCAG AA's 3:1 for
-   non-text UI indicators), instead of leaving it to each browser's own
-   default outline, which varies in visibility and doesn't reliably
+   site (--color-accent, the site's single interaction/accent colour —
+   against the dark green background comfortably clears WCAG AA's 3:1
+   for non-text UI indicators), instead of leaving it to each browser's
+   own default outline, which varies in visibility and doesn't reliably
    meet contrast on this palette. */
 a:focus-visible,
 button:focus-visible,
@@ -328,7 +332,7 @@ button {
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* Register button — Brick Sans, purple gradient, rises + shines on hover */
+/* Register button — Brick Sans, green accent gradient, rises + shines on hover */
 .btn-shine {
   position: relative;
   overflow: hidden;
@@ -385,7 +389,7 @@ button {
 
 .btn-shine:hover {
   transform: translateY(-6px) scale(1.04);
-  box-shadow: 0 16px 30px rgba(95, 61, 196, 0.55);
+  box-shadow: 0 16px 30px rgba(21, 122, 61, 0.55);
 }
 
 @keyframes shineSweep {
@@ -1319,10 +1323,10 @@ button {
   stroke-linecap: round;
 }
 
-/* Kept purple deliberately: this traces how far the visitor has
-   scrolled through the pi trail, so — unlike the site's other
-   decorative strokes, now green — it's live interactive feedback,
-   the same category as a progress indicator. */
+/* Uses --color-accent (the interaction colour) rather than a plain
+   decorative stroke: this traces how far the visitor has scrolled
+   through the pi trail, i.e. live interactive feedback, the same
+   category as a progress indicator. */
 .pi-trail-progress {
   fill: none;
   stroke: var(--color-accent);
@@ -1891,7 +1895,7 @@ button {
 .form-field select:focus {
   outline: none;
   border-color: var(--color-accent-strong);
-  box-shadow: 0 0 0 3px rgba(95, 61, 196, 0.15);
+  box-shadow: 0 0 0 3px rgba(21, 122, 61, 0.15);
 }
 
 .form-row {
