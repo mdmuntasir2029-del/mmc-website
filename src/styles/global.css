@@ -612,8 +612,9 @@ button {
   overflow: visible;
 }
 
-/* Same pattern as .home-page — the About page's own pinned lineup
-   section (see About.tsx) needs the same sticky-friendly treatment. */
+/* Same pattern as .home-page — About's own sticky-positioned content
+   (e.g. the pinned Activity Slideshow controls) needs the same
+   sticky-friendly treatment. */
 .about-page {
   position: relative;
   overflow: hidden;

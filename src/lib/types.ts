@@ -126,7 +126,7 @@ export const SECTION_KEYS: SectionKey[] = [
 export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }> = {
   about: { title: "About Page", desc: "The /about page and its navbar/footer link — the whole page, including the sub-sections below." },
   session_photos: { title: "Some Recent Photos of Our Activities", desc: "Home page — the pi-wave photo panels." },
-  lineup: { title: "How We Meet & Compete", desc: "About page — the weekly sessions / contests cards." },
+  lineup: { title: "How We Meet & Compete", desc: "Home page — the weekly sessions / contests cards." },
   activity_slideshow: { title: "Activity Slideshow", desc: "About page — the admin-managed photo slideshow, organized by week." },
   awards: { title: "Awards Page", desc: "The /awards page and its navbar/footer link." },
   articles: { title: "Articles Page", desc: "The /articles page and its navbar/footer link." },
