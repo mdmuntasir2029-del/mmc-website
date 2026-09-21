@@ -102,14 +102,8 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <span>
-            &copy; {new Date().getFullYear()} Manarat Mathletes Club &mdash;
-            to infinity unbound.
-          </span>
+          <span>&copy; {new Date().getFullYear()} Manarat Mathletes Club</span>
           <span>Developed by Muntasir B28</span>
-          <Link to="/signin" className="footer-admin-link">
-            Admin
-          </Link>
         </div>
       </div>
     </footer>

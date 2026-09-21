@@ -75,11 +75,6 @@ export default function Navbar() {
                 <Link to="/hall-of-fame">Hall of Fame</Link>
               </li>
             )}
-            {isAdmin && (
-              <li>
-                <Link to="/admin">Admin Panel</Link>
-              </li>
-            )}
           </ul>
 
           <div className="navbar-menu-actions">

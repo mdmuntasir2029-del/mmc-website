@@ -1870,18 +1870,6 @@ button {
   font-weight: 600;
 }
 
-.footer-admin-link {
-  margin-left: auto;
-  font-size: 0.72rem;
-  color: rgba(169, 217, 180, 0.55);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.footer-admin-link:hover {
-  color: #a6f0b8;
-}
-
 /* ===================== Access (Register / Sign in) ===================== */
 
 .access-wrap {
