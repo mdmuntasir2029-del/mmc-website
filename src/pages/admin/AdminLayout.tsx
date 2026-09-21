@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useDesignMode } from "../../context/DesignModeContext";
 import {
   IconDashboard,
   IconCalendar,
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
 
 export default function AdminLayout() {
   const { email, signOut } = useAuth();
+  const { mode, setMode } = useDesignMode();
   const navigate = useNavigate();
 
   async function handleSignOut() {
@@ -56,6 +58,31 @@ export default function AdminLayout() {
             <item.Icon /> {item.label}
           </NavLink>
         ))}
+
+        <div className="admin-design-toggle">
+          <span className="admin-design-toggle-label">Design Preview</span>
+          <p className="admin-design-toggle-hint">
+            Personal, this browser only — doesn't change what visitors see.
+          </p>
+          <div className="admin-design-toggle-switch" role="group" aria-label="Design preview mode">
+            <button
+              type="button"
+              className={mode === "classic" ? "is-active" : ""}
+              aria-pressed={mode === "classic"}
+              onClick={() => setMode("classic")}
+            >
+              Classic
+            </button>
+            <button
+              type="button"
+              className={mode === "modern" ? "is-active" : ""}
+              aria-pressed={mode === "modern"}
+              onClick={() => setMode("modern")}
+            >
+              Modern
+            </button>
+          </div>
+        </div>
 
         <div className="admin-sidebar-footer">
           <button className="btn btn-secondary btn-sm" onClick={handleSignOut} style={{ width: "100%" }}>

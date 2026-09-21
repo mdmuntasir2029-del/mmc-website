@@ -60,6 +60,53 @@
   line-gap-override: 19.44%;
 }
 
+/* ===================== "Modern" preview theme ===================== */
+/* An admin-only, personal-browser preview of an alternate look (toggle
+   in the admin panel — see DesignModeContext) — typography/design
+   language borrowed from bizfest.papro.me, NOT its colours: this site
+   keeps its own dark-green identity throughout, just under different
+   type. Bebas Neue (SIL OFL) + Barlow (SIL OFL), both self-hosted the
+   same way as STIX Two Text; licenses at /fonts/modern/OFL-*.txt. */
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/modern/barlow-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/modern/barlow-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/modern/barlow-600.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/modern/barlow-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Bebas Neue";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/modern/bebas-neue-400.woff2") format("woff2");
+}
+
 /* ===================== Theme tokens ===================== */
 :root {
   --purple-nav: #ded2f7;
@@ -120,6 +167,14 @@
   --font-body: "STIX Two Text", "STIX Two Text Fallback", Cambria, Georgia, serif;
   --font-brick: "STIX Two Text", "STIX Two Text Fallback", Cambria, Georgia, serif;
   --font-math: "STIX Two Text", "STIX Two Text Fallback", Cambria, Georgia, serif;
+
+  /* "Modern" preview theme tokens — see the [data-theme="modern"]
+     block near the end of this file. --font-math (the pi-trail digits)
+     deliberately doesn't switch with the theme: Bebas Neue has no
+     Greek coverage (no π), and the curve's typography is closer to a
+     protected identity element than a themeable heading anyway. */
+  --font-heading-modern: "Bebas Neue", "Barlow", sans-serif;
+  --font-body-modern: "Barlow", sans-serif;
 }
 
 * {
@@ -2043,8 +2098,53 @@ button {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.admin-sidebar-footer {
+.admin-design-toggle {
   margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.admin-design-toggle-label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+
+.admin-design-toggle-hint {
+  font-size: 0.72rem;
+  color: rgba(234, 251, 238, 0.65);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.admin-design-toggle-switch {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 3px;
+}
+
+.admin-design-toggle-switch button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: rgba(234, 251, 238, 0.75);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-design-toggle-switch button.is-active {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.admin-sidebar-footer {
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -2512,4 +2612,87 @@ tr:hover td {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
   }
+}
+
+/* ===================== "Modern" preview theme ===================== */
+/* Personal, admin-only preview (toggled from /admin, stored in that
+   browser's localStorage — see DesignModeContext) of an alternate
+   typographic/component skin, styled after bizfest.papro.me: a huge
+   condensed display face for big headings, a clean grotesque for
+   everything else, and uppercase/letter-spaced treatment on nav,
+   buttons, and labels. Page structure/content is untouched — this is
+   CSS only, scoped entirely under [data-theme="modern"] on <html>, so
+   it can't affect the default site for anyone who hasn't opted in.
+   Colour palette deliberately NOT touched — still this site's own
+   dark green, not bizfest's. */
+
+[data-theme="modern"] body {
+  font-family: var(--font-body-modern);
+}
+
+/* Big display headings get the condensed treatment; smaller ones (h3/
+   h4 — often longer card/list titles) stay in bold Barlow instead of
+   Bebas Neue, which is designed for short, large-scale text and gets
+   hard to read at small sizes or across multiple words. */
+[data-theme="modern"] h1,
+[data-theme="modern"] h2 {
+  font-family: var(--font-heading-modern);
+  font-weight: 400;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+}
+
+[data-theme="modern"] h3,
+[data-theme="modern"] h4 {
+  font-family: var(--font-body-modern);
+  font-weight: 700;
+}
+
+[data-theme="modern"] p,
+[data-theme="modern"] .hero-desc,
+[data-theme="modern"] .access-subtitle,
+[data-theme="modern"] .article-abstract {
+  font-family: var(--font-body-modern);
+}
+
+[data-theme="modern"] .eyebrow,
+[data-theme="modern"] .hero-eyebrow,
+[data-theme="modern"] .footer-col-title,
+[data-theme="modern"] .navbar-brand-text,
+[data-theme="modern"] .session-photos-label {
+  font-family: var(--font-body-modern);
+  letter-spacing: 0.14em;
+}
+
+[data-theme="modern"] .navbar-links a {
+  font-family: var(--font-body-modern);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+[data-theme="modern"] .text-link {
+  font-family: var(--font-body-modern);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme="modern"] .btn-shine,
+[data-theme="modern"] .btn-ghost,
+[data-theme="modern"] .btn-ghost-light,
+[data-theme="modern"] .btn {
+  font-family: var(--font-body-modern);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 6px;
+}
+
+[data-theme="modern"] .footer-admin-link {
+  font-family: var(--font-body-modern);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
