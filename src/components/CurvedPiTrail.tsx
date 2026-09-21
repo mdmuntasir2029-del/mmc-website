@@ -12,11 +12,16 @@ const MIN_DIGITS = 4;
 const MAX_DIGITS = 115;
 
 // Vertical wave: descends top-to-bottom of the pinned viewport, weaving
-// left and right, with the pi digits rolling down it as you scrub.
+// left and right, with the pi digits rolling down it as you scrub. A
+// third crest/trough (added on top of the original two) so the curve
+// itself reaches further down — on the static mobile ribbon this
+// closes what used to be a bare gap between the last digits and the
+// footer instead of just being blank space.
 const CURVE_D =
   "M 300 8 C 470 175, 130 345, 300 510 " +
-  "C 470 675, 130 845, 300 1012";
-const VIEWBOX = "0 0 600 1020";
+  "C 470 675, 130 845, 300 1012 " +
+  "C 470 1177, 130 1347, 300 1514";
+const VIEWBOX = "0 0 600 1530";
 
 /**
  * The curved pi trail for the pinned scroll-scrub intro on the home page.

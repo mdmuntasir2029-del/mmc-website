@@ -927,7 +927,11 @@ button {
    photos panel, then the pi wave as a standalone decorative ribbon. */
 .pi-intro-wave-mobile {
   position: relative;
-  height: clamp(320px, 60vh, 480px);
+  /* Scaled up to match CurvedPiTrail's now-3-crest path (was clamp(320px,
+     60vh, 480px) for the 2-crest version) — keeps the curve+digits
+     filling this box at roughly the same visual density instead of
+     just stretching the old amount of content thinner. */
+  height: clamp(420px, 85vh, 680px);
   margin-top: 32px;
 }
 
