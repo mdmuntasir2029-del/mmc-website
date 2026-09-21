@@ -125,7 +125,7 @@ export const SECTION_KEYS: SectionKey[] = [
 
 export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }> = {
   about: { title: "About Page", desc: "The /about page and its navbar/footer link — the whole page, including the sub-sections below." },
-  session_photos: { title: "Some Recent Photos of Our Activities", desc: "Home page — the pi-wave photo panels." },
+  session_photos: { title: "Hero Photo Slideshow", desc: "Home page — the latest session's photos, running behind the hero text." },
   lineup: { title: "How We Meet & Compete", desc: "Home page — the weekly sessions / contests cards." },
   activity_slideshow: { title: "Activity Slideshow", desc: "About page — the admin-managed photo slideshow, organized by week." },
   awards: { title: "Awards Page", desc: "The /awards page and its navbar/footer link." },
@@ -135,17 +135,21 @@ export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }>
     title: "Member Registration",
     desc: "The /register page, its nav/footer/hero links, and the hero \"registrations open\" line. Sign-in is unaffected.",
   },
-  hall_of_fame: { title: "Hall of Fame Page", desc: "The /hall-of-fame page and its navbar/footer link. Content TBD — stays off until there's something to show." },
+  hall_of_fame: { title: "Hall of Fame Page", desc: "The /hall-of-fame page and its navbar/footer link — now hosts the pi-wave." },
 };
 
 /**
  * Client-side fallback used before the DB responds (and for any key the
  * DB has no row for yet, e.g. schema.sql hasn't been re-run). Every
  * section defaults to visible except registration (deliberately paused
- * site-wide) and Hall of Fame (no content yet) — both should read as
- * hidden immediately on deploy rather than depending on an admin
- * remembering to also flip a DB toggle (or re-run a migration) at the
- * same time.
+ * site-wide) — that should read as hidden immediately on deploy rather
+ * than depending on an admin remembering to also flip a DB toggle (or
+ * re-run a migration) at the same time. Note this fallback only applies
+ * before schema.sql's seed row exists for a key (or before the DB
+ * responds) — once a `site_sections` row exists for `hall_of_fame`
+ * (seeded `false` back when the page was a placeholder), the admin
+ * needs to flip it on themselves from the Site Sections page now that
+ * it has real content; changing this default alone won't do it.
  */
 export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   about: true,
@@ -156,5 +160,5 @@ export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   articles: true,
   leaderboard: true,
   register: false,
-  hall_of_fame: false,
+  hall_of_fame: true,
 };

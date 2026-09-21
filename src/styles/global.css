@@ -627,28 +627,77 @@ button {
   overflow: visible;
 }
 
+/* Same pattern again — Hall of Fame hosts the pinned pi-wave scrub now. */
+.hall-of-fame-page {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: rgba(9, 42, 24, 0.34);
+}
+
+.hall-of-fame-page--pinned {
+  overflow: visible;
+}
+
 .hero {
   padding: 64px 0 80px;
   position: relative;
+  overflow: hidden;
+  min-height: clamp(480px, 76vh, 760px);
+  display: flex;
+  align-items: center;
+}
+
+/* Fills the hero behind the text — see HeroSlideshow.tsx. Absolutely
+   positioned, so it never affects the hero's own height/layout. */
+.hero-slideshow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-slideshow-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.hero-slideshow-slide.is-active {
+  opacity: 1;
+}
+
+/* Heavier over the text on the left, just a hint over the images on the
+   right — reads as "a background process running behind the text"
+   rather than a plain photo strip. */
+.hero-slideshow-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(6, 20, 12, 0.94) 0%,
+    rgba(6, 20, 12, 0.82) 40%,
+    rgba(6, 20, 12, 0.4) 68%,
+    rgba(6, 20, 12, 0.58) 100%
+  );
 }
 
 .hero-inner {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr;
   max-width: 760px;
 }
 
-.hero-eyebrow {
-  display: inline-block;
-  font-family: var(--font-body-modern);
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--green-light);
-  background: rgba(143, 217, 138, 0.14);
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  margin-bottom: 14px;
+.hero-text-panel {
+  background: rgba(0, 0, 0, 0.55);
+  padding: 30px 34px;
+  border-radius: var(--radius-lg);
 }
 
 .hero-title {
@@ -661,17 +710,6 @@ button {
    green now. */
 .hero-title span {
   color: var(--color-accent);
-}
-
-.hero-tagline {
-  font-style: italic;
-  color: var(--text-on-dark-soft);
-  font-weight: 500;
-}
-
-.hero-desc {
-  color: var(--text-on-dark-soft);
-  max-width: 46ch;
 }
 
 .hero-cta-row {
@@ -910,6 +948,10 @@ button {
   .pi-intro-static .container {
     padding: 0 14px;
   }
+
+  .hero-text-panel {
+    padding: 22px 20px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -960,29 +1002,20 @@ button {
     background: transparent;
   }
 
-  /* Photos From Last Session flank the pi trail while it's pinned. */
+  /* The pinned pi-wave scrub, now on the Hall of Fame page. */
   .pi-intro-row {
     flex: 1 1 auto;
     display: flex;
     align-items: stretch;
+    justify-content: center;
     gap: 24px;
     height: 100%;
     padding: 24px 24px 0;
   }
 
-  .pi-intro-row .session-photos {
-    flex: 0 0 clamp(240px, 26vw, 420px);
-    /* Anchored to the top (right after the navbar clearance above),
-       never centered — a centered panel taller than the available
-       height (a short window, or several photos) would overflow
-       equally at the top and bottom, pushing its "Photos From Last
-       Session" heading up underneath the navbar instead of just
-       trimming extra photos off the bottom. */
-    align-self: flex-start;
-  }
-
   .pi-intro-row .pi-trail--inline {
     flex: 1 1 0;
+    max-width: 640px;
     min-width: 0;
     width: auto;
     will-change: transform;

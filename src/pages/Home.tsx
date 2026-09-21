@@ -1,7 +1,6 @@
 import type { CSSProperties } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import CurvedPiTrail from "../components/CurvedPiTrail";
-import SessionPhotoPanel from "../components/SessionPhotoPanel";
+import { Link } from "react-router-dom";
+import HeroSlideshow from "../components/HeroSlideshow";
 import SineWave from "../components/SineWave";
 import { useScrollScrub, usePinnedScrollEnabled } from "../hooks/useScrollScrub";
 import { useSiteSections } from "../hooks/useSiteSections";
@@ -42,11 +41,9 @@ const waveRestY = (i: number, count: number) =>
 const revealAt = (i: number, count: number) => (i + 0.35) / count;
 
 export default function Home() {
-  const navigate = useNavigate();
   const pinned = usePinnedScrollEnabled();
   const { sections } = useSiteSections();
 
-  const piScrub = useScrollScrub(pinned);
   const lineupScrub = useScrollScrub(pinned);
 
   // When the pinned scrub is off (mobile / reduced motion) the lineup
@@ -57,28 +54,13 @@ export default function Home() {
   return (
     <div className={pinned ? "home-page home-page--pinned" : "home-page"}>
       <section className="hero">
+        {sections.session_photos && <HeroSlideshow />}
         <div className="container hero-inner">
-          <div>
-            <span className="hero-eyebrow">Session 2026&ndash;2027</span>
+          <div className="hero-text-panel">
             <h1 className="hero-title">
-              Manarat <span>Mathletes</span> Club
+              A standard of mathematical <span>excellence</span>
             </h1>
-            <p className="hero-desc">
-              A student-run club for anyone who wants to think in numbers,
-              patterns, and proofs &mdash; from casual puzzle-solvers to
-              olympiad hopefuls.
-              {sections.register &&
-                " Member registrations for the 2026–2027 session are open now. Boys from Classes 3-A2 are welcome to register and find their love for math!"}
-            </p>
             <div className="hero-cta-row">
-              {sections.register && (
-                <button
-                  className="btn-shine"
-                  onClick={() => navigate("/register")}
-                >
-                  Register
-                </button>
-              )}
               {sections.about && (
                 <Link to="/about" className="btn-ghost-light">
                   About the Club
@@ -88,31 +70,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {sections.session_photos && (
-        <>
-          {pinned ? (
-            <div className="pin-outer pi-intro-outer" ref={piScrub.outerRef}>
-              <div className="pin-sticky">
-                <div className="pi-intro-row">
-                  <SessionPhotoPanel variant="left" progress={piScrub.progress} />
-                  <CurvedPiTrail progress={piScrub.progress} />
-                  <SessionPhotoPanel variant="right" progress={piScrub.progress} />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <section className="section pi-intro-static">
-              <div className="container">
-                <SessionPhotoPanel variant="full" />
-                <div className="pi-intro-wave-mobile" aria-hidden="true">
-                  <CurvedPiTrail progress={1} />
-                </div>
-              </div>
-            </section>
-          )}
-        </>
-      )}
 
       {sections.lineup && (
         <div className="pin-outer lineup-outer" ref={lineupScrub.outerRef}>
