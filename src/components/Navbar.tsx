@@ -26,7 +26,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <img src="/logowhite.png" alt="Manarat Mathletes Club logo" width={68} height={46} />
+          <img src="/logowhite.png" alt="Manarat Mathletes Club logo" width={80} height={54} />
           <span className="navbar-brand-text">
             Manarat
             <br />

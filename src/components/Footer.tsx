@@ -10,7 +10,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand-block">
             <div className="footer-brand">
-              <img src="/logowhite.png" alt="Manarat Mathletes Club logo" width={50} height={34} />
+              <img src="/logowhite.png" alt="Manarat Mathletes Club logo" width={59} height={40} />
               Manarat Mathletes Club
             </div>
             <p className="footer-desc">
