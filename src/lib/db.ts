@@ -132,6 +132,95 @@ export async function revokeAdminSection(
   if (error) throw error;
 }
 
+// ---------- Named admin roles (reusable permission bundles) ----------
+
+export interface AdminRole {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export async function listAdminRoles(): Promise<AdminRole[]> {
+  const { data, error } = await supabase.rpc("list_admin_roles");
+  if (error) throw error;
+  return (data as { id: string; name: string; created_at: string }[]).map((row) => ({
+    id: row.id,
+    name: row.name,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function createAdminRole(name: string): Promise<string> {
+  const { data, error } = await supabase.rpc("create_admin_role", { role_name: name });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function deleteAdminRole(roleId: string): Promise<void> {
+  const { error } = await supabase.rpc("delete_admin_role", { target_role_id: roleId });
+  if (error) throw error;
+}
+
+export async function listAdminRolePermissions(): Promise<
+  { roleId: string; section: string }[]
+> {
+  const { data, error } = await supabase.rpc("list_admin_role_permissions");
+  if (error) throw error;
+  return (data as { role_id: string; section: string }[]).map((row) => ({
+    roleId: row.role_id,
+    section: row.section,
+  }));
+}
+
+export async function grantAdminRoleSection(
+  roleId: string,
+  section: string
+): Promise<void> {
+  const { error } = await supabase.rpc("grant_admin_role_section", {
+    target_role_id: roleId,
+    target_section: section,
+  });
+  if (error) throw error;
+}
+
+export async function revokeAdminRoleSection(
+  roleId: string,
+  section: string
+): Promise<void> {
+  const { error } = await supabase.rpc("revoke_admin_role_section", {
+    target_role_id: roleId,
+    target_section: section,
+  });
+  if (error) throw error;
+}
+
+export async function listAdminRoleAssignments(): Promise<
+  { email: string; roleId: string }[]
+> {
+  const { data, error } = await supabase.rpc("list_admin_role_assignments");
+  if (error) throw error;
+  return (data as { email: string; role_id: string }[]).map((row) => ({
+    email: row.email,
+    roleId: row.role_id,
+  }));
+}
+
+export async function assignAdminRole(email: string, roleId: string): Promise<void> {
+  const { error } = await supabase.rpc("assign_admin_role", {
+    target_email: email,
+    target_role_id: roleId,
+  });
+  if (error) throw error;
+}
+
+export async function unassignAdminRole(email: string, roleId: string): Promise<void> {
+  const { error } = await supabase.rpc("unassign_admin_role", {
+    target_email: email,
+    target_role_id: roleId,
+  });
+  if (error) throw error;
+}
+
 // ---------- Intra Math Olympiad registrations ----------
 // Deliberately not linked from anywhere in the UI (see OlympiadRegister.tsx
 // and its route in App.tsx) — this replaced general member registration,

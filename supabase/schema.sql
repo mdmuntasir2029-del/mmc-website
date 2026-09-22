@@ -89,16 +89,49 @@ create table if not exists admin_permissions (
 
 alter table admin_permissions enable row level security;
 
+-- Reusable named bundles of section permissions (e.g. "Content Editor"
+-- granting articles + resources) — same locked-down "RLS enabled, zero
+-- policies" pattern, only reachable through the RPCs below.
+create table if not exists admin_roles (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  created_at timestamptz not null default now()
+);
+
+alter table admin_roles enable row level security;
+
+create table if not exists admin_role_permissions (
+  role_id uuid not null references admin_roles (id) on delete cascade,
+  section text not null,
+  primary key (role_id, section)
+);
+
+alter table admin_role_permissions enable row level security;
+
+create table if not exists admin_role_assignments (
+  email text not null,
+  role_id uuid not null references admin_roles (id) on delete cascade,
+  assigned_at timestamptz not null default now(),
+  primary key (email, role_id)
+);
+
+alter table admin_role_assignments enable row level security;
+
 -- What sections can the CALLING admin access? Any signed-in admin can
 -- call this for themselves (no is_super_admin check) — the super admin
 -- implicitly has every section regardless of what's in the table, which
--- the app's AuthContext accounts for rather than this function.
+-- the app's AuthContext accounts for rather than this function. Unions
+-- sections granted directly with sections granted via an assigned role.
 create or replace function my_admin_permissions() returns setof text
 language sql security definer stable
 set search_path = public
 as $$
   select section from admin_permissions
-  where email = (auth.jwt() ->> 'email');
+  where email = (auth.jwt() ->> 'email')
+  union
+  select rp.section from admin_role_permissions rp
+  join admin_role_assignments ra on ra.role_id = rp.role_id
+  where ra.email = (auth.jwt() ->> 'email');
 $$;
 
 grant execute on function my_admin_permissions() to authenticated;
@@ -152,6 +185,7 @@ begin
   end if;
   delete from admins where lower(email) = lower(target_email);
   delete from admin_permissions where lower(email) = lower(target_email);
+  delete from admin_role_assignments where lower(email) = lower(target_email);
 end;
 $$;
 
@@ -186,6 +220,126 @@ end;
 $$;
 
 grant execute on function revoke_admin_section(text, text) to authenticated;
+
+-- ---------- Named roles (reusable permission bundles) ----------
+
+create or replace function list_admin_roles() returns table (id uuid, name text, created_at timestamptz)
+language sql security definer stable
+set search_path = public
+as $$
+  select r.id, r.name, r.created_at from admin_roles r where is_super_admin();
+$$;
+
+grant execute on function list_admin_roles() to authenticated;
+
+create or replace function list_admin_role_permissions() returns table (role_id uuid, section text)
+language sql security definer stable
+set search_path = public
+as $$
+  select rp.role_id, rp.section from admin_role_permissions rp where is_super_admin();
+$$;
+
+grant execute on function list_admin_role_permissions() to authenticated;
+
+create or replace function list_admin_role_assignments() returns table (email text, role_id uuid)
+language sql security definer stable
+set search_path = public
+as $$
+  select ra.email, ra.role_id from admin_role_assignments ra where is_super_admin();
+$$;
+
+grant execute on function list_admin_role_assignments() to authenticated;
+
+create or replace function create_admin_role(role_name text) returns uuid
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  new_id uuid;
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can create roles.';
+  end if;
+  insert into admin_roles (name) values (trim(role_name)) returning id into new_id;
+  return new_id;
+end;
+$$;
+
+grant execute on function create_admin_role(text) to authenticated;
+
+create or replace function delete_admin_role(target_role_id uuid) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can delete roles.';
+  end if;
+  delete from admin_roles where id = target_role_id;
+end;
+$$;
+
+grant execute on function delete_admin_role(uuid) to authenticated;
+
+create or replace function grant_admin_role_section(target_role_id uuid, target_section text) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can edit roles.';
+  end if;
+  insert into admin_role_permissions (role_id, section) values (target_role_id, target_section)
+  on conflict (role_id, section) do nothing;
+end;
+$$;
+
+grant execute on function grant_admin_role_section(uuid, text) to authenticated;
+
+create or replace function revoke_admin_role_section(target_role_id uuid, target_section text) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can edit roles.';
+  end if;
+  delete from admin_role_permissions
+  where role_id = target_role_id and section = target_section;
+end;
+$$;
+
+grant execute on function revoke_admin_role_section(uuid, text) to authenticated;
+
+create or replace function assign_admin_role(target_email text, target_role_id uuid) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can assign roles.';
+  end if;
+  insert into admin_role_assignments (email, role_id) values (lower(target_email), target_role_id)
+  on conflict (email, role_id) do nothing;
+end;
+$$;
+
+grant execute on function assign_admin_role(text, uuid) to authenticated;
+
+create or replace function unassign_admin_role(target_email text, target_role_id uuid) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if not is_super_admin() then
+    raise exception 'Only the super admin can unassign roles.';
+  end if;
+  delete from admin_role_assignments
+  where lower(email) = lower(target_email) and role_id = target_role_id;
+end;
+$$;
+
+grant execute on function unassign_admin_role(text, uuid) to authenticated;
 
 -- ========== Tables ==========
 

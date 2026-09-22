@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import * as db from "../../lib/db";
-import type { AdminAccount } from "../../lib/db";
+import type { AdminAccount, AdminRole } from "../../lib/db";
 import { ADMIN_SECTION_LABELS } from "../../lib/types";
 import type { AdminSection } from "../../lib/types";
 import { useAuth } from "../../context/AuthContext";
@@ -19,8 +20,12 @@ export default function AdminRoles() {
   const { email: myEmail } = useAuth();
   const [admins, setAdmins] = useState<AdminAccount[]>([]);
   const [permissions, setPermissions] = useState<{ email: string; section: string }[]>([]);
+  const [roles, setRoles] = useState<AdminRole[]>([]);
+  const [rolePermissions, setRolePermissions] = useState<{ roleId: string; section: string }[]>([]);
+  const [roleAssignments, setRoleAssignments] = useState<{ email: string; roleId: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [newEmail, setNewEmail] = useState("");
+  const [newRoleName, setNewRoleName] = useState("");
   const [error, setError] = useState("");
   const [busyKey, setBusyKey] = useState<string | null>(null);
 
@@ -28,12 +33,18 @@ export default function AdminRoles() {
     setLoading(true);
     setError("");
     try {
-      const [adminList, permList] = await Promise.all([
+      const [adminList, permList, roleList, rolePermList, roleAssignList] = await Promise.all([
         db.listAdmins(),
         db.listAdminPermissions(),
+        db.listAdminRoles(),
+        db.listAdminRolePermissions(),
+        db.listAdminRoleAssignments(),
       ]);
       setAdmins(adminList);
       setPermissions(permList);
+      setRoles(roleList);
+      setRolePermissions(rolePermList);
+      setRoleAssignments(roleAssignList);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -45,7 +56,7 @@ export default function AdminRoles() {
     load();
   }, []);
 
-  async function handleAdd(e: React.FormEvent) {
+  async function handleAdd(e: FormEvent) {
     e.preventDefault();
     const trimmed = newEmail.trim().toLowerCase();
     if (!trimmed) return;
@@ -71,7 +82,7 @@ export default function AdminRoles() {
   }
 
   async function toggleSection(email: string, section: AdminSection, granted: boolean) {
-    const key = `${email}:${section}`;
+    const key = `perm:${email}:${section}`;
     setBusyKey(key);
     setError("");
     try {
@@ -88,14 +99,76 @@ export default function AdminRoles() {
     }
   }
 
+  async function handleCreateRole(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = newRoleName.trim();
+    if (!trimmed) return;
+    setError("");
+    try {
+      await db.createAdminRole(trimmed);
+      setNewRoleName("");
+      await load();
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  }
+
+  async function handleDeleteRole(roleId: string, name: string) {
+    if (!confirm(`Delete the "${name}" role? Admins assigned it will lose the sections it granted.`)) return;
+    setError("");
+    try {
+      await db.deleteAdminRole(roleId);
+      await load();
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  }
+
+  async function toggleRoleSection(roleId: string, section: AdminSection, granted: boolean) {
+    const key = `role-perm:${roleId}:${section}`;
+    setBusyKey(key);
+    setError("");
+    try {
+      if (granted) {
+        await db.revokeAdminRoleSection(roleId, section);
+      } else {
+        await db.grantAdminRoleSection(roleId, section);
+      }
+      await load();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusyKey(null);
+    }
+  }
+
+  async function toggleRoleAssignment(email: string, roleId: string, assigned: boolean) {
+    const key = `role-assign:${email}:${roleId}`;
+    setBusyKey(key);
+    setError("");
+    try {
+      if (assigned) {
+        await db.unassignAdminRole(email, roleId);
+      } else {
+        await db.assignAdminRole(email, roleId);
+      }
+      await load();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusyKey(null);
+    }
+  }
+
   return (
     <>
       <div className="admin-content-header">
         <div>
           <h2>Admin Roles</h2>
           <p>
-            Add or remove admins and control which admin-panel sections each
-            one can access. Restricted to {SUPER_ADMIN_EMAIL}.
+            Add, remove, or edit individual admins' access, and create
+            reusable roles to assign the same set of sections to multiple
+            admins at once. Restricted to {SUPER_ADMIN_EMAIL}.
           </p>
         </div>
       </div>
@@ -103,6 +176,9 @@ export default function AdminRoles() {
       {error && <div className="form-msg error">{error}</div>}
 
       <div className="panel">
+        <div className="panel-title-row">
+          <h3 style={{ margin: 0 }}>Admins</h3>
+        </div>
         <form onSubmit={handleAdd} style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
           <input
             type="email"
@@ -155,7 +231,7 @@ export default function AdminRoles() {
                           permissions.some(
                             (p) => p.email === a.email && p.section === section
                           );
-                        const key = `${a.email}:${section}`;
+                        const key = `perm:${a.email}:${section}`;
                         return (
                           <td key={section} style={{ textAlign: "center" }}>
                             <input
@@ -185,6 +261,129 @@ export default function AdminRoles() {
           </div>
         )}
       </div>
+
+      <div className="panel">
+        <div className="panel-title-row">
+          <h3 style={{ margin: 0 }}>Roles</h3>
+        </div>
+        <p style={{ marginTop: 0 }}>
+          Create a reusable role (e.g. "Content Editor"), choose which
+          sections it grants, then assign it to any admin below — an
+          admin's access is the union of their direct checkboxes above and
+          every role assigned to them.
+        </p>
+        <form onSubmit={handleCreateRole} style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
+          <input
+            type="text"
+            placeholder="e.g. Content Editor"
+            value={newRoleName}
+            onChange={(e) => setNewRoleName(e.target.value)}
+            style={{
+              flex: 1,
+              padding: "11px 14px",
+              borderRadius: "8px",
+              border: "1.5px solid #d3ead4",
+            }}
+          />
+          <button className="btn btn-primary" type="submit">
+            Create Role
+          </button>
+        </form>
+
+        {roles.length === 0 ? (
+          <div className="empty-state">No roles created yet.</div>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  {SECTIONS.map((section) => (
+                    <th key={section}>{ADMIN_SECTION_LABELS[section]}</th>
+                  ))}
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {roles.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.name}</td>
+                    {SECTIONS.map((section) => {
+                      const granted = rolePermissions.some(
+                        (rp) => rp.roleId === r.id && rp.section === section
+                      );
+                      const key = `role-perm:${r.id}:${section}`;
+                      return (
+                        <td key={section} style={{ textAlign: "center" }}>
+                          <input
+                            type="checkbox"
+                            checked={granted}
+                            disabled={busyKey === key}
+                            onChange={() => toggleRoleSection(r.id, section, granted)}
+                          />
+                        </td>
+                      );
+                    })}
+                    <td>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeleteRole(r.id, r.name)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {roles.length > 0 && (
+        <div className="panel">
+          <div className="panel-title-row">
+            <h3 style={{ margin: 0 }}>Assign Roles to Admins</h3>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  {roles.map((r) => (
+                    <th key={r.id}>{r.name}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {admins
+                  .filter((a) => a.email.toLowerCase() !== SUPER_ADMIN_EMAIL)
+                  .map((a) => (
+                    <tr key={a.email}>
+                      <td>{a.email}</td>
+                      {roles.map((r) => {
+                        const assigned = roleAssignments.some(
+                          (ra) => ra.email === a.email && ra.roleId === r.id
+                        );
+                        const key = `role-assign:${a.email}:${r.id}`;
+                        return (
+                          <td key={r.id} style={{ textAlign: "center" }}>
+                            <input
+                              type="checkbox"
+                              checked={assigned}
+                              disabled={busyKey === key}
+                              onChange={() => toggleRoleAssignment(a.email, r.id, assigned)}
+                            />
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </>
   );
 }
