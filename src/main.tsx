@@ -5,13 +5,16 @@ import "./styles/global.css";
 import App from "./App.tsx";
 import { AuthProvider } from "./context/AuthContext";
 import { SiteSectionsProvider } from "./context/SiteSectionsContext";
+import { FrdModeProvider } from "./context/FrdModeContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <SiteSectionsProvider>
-          <App />
+          <FrdModeProvider>
+            <App />
+          </FrdModeProvider>
         </SiteSectionsProvider>
       </AuthProvider>
     </BrowserRouter>

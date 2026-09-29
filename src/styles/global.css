@@ -117,6 +117,58 @@
   src: url("/fonts/cursive/dancing-script-latin.woff2") format("woff2");
 }
 
+/* ===================== FRD mode typeface ===================== */
+/* Typography for the toggleable "FRD" preview mode (see FrdModeContext) —
+   SIL OFL, self-hosted the same way as the rest; licenses at
+   /fonts/frd/OFL-*.txt. Not loaded/used by the default site at all. */
+@font-face {
+  font-family: "Cinzel";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/frd/cinzel-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/frd/cormorant-garamond-400italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/frd/inter-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/frd/inter-600.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/frd/jetbrains-mono-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/frd/jetbrains-mono-700.woff2") format("woff2");
+}
+
 /* ===================== Theme tokens ===================== */
 :root {
   --purple-nav: #ded2f7;
@@ -185,6 +237,128 @@
   --font-heading-modern: "Bebas Neue", "Barlow", sans-serif;
   --font-body-modern: "Barlow", sans-serif;
   --font-cursive: "Dancing Script", cursive;
+}
+
+/* ===================== FRD mode theme tokens ===================== */
+/* A personal, admin-only preview toggle (see FrdModeContext, restored in
+   the admin sidebar) — flips [data-theme="frd"] on <html>. Every visitor
+   without the toggle set in their own browser's localStorage sees the
+   default theme above, completely unaffected.
+
+   Rather than rewrite every component's CSS, this remaps the SAME base
+   palette variables everything already reads from "white card + dark
+   text on a dark green page" to "dark slate card + parchment text on an
+   obsidian page" — one token swap re-themes the whole site's existing
+   structure/layout consistently, per the FRD's colour tokens (Deep
+   Obsidian Chalkboard / Matte Ink / Dark Slate surfaces / Matrix
+   Emerald / Warm Parchment / Electric Cyan). Home, Navbar, and Footer
+   additionally get bespoke FRD-specific layouts on top of this (see
+   FrdHome.tsx and the Navbar/Footer FRD overrides) — every other page
+   just re-colors/re-fonts in place. */
+:root[data-theme="frd"] {
+  --frd-bg: #0a0b0e;
+  --frd-bg-2: #111318;
+  --frd-surface: #1e2330;
+  --frd-surface-2: #171b24;
+  --frd-border: rgba(255, 255, 255, 0.08);
+  --frd-emerald: #00ff88;
+  --frd-emerald-deep: #00cc76;
+  --frd-parchment: #f5e6d3;
+  --frd-cyan: #00e5ff;
+  --frd-muted: #9ca3af;
+
+  --font-frd-display: "STIX Two Text", "STIX Two Text Fallback", serif;
+  --font-frd-heading: "Cinzel", serif;
+  --font-frd-body: "Inter", sans-serif;
+  --font-frd-meta: "Cormorant Garamond", serif;
+  --font-frd-mono: "JetBrains Mono", monospace;
+
+  /* Structural palette — everything below is a straight re-point of the
+     variables the rest of the stylesheet already uses. */
+  --green-light: var(--frd-emerald);
+  --green-mid: var(--frd-cyan);
+  --green-dark: var(--frd-emerald-deep);
+  --green-dark-2: var(--frd-parchment);
+
+  --white: var(--frd-surface);
+  --cream: var(--frd-surface-2);
+  --surface-tint: var(--frd-surface-2);
+  --ink: var(--frd-parchment);
+  --ink-soft: var(--frd-muted);
+
+  --page-bg: var(--frd-bg);
+  --text-on-dark: var(--frd-parchment);
+  --text-on-dark-soft: var(--frd-muted);
+
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-btn: 0 8px 20px rgba(0, 255, 136, 0.3);
+
+  --color-accent: var(--frd-emerald);
+  --color-accent-strong: var(--frd-emerald-deep);
+  --color-accent-mid: var(--frd-cyan);
+  --color-accent-soft: rgba(0, 255, 136, 0.12);
+  --color-accent-border: rgba(0, 255, 136, 0.4);
+  --color-surface: var(--frd-surface);
+  --color-text: var(--frd-parchment);
+  --color-text-soft: var(--frd-muted);
+
+  --font-heading: var(--font-frd-display);
+  --font-body: var(--font-frd-body);
+  --font-heading-modern: var(--font-frd-heading);
+  --font-body-modern: var(--font-frd-body);
+}
+
+[data-theme="frd"] html {
+  background: var(--frd-bg);
+}
+
+/* A faint chalkboard texture over the obsidian background — cheap
+   repeating gradients, no image asset. */
+[data-theme="frd"] body {
+  background-image: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.012) 0px,
+      rgba(255, 255, 255, 0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.012) 0px,
+      rgba(255, 255, 255, 0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+}
+
+/* h3/h4 in the default theme deliberately stay body-weight (see the
+   base rule) — FRD mode's own Cinzel display face reads fine at those
+   sizes too, so this mode doesn't need that split. */
+[data-theme="frd"] h3,
+[data-theme="frd"] h4 {
+  font-family: var(--font-frd-heading);
+  font-weight: 700;
+}
+
+[data-theme="frd"] .eyebrow,
+[data-theme="frd"] .hero-eyebrow {
+  font-family: var(--font-frd-meta);
+  font-style: italic;
+  letter-spacing: 0.08em;
+}
+
+/* These page-wrapper washes are a literal rgba(), not a token — the
+   comment on .home-page explains why (lets the digital-rain canvas
+   read through) but that means every one needs its own FRD override
+   rather than picking it up for free from the palette remap above. */
+[data-theme="frd"] .home-page,
+[data-theme="frd"] .about-page,
+[data-theme="frd"] .hall-of-fame-page,
+[data-theme="frd"] .awards-page,
+[data-theme="frd"] .club-publications-page,
+[data-theme="frd"] .leaderboard-page,
+[data-theme="frd"] .access-wrap {
+  background: rgba(10, 11, 14, 0.55);
 }
 
 * {
@@ -2448,8 +2622,53 @@ button {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.admin-sidebar-footer {
+.admin-design-toggle {
   margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.admin-design-toggle-label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+
+.admin-design-toggle-hint {
+  font-size: 0.72rem;
+  color: rgba(234, 251, 238, 0.65);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.admin-design-toggle-switch {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 3px;
+}
+
+.admin-design-toggle-switch button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: rgba(234, 251, 238, 0.75);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-design-toggle-switch button.is-active {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.admin-sidebar-footer {
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -2896,6 +3115,7 @@ tr:hover td {
     margin-bottom: 12px;
   }
 
+  .admin-design-toggle,
   .admin-sidebar-footer {
     margin-top: 16px;
     padding-top: 16px;

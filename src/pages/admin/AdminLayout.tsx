@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useFrdMode } from "../../context/FrdModeContext";
 import type { AdminSection } from "../../lib/types";
 import {
   IconDashboard,
@@ -58,8 +59,11 @@ const NAV_GROUPS: NavGroup[] = [
     items: [{ to: "/admin/awards", label: "Awards", Icon: IconStar, section: "awards" }],
   },
   {
-    label: "Articles",
-    items: [{ to: "/admin/articles", label: "Articles", Icon: IconNewspaper, section: "articles" }],
+    label: "Club Publications",
+    items: [
+      { to: "/admin/articles", label: "Articles", Icon: IconNewspaper, section: "articles" },
+      { to: "/admin/resources", label: "Resources", Icon: IconBook, section: "resources" },
+    ],
   },
   {
     label: "Leaderboards",
@@ -69,7 +73,6 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Site-wide",
     items: [
       { to: "/admin/activity-log", label: "Club Activity Log", Icon: IconCalendar, section: "activity_log" },
-      { to: "/admin/resources", label: "Resources", Icon: IconBook, section: "resources" },
       { to: "/admin/forum", label: "Executive Forum", Icon: IconChat, section: "forum" },
       { to: "/admin/olympiad-registrations", label: "Olympiad Registrations", Icon: IconUsers, section: "olympiad_registrations" },
       { to: "/admin/site-sections", label: "Site Sections", Icon: IconEye, section: "site_sections" },
@@ -86,6 +89,7 @@ const NAV_GROUPS: NavGroup[] = [
 
 export default function AdminLayout() {
   const { email, isSuperAdmin, canAccess, signOut } = useAuth();
+  const { frdMode, setFrdMode } = useFrdMode();
   const navigate = useNavigate();
 
   async function handleSignOut() {
@@ -126,6 +130,31 @@ export default function AdminLayout() {
             </div>
           );
         })}
+
+        <div className="admin-design-toggle">
+          <span className="admin-design-toggle-label">FRD Mode Preview</span>
+          <p className="admin-design-toggle-hint">
+            Personal, this browser only — doesn't change what visitors see.
+          </p>
+          <div className="admin-design-toggle-switch" role="group" aria-label="FRD mode preview">
+            <button
+              type="button"
+              className={!frdMode ? "is-active" : ""}
+              aria-pressed={!frdMode}
+              onClick={() => setFrdMode(false)}
+            >
+              Default
+            </button>
+            <button
+              type="button"
+              className={frdMode ? "is-active" : ""}
+              aria-pressed={frdMode}
+              onClick={() => setFrdMode(true)}
+            >
+              FRD Mode
+            </button>
+          </div>
+        </div>
 
         <div className="admin-sidebar-footer">
           <button className="btn btn-secondary btn-sm" onClick={handleSignOut} style={{ width: "100%" }}>
