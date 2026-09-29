@@ -361,6 +361,45 @@
   background: rgba(10, 11, 14, 0.55);
 }
 
+/* ---- Navbar & Footer ---- */
+/* Same structure as the default theme, just the FRD tokens/typography —
+   most colour already comes free from the palette remap above; what's
+   left are the couple of places .navbar/.footer hardcode a literal
+   colour instead of reading a variable. */
+
+[data-theme="frd"] .navbar {
+  background: rgba(10, 11, 14, 0.75);
+}
+
+[data-theme="frd"] .navbar-brand-text,
+[data-theme="frd"] .footer-col-title {
+  font-family: var(--font-frd-heading);
+  font-weight: 700;
+}
+
+[data-theme="frd"] .footer {
+  background: rgba(17, 19, 24, 0.75);
+  color: var(--frd-parchment);
+}
+
+[data-theme="frd"] .footer-bottom {
+  color: var(--frd-muted);
+}
+
+[data-theme="frd"] .footer-bottom a,
+[data-theme="frd"] .footer-social {
+  color: var(--frd-emerald);
+}
+
+/* .footer-brand/.footer-contact-name use --white as "literal white
+   text," not "card background" — the two meanings collide once --white
+   itself gets remapped dark above, so these need their own override
+   back to a light colour. */
+[data-theme="frd"] .footer-brand,
+[data-theme="frd"] .footer-contact-name {
+  color: var(--frd-parchment);
+}
+
 * {
   box-sizing: border-box;
 }

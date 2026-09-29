@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 
 const STORAGE_KEY = "mmc_frd_mode";
 
@@ -27,17 +28,27 @@ function readStored(): boolean {
  * it survives navigating away from /admin to look at the public pages
  * in the new skin. See the "FRD mode" plan — this mirrors the earlier
  * bizfest-preview toggle before that one was made permanent for everyone.
+ *
+ * The attribute is only ever applied on public routes, never on
+ * /admin/* — the FRD token remap re-themes the whole public site for
+ * "dark card + light text," which is the opposite of the admin panel's
+ * own light-background convention (and the toggle itself lives in the
+ * admin sidebar, so it needs to stay legible regardless of its own
+ * state). `frdMode` itself still reflects the stored preference either
+ * way — only the DOM attribute is route-gated.
  */
 export function FrdModeProvider({ children }: { children: ReactNode }) {
   const [frdMode, setFrdModeState] = useState<boolean>(readStored);
+  const location = useLocation();
 
   useEffect(() => {
-    if (frdMode) {
+    const isAdminRoute = location.pathname.startsWith("/admin");
+    if (frdMode && !isAdminRoute) {
       document.documentElement.setAttribute("data-theme", "frd");
     } else {
       document.documentElement.removeAttribute("data-theme");
     }
-  }, [frdMode]);
+  }, [frdMode, location.pathname]);
 
   function setFrdMode(on: boolean) {
     setFrdModeState(on);
