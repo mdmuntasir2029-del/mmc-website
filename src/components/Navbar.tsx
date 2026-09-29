@@ -65,6 +65,11 @@ export default function Navbar() {
                 <Link to="/club-publications">Club Publications</Link>
               </li>
             )}
+            {sections.announcements && (
+              <li>
+                <Link to="/announcements">Announcements</Link>
+              </li>
+            )}
             {sections.leaderboard && (
               <li>
                 <Link to="/leaderboard">Leaderboard</Link>

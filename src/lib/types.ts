@@ -149,7 +149,27 @@ export interface Announcement {
   imageUrl: string;
   /** srcset value covering several widths, for responsive <img> sizing. */
   imageSrcSet: string;
+  /** The upload's real pixel dimensions — used for CLS-safe width/height
+   *  attributes without forcing a crop (announcements vary in shape). */
+  imageWidth: number | null;
+  imageHeight: number | null;
   caption: string | null;
+  /** Longer blog-post-style body shown in the detail popup. */
+  description: string | null;
+  /** Optional "learn more" link. */
+  embedUrl: string | null;
+  likesCount: number;
+  createdAt: string;
+}
+
+/** An open comment on an announcement — no visitor-account system on
+ *  this site, so just a display name + message, like the Olympiad
+ *  registration / issue-report forms. */
+export interface AnnouncementComment {
+  id: string;
+  announcementId: string;
+  authorName: string;
+  message: string;
   createdAt: string;
 }
 

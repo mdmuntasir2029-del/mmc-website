@@ -152,19 +152,6 @@ export default function Home() {
         </div>
       )}
 
-      <section className="section section-upcoming">
-        <div className="container">
-          <div className="upcoming-card">
-            <span className="eyebrow">Upcoming</span>
-            <h2>Intra Math Olympiad &mdash; Spring 2027</h2>
-            <p>
-              Registration details and the event schedule will be announced
-              here soon &mdash; keep an eye on this space.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {sections.announcements && <AnnouncementsPanel />}
 
       {sections.articles && (

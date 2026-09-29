@@ -503,6 +503,52 @@ create table if not exists announcements (
   created_at timestamptz not null default now()
 );
 
+-- image_width/image_height: the upload's real pixel dimensions, read
+-- client-side before upload (see admin/Announcements.tsx) — used as the
+-- public <img>'s width/height attributes so the browser reserves the
+-- CORRECT aspect ratio before the image loads. Without these, every
+-- reload briefly lays the grid out with no size hint at all (images
+-- vary in shape, unlike session photos, so a single guessed ratio
+-- would be wrong for most of them) and then snaps once each image
+-- finishes loading — the "resolution messes up on reload" report.
+-- embed_url: optional "learn more" link. description: the longer
+-- blog-post-style body shown in the detail popup. likes_count: a
+-- simple counter (see the increment_announcement_likes() RPC below) —
+-- good enough for a club site without a visitor-account system to key
+-- a proper per-user like off of.
+alter table announcements add column if not exists image_width integer;
+alter table announcements add column if not exists image_height integer;
+alter table announcements add column if not exists embed_url text;
+alter table announcements add column if not exists description text;
+alter table announcements add column if not exists likes_count integer not null default 0;
+
+-- Open comments (no visitor-account system on this site) — a display
+-- name plus a message, same low-friction pattern as the Olympiad
+-- registration / issue reports forms.
+create table if not exists announcement_comments (
+  id uuid primary key default gen_random_uuid(),
+  announcement_id uuid not null references announcements (id) on delete cascade,
+  author_name text not null,
+  message text not null,
+  created_at timestamptz not null default now()
+);
+
+create or replace function increment_announcement_likes(target_id uuid) returns integer
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  new_count integer;
+begin
+  update announcements set likes_count = likes_count + 1
+  where id = target_id
+  returning likes_count into new_count;
+  return new_count;
+end;
+$$;
+
+grant execute on function increment_announcement_likes(uuid) to anon, authenticated;
+
 -- Bug reports / suggestions submitted via the sitewide "Report an
 -- issue" button. Visible only to the super admin (mdmuntasir.2029@
 -- gmail.com), not every admin — see is_super_admin() above.
@@ -590,6 +636,7 @@ alter table activity_slideshow_photos enable row level security;
 alter table hall_of_fame_entries enable row level security;
 alter table testimonials enable row level security;
 alter table announcements enable row level security;
+alter table announcement_comments enable row level security;
 alter table issue_reports enable row level security;
 alter table problem_of_the_day enable row level security;
 alter table upcoming_competitions enable row level security;
@@ -696,6 +743,20 @@ create policy "announcements_public_select" on announcements
 drop policy if exists "announcements_admin_write" on announcements;
 create policy "announcements_admin_write" on announcements
   for all using (is_admin()) with check (is_admin());
+
+-- Comments are public to post and read (open, no visitor accounts);
+-- only admins can delete (moderation).
+drop policy if exists "announcement_comments_public_select" on announcement_comments;
+create policy "announcement_comments_public_select" on announcement_comments
+  for select to anon, authenticated using (true);
+
+drop policy if exists "announcement_comments_public_insert" on announcement_comments;
+create policy "announcement_comments_public_insert" on announcement_comments
+  for insert to anon, authenticated with check (true);
+
+drop policy if exists "announcement_comments_admin_delete" on announcement_comments;
+create policy "announcement_comments_admin_delete" on announcement_comments
+  for delete using (is_admin());
 
 -- Anyone can report an issue; only the super admin can read or clear
 -- them (not every admin — see is_super_admin() above).

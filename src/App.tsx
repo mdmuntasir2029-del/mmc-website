@@ -12,6 +12,7 @@ import Awards from "./pages/Awards";
 import ClubPublications from "./pages/ClubPublications";
 import Articles from "./pages/Articles";
 import ClubResources from "./pages/ClubResources";
+import AnnouncementsPage from "./pages/AnnouncementsPage";
 import Leaderboard from "./pages/Leaderboard";
 import HallOfFame from "./pages/HallOfFame";
 import Access from "./pages/Access";
@@ -54,6 +55,7 @@ function App() {
             <Route path="articles" element={<Articles />} />
             <Route path="resources" element={<ClubResources />} />
           </Route>
+          <Route path="/announcements" element={<AnnouncementsPage />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/hall-of-fame" element={<HallOfFame />} />
           <Route path="/signin" element={<Access />} />

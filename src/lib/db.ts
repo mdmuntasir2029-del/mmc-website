@@ -19,6 +19,7 @@ import type {
   HallOfFameEntry,
   Testimonial,
   Announcement,
+  AnnouncementComment,
   IssueReport,
   ProblemOfTheDay,
   UpcomingCompetition,
@@ -1096,7 +1097,12 @@ export async function deleteTestimonial(id: string): Promise<void> {
 interface AnnouncementRow {
   id: string;
   image_path: string;
+  image_width: number | null;
+  image_height: number | null;
   caption: string | null;
+  description: string | null;
+  embed_url: string | null;
+  likes_count: number;
   created_at: string;
 }
 
@@ -1106,7 +1112,12 @@ function fromAnnouncementRow(row: AnnouncementRow): Announcement {
     imagePath: row.image_path,
     imageUrl: publicImageUrl(row.image_path, 960),
     imageSrcSet: gallerySrcSet(row.image_path),
+    imageWidth: row.image_width,
+    imageHeight: row.image_height,
     caption: row.caption,
+    description: row.description,
+    embedUrl: row.embed_url,
+    likesCount: row.likes_count,
     createdAt: row.created_at,
   };
 }
@@ -1121,7 +1132,16 @@ export async function getAnnouncements(): Promise<Announcement[]> {
 }
 
 export async function addAnnouncement(
-  data: { caption: string | null },
+  data: {
+    caption: string | null;
+    description: string | null;
+    embedUrl: string | null;
+    /** Read client-side (e.g. via an Image() probe) before upload — see
+     *  admin/Announcements.tsx — so the public page can reserve the
+     *  correct aspect ratio instead of guessing one. */
+    imageWidth: number | null;
+    imageHeight: number | null;
+  },
   file: File
 ): Promise<Announcement> {
   const imagePath = `announcements/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
@@ -1132,7 +1152,14 @@ export async function addAnnouncement(
 
   const { data: row, error } = await supabase
     .from("announcements")
-    .insert({ image_path: imagePath, caption: data.caption })
+    .insert({
+      image_path: imagePath,
+      caption: data.caption,
+      description: data.description,
+      embed_url: data.embedUrl,
+      image_width: data.imageWidth,
+      image_height: data.imageHeight,
+    })
     .select("*")
     .single();
 
@@ -1153,6 +1180,65 @@ export async function deleteAnnouncement(id: string): Promise<void> {
   if (error) throw error;
   const path = (row as { image_path: string } | null)?.image_path;
   if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
+}
+
+/** Increments and returns the new like count — a plain counter, not a
+ *  per-visitor toggle (no visitor-account system on this site); the
+ *  public component debounces repeat clicks from the same browser via
+ *  localStorage so it isn't trivially spammable by accident. */
+export async function likeAnnouncement(id: string): Promise<number> {
+  const { data, error } = await supabase.rpc("increment_announcement_likes", {
+    target_id: id,
+  });
+  if (error) throw error;
+  return data as number;
+}
+
+interface AnnouncementCommentRow {
+  id: string;
+  announcement_id: string;
+  author_name: string;
+  message: string;
+  created_at: string;
+}
+
+function fromAnnouncementCommentRow(row: AnnouncementCommentRow): AnnouncementComment {
+  return {
+    id: row.id,
+    announcementId: row.announcement_id,
+    authorName: row.author_name,
+    message: row.message,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getAnnouncementComments(
+  announcementId: string
+): Promise<AnnouncementComment[]> {
+  const { data, error } = await supabase
+    .from("announcement_comments")
+    .select("*")
+    .eq("announcement_id", announcementId)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data as AnnouncementCommentRow[]).map(fromAnnouncementCommentRow);
+}
+
+export async function addAnnouncementComment(
+  announcementId: string,
+  data: { authorName: string; message: string }
+): Promise<void> {
+  const { error } = await supabase.from("announcement_comments").insert({
+    announcement_id: announcementId,
+    author_name: data.authorName,
+    message: data.message,
+  });
+  if (error) throw error;
+}
+
+export async function deleteAnnouncementComment(id: string): Promise<void> {
+  const { error } = await supabase.from("announcement_comments").delete().eq("id", id);
+  if (error) throw error;
 }
 
 // ---------- Issue reports (super-admin only) ----------

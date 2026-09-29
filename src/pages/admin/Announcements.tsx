@@ -3,11 +3,34 @@ import type { FormEvent } from "react";
 import * as db from "../../lib/db";
 import type { Announcement } from "../../lib/types";
 
+/** Reads a File's real pixel dimensions before upload — decoding it via
+ *  a throwaway <img>, which is the only reliable cross-browser way to
+ *  get natural width/height from a File without a server round trip.
+ *  Used so the public page can reserve the correct aspect ratio per
+ *  image instead of guessing one (see db.ts's addAnnouncement). */
+function readImageDimensions(file: File): Promise<{ width: number; height: number } | null> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+    img.src = url;
+  });
+}
+
 export default function Announcements() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [caption, setCaption] = useState("");
+  const [description, setDescription] = useState("");
+  const [embedUrl, setEmbedUrl] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
   const [fileInputKey, setFileInputKey] = useState(0);
   const [error, setError] = useState("");
@@ -33,9 +56,21 @@ export default function Announcements() {
     setSubmitting(true);
     try {
       for (const file of Array.from(files)) {
-        await db.addAnnouncement({ caption: caption.trim() || null }, file);
+        const dims = await readImageDimensions(file);
+        await db.addAnnouncement(
+          {
+            caption: caption.trim() || null,
+            description: description.trim() || null,
+            embedUrl: embedUrl.trim() || null,
+            imageWidth: dims?.width ?? null,
+            imageHeight: dims?.height ?? null,
+          },
+          file
+        );
       }
       setCaption("");
+      setDescription("");
+      setEmbedUrl("");
       setFiles(null);
       setFileInputKey((k) => k + 1);
       load();
@@ -56,7 +91,7 @@ export default function Announcements() {
       <div className="admin-content-header">
         <div>
           <h2>Announcements</h2>
-          <p>Image announcements shown on the Home page, newest first.</p>
+          <p>Image announcements shown on the Home page and the full /announcements page, newest first.</p>
         </div>
       </div>
 
@@ -77,6 +112,24 @@ export default function Announcements() {
               placeholder="Applied to every image in this upload"
             />
           </div>
+          <div className="form-field" style={{ marginBottom: 12 }}>
+            <label>Description (optional, shown in the detail popup)</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="A longer write-up, like a blog post body."
+              rows={4}
+            />
+          </div>
+          <div className="form-field" style={{ marginBottom: 12 }}>
+            <label>"Learn more" link (optional)</label>
+            <input
+              type="url"
+              value={embedUrl}
+              onChange={(e) => setEmbedUrl(e.target.value)}
+              placeholder="https://..."
+            />
+          </div>
           <div className="form-field" style={{ marginBottom: 0 }}>
             <label>
               Image(s) <span className="required">*</span>
@@ -90,6 +143,10 @@ export default function Announcements() {
                 onChange={(e) => setFiles(e.target.files)}
               />
             </div>
+            <p className="form-hint" style={{ marginTop: 6 }}>
+              The description/link above apply to every image in this
+              upload — post them one at a time if they need to differ.
+            </p>
           </div>
           <button
             className="btn btn-primary"
