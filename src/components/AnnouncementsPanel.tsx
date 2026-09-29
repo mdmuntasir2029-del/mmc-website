@@ -32,8 +32,6 @@ export default function AnnouncementsPanel() {
                   src={a.imageUrl}
                   srcSet={a.imageSrcSet}
                   sizes="(max-width: 900px) 100vw, 380px"
-                  width={800}
-                  height={600}
                   alt={a.caption ?? "Club announcement"}
                   loading={i === 0 ? "eager" : "lazy"}
                   decoding="async"

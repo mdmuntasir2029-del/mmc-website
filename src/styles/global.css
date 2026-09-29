@@ -3315,6 +3315,12 @@ tr:hover td {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
+  /* Announcements are posters/flyers of whatever shape an admin uploads
+     (often portrait, or text close to the edges) — unlike session
+     photos, forcing a uniform crop cuts off real content. Cards size to
+     their own image instead of stretching to match the tallest one in
+     the row. */
+  align-items: start;
 }
 
 .announcement-card {
@@ -3328,8 +3334,6 @@ tr:hover td {
 .announcement-card img {
   width: 100%;
   height: auto;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
   display: block;
 }
 
