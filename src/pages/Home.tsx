@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import HeroSlideshow from "../components/HeroSlideshow";
 import AnnouncementsPanel from "../components/AnnouncementsPanel";
 import SineWave from "../components/SineWave";
+import FrdHome from "./FrdHome";
 import { useScrollScrub, usePinnedScrollEnabled } from "../hooks/useScrollScrub";
 import { useSiteSections } from "../hooks/useSiteSections";
+import { useFrdMode } from "../context/FrdModeContext";
 import { IconTrophy, IconBook, IconUsers } from "../components/icons";
 
 const HIGHLIGHTS = [
@@ -51,15 +53,20 @@ const STATS = [
 ];
 
 export default function Home() {
+  const { frdMode } = useFrdMode();
   const pinned = usePinnedScrollEnabled();
   const { sections } = useSiteSections();
-
   const lineupScrub = useScrollScrub(pinned);
 
   // When the pinned scrub is off (mobile / reduced motion) the lineup
   // cards are simply shown — no scroll-reveal gate, so they can't get
   // stuck invisible if an observer never fires.
   const lineupProgress = pinned ? lineupScrub.progress : 1;
+
+  // All hooks above run unconditionally on every render regardless of
+  // frdMode, so this early return never violates the rules of hooks —
+  // it just skips the (unused, in that case) default-theme markup below.
+  if (frdMode) return <FrdHome />;
 
   return (
     <div className={pinned ? "home-page home-page--pinned" : "home-page"}>
