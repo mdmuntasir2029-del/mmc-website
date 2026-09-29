@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import DigitalRain from "./components/DigitalRain";
+import FrdPreloader from "./components/FrdPreloader";
 import ReportIssueButton from "./components/ReportIssueButton";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import RequireAdminSection from "./components/RequireAdminSection";
@@ -42,6 +43,7 @@ function App() {
   return (
     <>
       <DigitalRain />
+      <FrdPreloader />
       <Navbar />
       <main className="page-main">
         <Routes>
