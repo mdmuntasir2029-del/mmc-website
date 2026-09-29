@@ -3756,3 +3756,164 @@ tr:hover td {
   }
 }
 
+/* ===================== FRD mode — Competition Bento ===================== */
+
+.frd-bento-section {
+  padding: 20px 0 90px;
+}
+
+.frd-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: min-content;
+  gap: 20px;
+  margin-top: 18px;
+}
+
+.frd-bento-card {
+  background: var(--frd-surface, #1e2330);
+  border: 1px solid var(--frd-border, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  padding: 26px 28px;
+}
+
+.frd-bento-label {
+  display: block;
+  font-family: var(--font-frd-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--frd-cyan, #00e5ff);
+  margin-bottom: 14px;
+}
+
+.frd-bento-card h3 {
+  color: var(--frd-parchment, #f5e6d3);
+  margin-bottom: 18px;
+}
+
+/* Asymmetric — the countdown tile is narrower, rankings/archive get the
+   remaining width, per the brief's "asymmetric bento grids" principle. */
+.frd-bento-countdown {
+  grid-column: span 1;
+}
+
+.frd-bento-rankings {
+  grid-column: span 1;
+}
+
+.frd-bento-archive {
+  grid-column: span 1;
+}
+
+.frd-countdown-row {
+  display: flex;
+  gap: 16px;
+}
+
+.frd-countdown-row > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.frd-countdown-num {
+  font-family: var(--font-frd-mono, monospace);
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--frd-emerald, #00ff88);
+  line-height: 1;
+}
+
+.frd-countdown-unit {
+  font-family: var(--font-frd-mono, monospace);
+  font-size: 0.7rem;
+  color: var(--frd-muted, #9ca3af);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.frd-rankings-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.frd-rankings-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-frd-body, sans-serif);
+  font-size: 0.9rem;
+}
+
+.frd-rankings-place {
+  font-family: var(--font-frd-mono, monospace);
+  color: var(--frd-cyan, #00e5ff);
+  width: 1.5em;
+}
+
+.frd-rankings-name {
+  flex: 1;
+  color: var(--frd-parchment, #f5e6d3);
+}
+
+.frd-rankings-score {
+  font-family: var(--font-frd-mono, monospace);
+  color: var(--frd-emerald, #00ff88);
+  font-weight: 700;
+}
+
+.frd-archive-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.frd-archive-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--frd-border, rgba(255, 255, 255, 0.08));
+}
+
+.frd-archive-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.frd-archive-name {
+  font-family: var(--font-frd-body, sans-serif);
+  font-weight: 600;
+  color: var(--frd-parchment, #f5e6d3);
+}
+
+.frd-archive-year {
+  font-family: var(--font-frd-mono, monospace);
+  font-size: 0.78rem;
+  color: var(--frd-muted, #9ca3af);
+}
+
+.frd-archive-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.frd-archive-actions .frd-btn {
+  padding: 7px 14px;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 900px) {
+  .frd-bento-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -82,6 +82,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "FRD Mode",
     items: [
       { to: "/admin/problem-of-the-day", label: "Problem of the Day", Icon: IconBook, section: "frd_problem_of_the_day" },
+      { to: "/admin/frd-competitions", label: "Competitions & Archive", Icon: IconTrophy, section: "frd_competitions" },
     ],
   },
   {
