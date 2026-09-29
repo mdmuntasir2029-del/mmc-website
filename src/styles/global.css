@@ -3917,3 +3917,108 @@ tr:hover td {
   }
 }
 
+/* ===================== FRD mode — Executive Board ===================== */
+
+.frd-execboard {
+  padding: 20px 0 100px;
+}
+
+.frd-execboard-title {
+  margin: 4px 0 28px;
+}
+
+.frd-execboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
+}
+
+.frd-exec-card {
+  background: var(--frd-surface, #1e2330);
+  border: 1px solid var(--frd-border, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  padding: 26px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.frd-exec-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--frd-emerald, #00ff88);
+}
+
+.frd-exec-photo {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+}
+
+.frd-exec-photo--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-frd-heading, serif);
+  font-size: 1.6rem;
+  color: var(--frd-bg, #0a0b0e);
+  background: var(--frd-emerald, #00ff88);
+}
+
+.frd-exec-card h3 {
+  margin-bottom: 2px;
+}
+
+.frd-exec-role {
+  font-family: var(--font-frd-mono, monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--frd-cyan, #00e5ff);
+  margin-bottom: 14px;
+}
+
+.frd-exec-meta {
+  font-family: var(--font-frd-meta, serif);
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--frd-muted, #9ca3af);
+  margin: 0 0 6px;
+}
+
+.frd-exec-meta-label {
+  font-family: var(--font-frd-mono, monospace);
+  font-style: normal;
+  color: var(--frd-parchment, #f5e6d3);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.frd-exec-awards {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--frd-border, rgba(255, 255, 255, 0.08));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.frd-exec-awards li {
+  font-size: 0.82rem;
+  color: var(--frd-parchment, #f5e6d3);
+  padding-left: 14px;
+  position: relative;
+}
+
+.frd-exec-awards li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--frd-emerald, #00ff88);
+}
+

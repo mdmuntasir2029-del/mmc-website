@@ -956,6 +956,8 @@ interface HallOfFameEntryRow {
   session_year: string;
   image_path: string | null;
   display_order: number;
+  favorite_constant: string | null;
+  research_area: string | null;
   created_at: string;
 }
 
@@ -969,6 +971,8 @@ function fromHallOfFameEntryRow(row: HallOfFameEntryRow): HallOfFameEntry {
     imageUrl: row.image_path ? publicImageUrl(row.image_path, 480) : null,
     imageSrcSet: row.image_path ? gallerySrcSet(row.image_path) : null,
     displayOrder: row.display_order,
+    favoriteConstant: row.favorite_constant,
+    researchArea: row.research_area,
     createdAt: row.created_at,
   };
 }
@@ -984,7 +988,14 @@ export async function getHallOfFameEntries(): Promise<HallOfFameEntry[]> {
 }
 
 export async function addHallOfFameEntry(
-  data: { name: string; roleTitle: string; sessionYear: string; displayOrder: number },
+  data: {
+    name: string;
+    roleTitle: string;
+    sessionYear: string;
+    displayOrder: number;
+    favoriteConstant?: string | null;
+    researchArea?: string | null;
+  },
   file: File | null
 ): Promise<HallOfFameEntry> {
   let imagePath: string | null = null;
@@ -1004,6 +1015,8 @@ export async function addHallOfFameEntry(
       session_year: data.sessionYear,
       display_order: data.displayOrder,
       image_path: imagePath,
+      favorite_constant: data.favoriteConstant ?? null,
+      research_area: data.researchArea ?? null,
     })
     .select("*")
     .single();

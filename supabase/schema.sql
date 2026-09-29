@@ -478,6 +478,12 @@ create table if not exists hall_of_fame_entries (
   created_at timestamptz not null default now()
 );
 
+-- Extra fields for the FRD mode "Executive Board" module — optional, so
+-- entries added before this stage (or for non-exec roster members)
+-- don't need them.
+alter table hall_of_fame_entries add column if not exists favorite_constant text;
+alter table hall_of_fame_entries add column if not exists research_area text;
+
 -- "What people say about the club" — testimonials from club personnel,
 -- shown on the About page.
 create table if not exists testimonials (

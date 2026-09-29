@@ -117,6 +117,9 @@ export interface HallOfFameEntry {
   /** srcset value covering several widths, for responsive <img> sizing. */
   imageSrcSet: string | null;
   displayOrder: number;
+  /** Only ever set/shown for the FRD mode Executive Board module. */
+  favoriteConstant: string | null;
+  researchArea: string | null;
   createdAt: string;
 }
 

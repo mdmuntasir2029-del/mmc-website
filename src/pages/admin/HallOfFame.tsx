@@ -12,6 +12,8 @@ export default function HallOfFame() {
   const [roleTitle, setRoleTitle] = useState("");
   const [sessionYear, setSessionYear] = useState(CURRENT_SESSION_YEAR);
   const [displayOrder, setDisplayOrder] = useState("0");
+  const [favoriteConstant, setFavoriteConstant] = useState("");
+  const [researchArea, setResearchArea] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -41,12 +43,16 @@ export default function HallOfFame() {
           roleTitle: roleTitle.trim(),
           sessionYear: sessionYear.trim(),
           displayOrder: parseInt(displayOrder, 10) || 0,
+          favoriteConstant: favoriteConstant.trim() || null,
+          researchArea: researchArea.trim() || null,
         },
         file
       );
       setName("");
       setRoleTitle("");
       setDisplayOrder("0");
+      setFavoriteConstant("");
+      setResearchArea("");
       setFile(null);
       load();
     } catch {
@@ -122,6 +128,26 @@ export default function HallOfFame() {
                 type="number"
                 value={displayOrder}
                 onChange={(e) => setDisplayOrder(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-field" style={{ marginBottom: 0 }}>
+              <label>Favorite Constant (FRD mode only)</label>
+              <input
+                type="text"
+                value={favoriteConstant}
+                onChange={(e) => setFavoriteConstant(e.target.value)}
+                placeholder="e.g. e (Euler's number)"
+              />
+            </div>
+            <div className="form-field" style={{ marginBottom: 0 }}>
+              <label>Research Area (FRD mode only)</label>
+              <input
+                type="text"
+                value={researchArea}
+                onChange={(e) => setResearchArea(e.target.value)}
+                placeholder="e.g. Combinatorics"
               />
             </div>
           </div>
