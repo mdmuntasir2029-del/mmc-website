@@ -150,6 +150,38 @@ export interface Announcement {
   createdAt: string;
 }
 
+/** A "Problem of the Day" entry for FRD mode's terminal — the newest
+ *  row is treated as today's. */
+export interface ProblemOfTheDay {
+  id: string;
+  problemDate: string;
+  latexProblem: string;
+  hints: string[];
+  answerText: string;
+  solutionText: string;
+  createdAt: string;
+}
+
+/** An upcoming competition, for the FRD Competition Bento's countdown. */
+export interface UpcomingCompetition {
+  id: string;
+  name: string;
+  eventDate: string;
+  createdAt: string;
+}
+
+/** A past contest's paper + (optional) solution key, for the FRD
+ *  Competition Archive bento. Files are downloaded via signed URL from
+ *  the private mmc-files bucket, same as Articles/Resources. */
+export interface CompetitionArchiveEntry {
+  id: string;
+  contestName: string;
+  contestYear: string;
+  paperPath: string;
+  solutionPath: string | null;
+  createdAt: string;
+}
+
 /**
  * Admin-panel areas that can be granted to individual admins by the
  * super admin (see AdminRoles.tsx / grant_admin_section in schema.sql).
@@ -171,7 +203,9 @@ export type AdminSection =
   | "site_sections"
   | "hall_of_fame_entries"
   | "testimonials"
-  | "announcements";
+  | "announcements"
+  | "frd_problem_of_the_day"
+  | "frd_competitions";
 
 export const ADMIN_SECTION_LABELS: Record<AdminSection, string> = {
   activity_log: "Club Activity Log",
@@ -187,6 +221,8 @@ export const ADMIN_SECTION_LABELS: Record<AdminSection, string> = {
   hall_of_fame_entries: "Hall of Fame Roster",
   testimonials: "Testimonials (About)",
   announcements: "Announcements (Home)",
+  frd_problem_of_the_day: "Problem of the Day (FRD mode)",
+  frd_competitions: "Competitions & Archive (FRD mode)",
 };
 
 /** Major site sections/pages the admin can show or hide. */

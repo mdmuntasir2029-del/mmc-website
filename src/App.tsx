@@ -34,6 +34,7 @@ import AdminHallOfFame from "./pages/admin/HallOfFame";
 import AdminTestimonials from "./pages/admin/Testimonials";
 import AdminAnnouncements from "./pages/admin/Announcements";
 import AdminIssueReports from "./pages/admin/IssueReports";
+import AdminProblemOfTheDay from "./pages/admin/ProblemOfTheDay";
 
 function App() {
   return (
@@ -169,6 +170,14 @@ function App() {
               element={
                 <RequireAdminSection section="announcements">
                   <AdminAnnouncements />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="problem-of-the-day"
+              element={
+                <RequireAdminSection section="frd_problem_of_the_day">
+                  <AdminProblemOfTheDay />
                 </RequireAdminSection>
               }
             />

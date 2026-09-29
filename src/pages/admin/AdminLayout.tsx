@@ -79,6 +79,12 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "FRD Mode",
+    items: [
+      { to: "/admin/problem-of-the-day", label: "Problem of the Day", Icon: IconBook, section: "frd_problem_of_the_day" },
+    ],
+  },
+  {
     label: "Super Admin",
     items: [
       { to: "/admin/roles", label: "Admin Roles", Icon: IconUsers, superAdminOnly: true },

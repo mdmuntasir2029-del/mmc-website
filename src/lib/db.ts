@@ -20,6 +20,9 @@ import type {
   Testimonial,
   Announcement,
   IssueReport,
+  ProblemOfTheDay,
+  UpcomingCompetition,
+  CompetitionArchiveEntry,
   SectionKey,
 } from "./types";
 
@@ -1186,6 +1189,201 @@ export async function getIssueReports(): Promise<IssueReport[]> {
 export async function deleteIssueReport(id: string): Promise<void> {
   const { error } = await supabase.from("issue_reports").delete().eq("id", id);
   if (error) throw error;
+}
+
+// ---------- FRD mode: Problem of the Day ----------
+
+interface ProblemOfTheDayRow {
+  id: string;
+  problem_date: string;
+  latex_problem: string;
+  hints: string[];
+  answer_text: string;
+  solution_text: string;
+  created_at: string;
+}
+
+function fromProblemOfTheDayRow(row: ProblemOfTheDayRow): ProblemOfTheDay {
+  return {
+    id: row.id,
+    problemDate: row.problem_date,
+    latexProblem: row.latex_problem,
+    hints: row.hints,
+    answerText: row.answer_text,
+    solutionText: row.solution_text,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getProblemsOfTheDay(): Promise<ProblemOfTheDay[]> {
+  const { data, error } = await supabase
+    .from("problem_of_the_day")
+    .select("*")
+    .order("problem_date", { ascending: false });
+  if (error) throw error;
+  return (data as ProblemOfTheDayRow[]).map(fromProblemOfTheDayRow);
+}
+
+/** Today's problem is just the most recently dated row — same
+ *  "latest wins" convention as Session Photos' "latest session." */
+export async function getLatestProblemOfTheDay(): Promise<ProblemOfTheDay | null> {
+  const { data, error } = await supabase
+    .from("problem_of_the_day")
+    .select("*")
+    .order("problem_date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? fromProblemOfTheDayRow(data as ProblemOfTheDayRow) : null;
+}
+
+export async function addProblemOfTheDay(data: {
+  problemDate: string;
+  latexProblem: string;
+  hints: string[];
+  answerText: string;
+  solutionText: string;
+}): Promise<ProblemOfTheDay> {
+  const { data: row, error } = await supabase
+    .from("problem_of_the_day")
+    .insert({
+      problem_date: data.problemDate,
+      latex_problem: data.latexProblem,
+      hints: data.hints,
+      answer_text: data.answerText,
+      solution_text: data.solutionText,
+    })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return fromProblemOfTheDayRow(row as ProblemOfTheDayRow);
+}
+
+export async function deleteProblemOfTheDay(id: string): Promise<void> {
+  const { error } = await supabase.from("problem_of_the_day").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ---------- FRD mode: upcoming competitions ----------
+
+interface UpcomingCompetitionRow {
+  id: string;
+  name: string;
+  event_date: string;
+  created_at: string;
+}
+
+function fromUpcomingCompetitionRow(row: UpcomingCompetitionRow): UpcomingCompetition {
+  return {
+    id: row.id,
+    name: row.name,
+    eventDate: row.event_date,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getUpcomingCompetitions(): Promise<UpcomingCompetition[]> {
+  const { data, error } = await supabase
+    .from("upcoming_competitions")
+    .select("*")
+    .order("event_date", { ascending: true });
+  if (error) throw error;
+  return (data as UpcomingCompetitionRow[]).map(fromUpcomingCompetitionRow);
+}
+
+export async function addUpcomingCompetition(data: {
+  name: string;
+  eventDate: string;
+}): Promise<UpcomingCompetition> {
+  const { data: row, error } = await supabase
+    .from("upcoming_competitions")
+    .insert({ name: data.name, event_date: data.eventDate })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return fromUpcomingCompetitionRow(row as UpcomingCompetitionRow);
+}
+
+export async function deleteUpcomingCompetition(id: string): Promise<void> {
+  const { error } = await supabase.from("upcoming_competitions").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ---------- FRD mode: competition archive ----------
+
+interface CompetitionArchiveRow {
+  id: string;
+  contest_name: string;
+  contest_year: string;
+  paper_path: string;
+  solution_path: string | null;
+  created_at: string;
+}
+
+function fromCompetitionArchiveRow(row: CompetitionArchiveRow): CompetitionArchiveEntry {
+  return {
+    id: row.id,
+    contestName: row.contest_name,
+    contestYear: row.contest_year,
+    paperPath: row.paper_path,
+    solutionPath: row.solution_path,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getCompetitionArchive(): Promise<CompetitionArchiveEntry[]> {
+  const { data, error } = await supabase
+    .from("competition_archive")
+    .select("*")
+    .order("contest_year", { ascending: false });
+  if (error) throw error;
+  return (data as CompetitionArchiveRow[]).map(fromCompetitionArchiveRow);
+}
+
+export async function addCompetitionArchiveEntry(
+  data: { contestName: string; contestYear: string },
+  paperFile: File,
+  solutionFile: File | null
+): Promise<CompetitionArchiveEntry> {
+  const paperPath = `competition-archive/${crypto.randomUUID()}-${sanitizeFileName(paperFile.name)}`;
+  await uploadFile(paperPath, paperFile);
+
+  let solutionPath: string | null = null;
+  if (solutionFile) {
+    solutionPath = `competition-archive/${crypto.randomUUID()}-${sanitizeFileName(solutionFile.name)}`;
+    await uploadFile(solutionPath, solutionFile);
+  }
+
+  const { data: row, error } = await supabase
+    .from("competition_archive")
+    .insert({
+      contest_name: data.contestName,
+      contest_year: data.contestYear,
+      paper_path: paperPath,
+      solution_path: solutionPath,
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    await removeFile(paperPath);
+    await removeFile(solutionPath);
+    throw error;
+  }
+  return fromCompetitionArchiveRow(row as CompetitionArchiveRow);
+}
+
+export async function deleteCompetitionArchiveEntry(id: string): Promise<void> {
+  const { data: row } = await supabase
+    .from("competition_archive")
+    .select("paper_path, solution_path")
+    .eq("id", id)
+    .single();
+  const { error } = await supabase.from("competition_archive").delete().eq("id", id);
+  if (error) throw error;
+  const r = row as { paper_path: string; solution_path: string | null } | null;
+  if (r?.paper_path) await removeFile(r.paper_path);
+  if (r?.solution_path) await removeFile(r.solution_path);
 }
 
 // ---------- Site sections (admin show/hide) ----------

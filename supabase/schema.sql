@@ -508,6 +508,42 @@ create table if not exists issue_reports (
   created_at timestamptz not null default now()
 );
 
+-- ========== FRD mode content ==========
+-- Content for the toggleable FRD preview mode (see FrdModeContext) —
+-- public select / admin write, same pattern as everything else.
+
+create table if not exists problem_of_the_day (
+  id uuid primary key default gen_random_uuid(),
+  problem_date date not null unique,
+  latex_problem text not null,
+  hints text[] not null default '{}',
+  answer_text text not null,
+  solution_text text not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists upcoming_competitions (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  event_date date not null,
+  created_at timestamptz not null default now()
+);
+
+-- "Past contest papers, solution keys" for the Competition Archive
+-- bento — a question paper and (optionally) its solution key, kept as
+-- two separate downloadable files rather than folded into the generic
+-- `resources` table, since a contest entry naturally has both. Files
+-- live in the private mmc-files bucket (signed-URL downloads, same as
+-- Articles/Resources), not the public image bucket.
+create table if not exists competition_archive (
+  id uuid primary key default gen_random_uuid(),
+  contest_name text not null,
+  contest_year text not null,
+  paper_path text not null,
+  solution_path text,
+  created_at timestamptz not null default now()
+);
+
 -- Which major site sections/pages are currently shown. Rows are
 -- upserted from the admin "Site Sections" page, so this seed just makes
 -- sure every key exists (and defaults to visible) the first time the
@@ -549,6 +585,9 @@ alter table hall_of_fame_entries enable row level security;
 alter table testimonials enable row level security;
 alter table announcements enable row level security;
 alter table issue_reports enable row level security;
+alter table problem_of_the_day enable row level security;
+alter table upcoming_competitions enable row level security;
+alter table competition_archive enable row level security;
 
 drop policy if exists "olympiad_registrations_public_insert" on olympiad_registrations;
 create policy "olympiad_registrations_public_insert" on olympiad_registrations
@@ -666,6 +705,30 @@ create policy "issue_reports_super_admin_select" on issue_reports
 drop policy if exists "issue_reports_super_admin_delete" on issue_reports;
 create policy "issue_reports_super_admin_delete" on issue_reports
   for delete using (is_super_admin());
+
+drop policy if exists "problem_of_the_day_public_select" on problem_of_the_day;
+create policy "problem_of_the_day_public_select" on problem_of_the_day
+  for select to anon, authenticated using (true);
+
+drop policy if exists "problem_of_the_day_admin_write" on problem_of_the_day;
+create policy "problem_of_the_day_admin_write" on problem_of_the_day
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "upcoming_competitions_public_select" on upcoming_competitions;
+create policy "upcoming_competitions_public_select" on upcoming_competitions
+  for select to anon, authenticated using (true);
+
+drop policy if exists "upcoming_competitions_admin_write" on upcoming_competitions;
+create policy "upcoming_competitions_admin_write" on upcoming_competitions
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "competition_archive_public_select" on competition_archive;
+create policy "competition_archive_public_select" on competition_archive
+  for select to anon, authenticated using (true);
+
+drop policy if exists "competition_archive_admin_write" on competition_archive;
+create policy "competition_archive_admin_write" on competition_archive
+  for all using (is_admin()) with check (is_admin());
 
 -- Section visibility is read by every visitor (it decides what renders)
 -- but only admins can flip it.
