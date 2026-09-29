@@ -110,7 +110,7 @@ export default function Home() {
                 </div>
 
                 <div className="lineup-stage">
-                  <SineWave progress={lineupProgress} />
+                  <SineWave progress={lineupProgress} vertical={!pinned} />
                   <div className="card-grid">
                     {HIGHLIGHTS.map((h, i) => {
                       const shown =

@@ -974,6 +974,19 @@ button {
   .hero-text-panel {
     padding: 22px 20px;
   }
+
+  /* The wave itself weaves top-to-bottom here (see SineWave's `vertical`
+     prop) instead of left-to-right, so it needs a tall narrow box
+     spanning the whole stacked card column instead of a short wide band
+     pinned to the stage's vertical centre. */
+  .sine-wave--vertical {
+    left: 50%;
+    right: auto;
+    top: 0;
+    width: min(70vw, 280px);
+    height: 100%;
+    transform: translateX(-50%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
