@@ -5,6 +5,7 @@ import type {
   CompetitionArchiveEntry,
   UpcomingCompetition,
 } from "../lib/types";
+import GlobalGoldenBuffer from "./GlobalGoldenBuffer";
 
 function useCountdown(targetISODate: string | null) {
   const [now, setNow] = useState(() => Date.now());
@@ -59,15 +60,15 @@ export default function FrdCompetitionBento() {
     }
   }
 
-  if (!loaded) return null;
-  const isEmpty = !leaderboard && archive.length === 0 && !nextEvent;
+  const isEmpty = loaded && !leaderboard && archive.length === 0 && !nextEvent;
   if (isEmpty) return null;
 
   return (
     <section className="frd-bento-section" id="frd-competition-archive">
       <div className="container">
         <span className="frd-eyebrow">Competition Archive &amp; Leaderboard</span>
-        <div className="frd-bento-grid">
+        <div className={`frd-bento-grid${!loaded ? " frd-bento-grid--loading" : ""}`}>
+          <GlobalGoldenBuffer active={!loaded} label="Loading competition data" />
           {nextEvent && countdown && (
             <div className="frd-bento-card frd-bento-countdown">
               <span className="frd-bento-label">Upcoming</span>
@@ -114,6 +115,7 @@ export default function FrdCompetitionBento() {
               <div className="frd-archive-list">
                 {archive.map((a) => (
                   <div className="frd-archive-item" key={a.id}>
+                    <GlobalGoldenBuffer active={downloadingId === a.id} />
                     <div>
                       <div className="frd-archive-name">{a.contestName}</div>
                       <div className="frd-archive-year">{a.contestYear}</div>

@@ -3,6 +3,7 @@ import katex from "katex";
 import "katex/dist/katex.min.css";
 import * as db from "../lib/db";
 import type { ProblemOfTheDay } from "../lib/types";
+import GlobalGoldenBuffer from "./GlobalGoldenBuffer";
 
 function escapeHtml(text: string): string {
   return text
@@ -87,71 +88,76 @@ export default function FrdProblemOfTheDay() {
     });
   }
 
-  if (!loaded || !problem) return null;
+  if (loaded && !problem) return null;
 
   return (
     <section className="frd-potd" id="frd-problem-of-the-day">
       <div className="container">
         <div className="frd-potd-frame">
-          <div className="frd-potd-head">
-            <span className="frd-eyebrow">Problem of the Day</span>
-            <span className="frd-potd-date">{problem.problemDate}</span>
-          </div>
+          <GlobalGoldenBuffer active={!loaded} label="Loading today's problem" />
+          {problem && (
+            <>
+              <div className="frd-potd-head">
+                <span className="frd-eyebrow">Problem of the Day</span>
+                <span className="frd-potd-date">{problem.problemDate}</span>
+              </div>
 
-          <div
-            className="frd-potd-statement"
-            dangerouslySetInnerHTML={problemHtml ?? undefined}
-          />
+              <div
+                className="frd-potd-statement"
+                dangerouslySetInnerHTML={problemHtml ?? undefined}
+              />
 
-          {problem.hints.length > 0 && (
-            <div className="frd-potd-hints">
-              {problem.hints.slice(0, hintsShown).map((hint, i) => (
-                <p className="frd-potd-hint" key={i}>
-                  <span className="frd-sidenote-mark">hint {i + 1} —</span>{" "}
-                  <span dangerouslySetInnerHTML={renderLatex(hint)} />
-                </p>
-              ))}
-              {hintsShown < problem.hints.length && (
-                <button
-                  type="button"
-                  className="frd-btn frd-btn-outline frd-potd-hint-btn"
-                  onClick={revealNextHint}
-                >
-                  Reveal a hint ({hintsShown}/{problem.hints.length})
-                </button>
+              {problem.hints.length > 0 && (
+                <div className="frd-potd-hints">
+                  {problem.hints.slice(0, hintsShown).map((hint, i) => (
+                    <p className="frd-potd-hint" key={i}>
+                      <span className="frd-sidenote-mark">hint {i + 1} —</span>{" "}
+                      <span dangerouslySetInnerHTML={renderLatex(hint)} />
+                    </p>
+                  ))}
+                  {hintsShown < problem.hints.length && (
+                    <button
+                      type="button"
+                      className="frd-btn frd-btn-outline frd-potd-hint-btn"
+                      onClick={revealNextHint}
+                    >
+                      Reveal a hint ({hintsShown}/{problem.hints.length})
+                    </button>
+                  )}
+                </div>
               )}
-            </div>
-          )}
 
-          <form className="frd-potd-check" onSubmit={handleCheck}>
-            <input
-              type="text"
-              value={guess}
-              onChange={(e) => setGuess(e.target.value)}
-              placeholder="Your answer"
-              className="frd-potd-input"
-            />
-            <button type="submit" className="frd-btn frd-btn-emerald">
-              Check
-            </button>
-          </form>
+              <form className="frd-potd-check" onSubmit={handleCheck}>
+                <input
+                  type="text"
+                  value={guess}
+                  onChange={(e) => setGuess(e.target.value)}
+                  placeholder="Your answer"
+                  className="frd-potd-input"
+                />
+                <button type="submit" className="frd-btn frd-btn-emerald">
+                  Check
+                </button>
+              </form>
 
-          {status === "correct" && (
-            <p className="frd-potd-status frd-potd-status--correct">
-              Correct — see the full solution below.
-            </p>
-          )}
-          {status === "incorrect" && (
-            <p className="frd-potd-status frd-potd-status--incorrect">
-              Not quite. Try a hint, or keep going.
-            </p>
-          )}
+              {status === "correct" && (
+                <p className="frd-potd-status frd-potd-status--correct">
+                  Correct — see the full solution below.
+                </p>
+              )}
+              {status === "incorrect" && (
+                <p className="frd-potd-status frd-potd-status--incorrect">
+                  Not quite. Try a hint, or keep going.
+                </p>
+              )}
 
-          {solutionShown && (
-            <div className="frd-potd-solution">
-              <span className="frd-potd-solution-label">Solution</span>
-              <div dangerouslySetInnerHTML={solutionHtml ?? undefined} />
-            </div>
+              {solutionShown && (
+                <div className="frd-potd-solution">
+                  <span className="frd-potd-solution-label">Solution</span>
+                  <div dangerouslySetInnerHTML={solutionHtml ?? undefined} />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

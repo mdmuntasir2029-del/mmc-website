@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import DigitalRain from "./components/DigitalRain";
 import FrdPreloader from "./components/FrdPreloader";
+import FrdRouteBuffer from "./components/FrdRouteBuffer";
 import ReportIssueButton from "./components/ReportIssueButton";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import RequireAdminSection from "./components/RequireAdminSection";
@@ -44,6 +45,7 @@ function App() {
     <>
       <DigitalRain />
       <FrdPreloader />
+      <FrdRouteBuffer />
       <Navbar />
       <main className="page-main">
         <Routes>
