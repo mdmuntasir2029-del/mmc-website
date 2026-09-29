@@ -18,7 +18,7 @@ const SECTION_GROUPS: { label: string; keys: SectionKey[] }[] = [
   { label: "About", keys: ["about", "activity_slideshow", "current_lineup", "testimonials"] },
   { label: "Hall of Fame", keys: ["hall_of_fame"] },
   { label: "Awards", keys: ["awards"] },
-  { label: "Articles", keys: ["articles"] },
+  { label: "Club Publications", keys: ["articles", "resources"] },
   { label: "Leaderboard", keys: ["leaderboard"] },
 ];
 

@@ -520,7 +520,7 @@ create table if not exists site_sections (
 
 insert into site_sections (key) values
   ('about'), ('session_photos'), ('lineup'), ('activity_slideshow'),
-  ('awards'), ('articles'), ('leaderboard'), ('hall_of_fame'),
+  ('awards'), ('articles'), ('resources'), ('leaderboard'), ('hall_of_fame'),
   ('current_lineup'), ('testimonials'), ('announcements')
 on conflict (key) do nothing;
 

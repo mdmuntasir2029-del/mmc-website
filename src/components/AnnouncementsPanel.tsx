@@ -13,32 +13,36 @@ export default function AnnouncementsPanel() {
       .finally(() => setLoaded(true));
   }, []);
 
-  if (loaded && announcements.length === 0) return null;
-
   return (
-    <section className="section section-announcements">
+    // Always rendered with this id (even when empty) — the hero's "See
+    // Upcoming Events" button anchors straight here.
+    <section className="section section-announcements" id="announcements">
       <div className="container">
         <div className="section-heading">
           <span className="eyebrow">Stay in the loop</span>
           <h2>Announcements</h2>
         </div>
-        <div className="announcement-grid">
-          {announcements.map((a, i) => (
-            <figure className="announcement-card" key={a.id}>
-              <img
-                src={a.imageUrl}
-                srcSet={a.imageSrcSet}
-                sizes="(max-width: 900px) 100vw, 380px"
-                width={800}
-                height={600}
-                alt={a.caption ?? "Club announcement"}
-                loading={i === 0 ? "eager" : "lazy"}
-                decoding="async"
-              />
-              {a.caption && <figcaption>{a.caption}</figcaption>}
-            </figure>
-          ))}
-        </div>
+        {loaded && announcements.length === 0 ? (
+          <p className="empty-state">No announcements yet &mdash; check back soon.</p>
+        ) : (
+          <div className="announcement-grid">
+            {announcements.map((a, i) => (
+              <figure className="announcement-card" key={a.id}>
+                <img
+                  src={a.imageUrl}
+                  srcSet={a.imageSrcSet}
+                  sizes="(max-width: 900px) 100vw, 380px"
+                  width={800}
+                  height={600}
+                  alt={a.caption ?? "Club announcement"}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                />
+                {a.caption && <figcaption>{a.caption}</figcaption>}
+              </figure>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

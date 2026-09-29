@@ -201,7 +201,8 @@ export type SectionKey =
   | "hall_of_fame"
   | "current_lineup"
   | "testimonials"
-  | "announcements";
+  | "announcements"
+  | "resources";
 
 export const SECTION_KEYS: SectionKey[] = [
   "about",
@@ -210,6 +211,7 @@ export const SECTION_KEYS: SectionKey[] = [
   "activity_slideshow",
   "awards",
   "articles",
+  "resources",
   "leaderboard",
   "hall_of_fame",
   "current_lineup",
@@ -223,12 +225,13 @@ export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }>
   lineup: { title: "How We Meet & Compete", desc: "Home page — the weekly sessions / contests cards." },
   activity_slideshow: { title: "Activity Slideshow", desc: "About page — the admin-managed photo slideshow, organized by week." },
   awards: { title: "Awards Page", desc: "The /awards page and its navbar/footer link." },
-  articles: { title: "Articles Page", desc: "The /articles page and its navbar/footer link." },
+  articles: { title: "Club Publications — Articles", desc: "The /club-publications/articles tab, and the \"Read some of our articles\" link on Home." },
+  resources: { title: "Club Publications — Resources", desc: "The /club-publications/resources tab, and the \"Browse resources\" link on Home." },
   leaderboard: { title: "Leaderboard Page", desc: "The /leaderboard page and its navbar/footer link." },
   hall_of_fame: { title: "Hall of Fame Page", desc: "The /hall-of-fame page and its navbar/footer link — hosts the pi-wave and the full roster." },
   current_lineup: { title: "Current Year Lineup", desc: "About page — this session's Hall of Fame entries, shown as cards." },
   testimonials: { title: "What People Say", desc: "About page — testimonials from club personnel." },
-  announcements: { title: "Announcements", desc: "Home page — admin-posted announcement images." },
+  announcements: { title: "Announcements", desc: "Home page — admin-posted announcement images, and the hero's \"See Upcoming Events\" button target." },
 };
 
 /**
@@ -247,6 +250,7 @@ export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   activity_slideshow: true,
   awards: true,
   articles: true,
+  resources: true,
   leaderboard: true,
   hall_of_fame: true,
   current_lineup: true,

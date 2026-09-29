@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import DigitalRain from "./components/DigitalRain";
@@ -9,7 +9,9 @@ import RequireSuperAdmin from "./components/RequireSuperAdmin";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Awards from "./pages/Awards";
+import ClubPublications from "./pages/ClubPublications";
 import Articles from "./pages/Articles";
+import ClubResources from "./pages/ClubResources";
 import Leaderboard from "./pages/Leaderboard";
 import HallOfFame from "./pages/HallOfFame";
 import Access from "./pages/Access";
@@ -43,7 +45,13 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/awards" element={<Awards />} />
-          <Route path="/articles" element={<Articles />} />
+          {/* Articles moved under Club Publications — old links keep working. */}
+          <Route path="/articles" element={<Navigate to="/club-publications/articles" replace />} />
+          <Route path="/club-publications" element={<ClubPublications />}>
+            <Route index element={<Navigate to="articles" replace />} />
+            <Route path="articles" element={<Articles />} />
+            <Route path="resources" element={<ClubResources />} />
+          </Route>
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/hall-of-fame" element={<HallOfFame />} />
           <Route path="/signin" element={<Access />} />

@@ -60,9 +60,9 @@ export default function Navbar() {
                 <Link to="/awards">Awards</Link>
               </li>
             )}
-            {sections.articles && (
+            {(sections.articles || sections.resources) && (
               <li>
-                <Link to="/articles">Articles</Link>
+                <Link to="/club-publications">Club Publications</Link>
               </li>
             )}
             {sections.leaderboard && (

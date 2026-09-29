@@ -68,13 +68,18 @@ export default function Home() {
         <div className="container hero-inner">
           <div className="hero-text-panel">
             <h1 className="hero-title">
-              A standard of mathematical <span>excellence</span>
+              <span>mathematics</span> like you have never seen before
             </h1>
             <div className="hero-cta-row">
               {sections.about && (
                 <Link to="/about" className="btn-ghost-light">
                   About the Club
                 </Link>
+              )}
+              {sections.announcements && (
+                <a href="#announcements" className="btn-ghost-light">
+                  See Upcoming Events
+                </a>
               )}
             </div>
           </div>
@@ -102,8 +107,8 @@ export default function Home() {
                     <span className="eyebrow">This year's program</span>
                     <h2>How We Meet &amp; Compete</h2>
                   </div>
-                  {sections.articles && (
-                    <Link to="/articles" className="text-link">
+                  {sections.resources && (
+                    <Link to="/club-publications/resources" className="text-link">
                       Browse resources &rarr;
                     </Link>
                   )}
@@ -157,7 +162,7 @@ export default function Home() {
 
       {sections.articles && (
         <div className="container pi-articles-link">
-          <Link to="/articles" className="text-link">
+          <Link to="/club-publications/articles" className="text-link">
             Read some of our articles &rarr;
           </Link>
         </div>

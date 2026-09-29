@@ -34,62 +34,60 @@ export default function Articles() {
   }
 
   return (
-    <div className="articles-page">
-      <section className="section">
-        <div className="container">
-          <div className="section-heading">
-            <h1>Research Articles</h1>
-            <p>Write-ups and research from the club, published by the admin.</p>
-          </div>
-
-          {loading ? (
-            <p style={{ textAlign: "center" }}>Loading...</p>
-          ) : articles.length === 0 ? (
-            <div className="empty-state">No articles published yet &mdash; check back soon.</div>
-          ) : (
-            <div className="article-list">
-              {articles.map((a) => (
-                <article className="article-card" key={a.id}>
-                  <div className="article-card-head">
-                    <h2>{a.title}</h2>
-                    <span className="article-meta">
-                      {a.author} &middot;{" "}
-                      {new Date(a.publishedDate + "T00:00:00").toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </div>
-                  <p className="article-abstract">{a.abstract}</p>
-                  <div className="row">
-                    {a.filePath && (
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        disabled={downloadingId === a.id}
-                        onClick={() => handleDownload(a)}
-                      >
-                        {downloadingId === a.id ? "Preparing..." : `Download ${a.fileName ?? "attachment"}`}
-                      </button>
-                    )}
-                    {a.link && (
-                      <a
-                        className="btn btn-secondary btn-sm"
-                        href={a.link}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={`Visit external link for ${a.title}`}
-                      >
-                        Visit Link
-                      </a>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
+    <section className="section">
+      <div className="container">
+        <div className="section-heading">
+          <h1>Research Articles</h1>
+          <p>Write-ups and research from the club, published by the admin.</p>
         </div>
-      </section>
-    </div>
+
+        {loading ? (
+          <p style={{ textAlign: "center" }}>Loading...</p>
+        ) : articles.length === 0 ? (
+          <div className="empty-state">No articles published yet &mdash; check back soon.</div>
+        ) : (
+          <div className="article-list">
+            {articles.map((a) => (
+              <article className="article-card" key={a.id}>
+                <div className="article-card-head">
+                  <h2>{a.title}</h2>
+                  <span className="article-meta">
+                    {a.author} &middot;{" "}
+                    {new Date(a.publishedDate + "T00:00:00").toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+                <p className="article-abstract">{a.abstract}</p>
+                <div className="row">
+                  {a.filePath && (
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      disabled={downloadingId === a.id}
+                      onClick={() => handleDownload(a)}
+                    >
+                      {downloadingId === a.id ? "Preparing..." : `Download ${a.fileName ?? "attachment"}`}
+                    </button>
+                  )}
+                  {a.link && (
+                    <a
+                      className="btn btn-secondary btn-sm"
+                      href={a.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Visit external link for ${a.title}`}
+                    >
+                      Visit Link
+                    </a>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
