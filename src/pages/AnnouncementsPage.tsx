@@ -84,6 +84,17 @@ export default function AnnouncementsPage() {
     }
   }
 
+  const weekGroups = useMemo(() => {
+    const map = new Map<string, { weekStart: Date; items: Announcement[] }>();
+    for (const a of announcements) {
+      const ws = startOfWeek(new Date(a.createdAt));
+      const key = ws.toISOString().slice(0, 10);
+      if (!map.has(key)) map.set(key, { weekStart: ws, items: [] });
+      map.get(key)!.items.push(a);
+    }
+    return [...map.values()].sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime());
+  }, [announcements]);
+
   if (sectionsLoaded && !sections.announcements) {
     return <SectionUnavailable />;
   }
@@ -100,17 +111,6 @@ export default function AnnouncementsPage() {
     d.setDate(gridStart.getDate() + i);
     days.push(d);
   }
-
-  const weekGroups = useMemo(() => {
-    const map = new Map<string, { weekStart: Date; items: Announcement[] }>();
-    for (const a of announcements) {
-      const ws = startOfWeek(new Date(a.createdAt));
-      const key = ws.toISOString().slice(0, 10);
-      if (!map.has(key)) map.set(key, { weekStart: ws, items: [] });
-      map.get(key)!.items.push(a);
-    }
-    return [...map.values()].sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime());
-  }, [announcements]);
 
   return (
     <div className="announcements-page">

@@ -1,0 +1,25 @@
+# Documentation Index
+
+This folder holds documentation that's too detailed for the root
+[README.md](../README.md) but doesn't belong inline in the code. Start at
+the root README for local setup and Supabase configuration — come here
+for a map of how the codebase itself is put together.
+
+## Contents
+
+- [architecture.md](architecture.md) — how the frontend, Supabase backend,
+  and Vercel hosting fit together; where to look for a given kind of
+  change.
+
+## Where else to look
+
+- [README.md](../README.md) — local dev setup, Supabase project setup,
+  Brevo email setup, adding/removing admins.
+- [CONTRIBUTING.md](../CONTRIBUTING.md) — branching, commit style, and the
+  checks to run before opening a PR.
+- [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) — community standards.
+- [SECURITY.md](../SECURITY.md) — how to report a vulnerability.
+- [supabase/schema.sql](../supabase/schema.sql) — the single source of
+  truth for every table, RLS policy, storage bucket, and RPC function.
+  There's no migration runner; this file is meant to be re-run wholesale
+  against the Supabase SQL editor.
