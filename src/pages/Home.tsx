@@ -71,7 +71,6 @@ export default function Home() {
   return (
     <div className={pinned ? "home-page home-page--pinned" : "home-page"}>
       <section className="hero">
-        {sections.session_photos && <HeroSlideshow />}
         <div className="container hero-inner">
           <div className="hero-text-panel">
             <h1 className="hero-title">
@@ -91,6 +90,12 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {sections.session_photos && (
+          <div className="container hero-slideshow-row">
+            <HeroSlideshow />
+          </div>
+        )}
       </section>
 
       <section className="section section-stats">
