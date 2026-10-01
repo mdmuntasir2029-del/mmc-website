@@ -43,15 +43,6 @@ const waveRestY = (i: number, count: number) =>
 // spaced so a card pops in roughly as the drawn wavefront reaches it.
 const revealAt = (i: number, count: number) => (i + 0.35) / count;
 
-// Placeholder copy (not yet DB-backed) — swap for real figures/dates
-// whenever they're ready.
-const STATS = [
-  { value: "50+", label: "Active Members" },
-  { value: "15+", label: "Competitions Attended" },
-  { value: "4", label: "Olympiad Medals" },
-  { value: "3", label: "Years Running" },
-];
-
 export default function Home() {
   const { frdMode } = useFrdMode();
   const pinned = usePinnedScrollEnabled();
@@ -96,17 +87,6 @@ export default function Home() {
             <HeroSlideshow />
           </div>
         )}
-      </section>
-
-      <section className="section section-stats">
-        <div className="container stats-strip">
-          {STATS.map((s) => (
-            <div className="stat-strip-item" key={s.label}>
-              <div className="stat-strip-value">{s.value}</div>
-              <div className="stat-strip-label">{s.label}</div>
-            </div>
-          ))}
-        </div>
       </section>
 
       {sections.lineup && (

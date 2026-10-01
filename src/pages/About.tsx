@@ -44,8 +44,8 @@ export default function About() {
               <div className="info-label">Open To</div>
             </div>
             <div className="info-cell">
-              <div className="info-value">Team &amp; Solo</div>
-              <div className="info-label">Contest Formats</div>
+              <div className="info-value">30+</div>
+              <div className="info-label">Active Members</div>
             </div>
             <div className="info-cell">
               <div className="info-value">2026&ndash;27</div>
