@@ -234,7 +234,11 @@
      than switching to Bebas Neue: Bebas Neue has no Greek coverage
      (no π), and the curve's typography is closer to a protected
      identity element than a themeable heading anyway. */
-  --font-heading-modern: "Bebas Neue", "Barlow", sans-serif;
+  /* Unified on Barlow (the footer column-title / nav / button face)
+     everywhere except special emphasis text (e.g. the cursive
+     "mathematics" on the landing page, --font-cursive) — Bebas Neue is
+     no longer used anywhere in this theme. */
+  --font-heading-modern: var(--font-body-modern);
   --font-body-modern: "Barlow", sans-serif;
   --font-cursive: "Dancing Script", cursive;
 }
@@ -484,14 +488,10 @@ h4 {
   color: var(--green-dark-2);
 }
 
-/* Big display headings get the condensed treatment; smaller ones (h3/
-   h4 — often longer card/list titles) stay in bold Barlow instead of
-   Bebas Neue, which is designed for short, large-scale text and gets
-   hard to read at small sizes or across multiple words. */
 h1,
 h2 {
   font-family: var(--font-heading-modern);
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: 0.015em;
   text-transform: uppercase;
 }
@@ -1969,7 +1969,7 @@ button {
   align-items: center;
   justify-content: center;
   font-family: var(--font-heading-modern);
-  font-weight: 400;
+  font-weight: 700;
   font-size: 1.3rem;
   color: #fff;
   background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
@@ -2071,7 +2071,7 @@ button {
   align-items: center;
   justify-content: center;
   font-family: var(--font-heading-modern);
-  font-weight: 400;
+  font-weight: 700;
   font-size: 2.4rem;
   color: #fff;
   background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
@@ -2369,6 +2369,7 @@ button {
 .olympiad-register-step {
   display: block;
   font-family: var(--font-heading-modern);
+  font-weight: 700;
   font-size: clamp(3rem, 8vw, 4.5rem);
   line-height: 1;
   color: var(--color-accent);
@@ -3234,7 +3235,7 @@ tr:hover td {
   align-items: center;
   justify-content: center;
   font-family: var(--font-heading-modern);
-  font-weight: 400;
+  font-weight: 700;
   font-size: 2rem;
   color: #fff;
   background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
