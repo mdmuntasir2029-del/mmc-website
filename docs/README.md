@@ -11,6 +11,12 @@ for a map of how the codebase itself is put together.
   and Vercel hosting fit together; where to look for a given kind of
   change.
 
+For the full depth — every table and RLS policy, every page and admin
+section cross-referenced, exact data-flow walkthroughs, the admin
+permissions model — see **[../sourceoftruth/](../sourceoftruth/)**. This
+page is the quick orientation; that folder is the reference you come back
+to before changing something.
+
 ## Where else to look
 
 - [README.md](../README.md) — local dev setup, Supabase project setup,

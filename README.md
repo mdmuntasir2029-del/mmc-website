@@ -2,6 +2,11 @@
 
 React + TypeScript + Vite, backed by Supabase (Postgres + Auth + Storage).
 
+**Looking for how the system actually works** — the full schema, every
+page/section mapped out, data-flow walkthroughs, the admin permissions
+model? See **[sourceoftruth/](sourceoftruth/)**. This README is just local
+setup.
+
 ## Run locally
 
 ```bash
