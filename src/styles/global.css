@@ -473,10 +473,16 @@ body {
   display: block;
 }
 
+/* Must outrank .footer's own stacking context (also z-index: 1) —
+   otherwise any fixed-position modal rendered from a page component
+   (award/announcement detail modals, the generic Modal) gets trapped
+   below the footer once scrolled into view, no matter how high the
+   modal's own z-index is set, since it can never escape its parent
+   stacking context's rank among siblings. */
 .page-main {
   flex: 1;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 h1,
@@ -3519,15 +3525,20 @@ tr:hover td {
 .announcements-view-toggle button {
   padding: 9px 20px;
   border-radius: 999px;
-  border: 1.5px solid #d3ead4;
-  background: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
   font-family: var(--font-body-modern);
   font-weight: 700;
   font-size: 0.85rem;
   letter-spacing: 0.03em;
-  color: var(--ink);
+  color: var(--text-on-dark-soft);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.announcements-view-toggle button:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--text-on-dark);
 }
 
 .announcements-view-toggle button.is-active {
@@ -3556,15 +3567,25 @@ tr:hover td {
   font-size: 1.3rem;
 }
 
+.calendar-nav h2 {
+  color: var(--text-on-dark);
+}
+
 .calendar-nav button {
-  background: none;
-  border: 1.5px solid #d3ead4;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   width: 36px;
   height: 36px;
   font-size: 1rem;
   cursor: pointer;
-  color: var(--green-dark);
+  color: var(--green-light);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.calendar-nav button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .calendar-grid {
@@ -3582,7 +3603,7 @@ tr:hover td {
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: var(--ink-soft);
+  color: var(--text-on-dark-soft);
   text-transform: uppercase;
 }
 
@@ -3593,28 +3614,38 @@ tr:hover td {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
-  border: 1.5px solid #eef6ef;
-  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
   font-family: var(--font-body-modern);
   font-size: 0.9rem;
-  color: var(--ink-soft);
+  color: var(--text-on-dark-soft);
   cursor: default;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
 .calendar-day.is-outside {
-  color: #d4dcd5;
-  border-color: #f5f9f5;
+  color: rgba(169, 201, 172, 0.3);
+  border-color: rgba(255, 255, 255, 0.03);
+  background: transparent;
+}
+
+.calendar-day.is-today {
+  border-color: var(--green-light);
+  color: var(--text-on-dark);
 }
 
 .calendar-day.has-announcements {
   cursor: pointer;
-  border-color: #bfe3c2;
-  color: var(--ink);
+  border-color: rgba(143, 217, 138, 0.4);
+  background: rgba(143, 217, 138, 0.07);
+  color: var(--text-on-dark);
   font-weight: 700;
 }
 
 .calendar-day.has-announcements:hover {
-  background: #f3fbf3;
+  background: rgba(143, 217, 138, 0.16);
+  border-color: var(--green-light);
+  transform: translateY(-2px);
 }
 
 .calendar-day-dot {
@@ -3623,12 +3654,12 @@ tr:hover td {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--green-dark);
+  background: var(--green-light);
 }
 
 .calendar-day.is-glowing {
-  border-color: var(--green-mid, #3aa35a);
-  box-shadow: 0 0 0 2px rgba(58, 163, 90, 0.25), 0 0 12px rgba(58, 163, 90, 0.55);
+  border-color: #ffb020;
+  box-shadow: 0 0 0 2px rgba(255, 176, 32, 0.2), 0 0 14px rgba(255, 176, 32, 0.45);
   animation: announcement-glow 1.8s ease-in-out infinite;
 }
 
@@ -3639,10 +3670,10 @@ tr:hover td {
 
 @keyframes announcement-glow {
   0%, 100% {
-    box-shadow: 0 0 0 2px rgba(58, 163, 90, 0.25), 0 0 8px rgba(58, 163, 90, 0.4);
+    box-shadow: 0 0 0 2px rgba(255, 176, 32, 0.2), 0 0 10px rgba(255, 176, 32, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 2px rgba(58, 163, 90, 0.4), 0 0 16px rgba(58, 163, 90, 0.75);
+    box-shadow: 0 0 0 2px rgba(255, 176, 32, 0.35), 0 0 20px rgba(255, 176, 32, 0.7);
   }
 }
 
@@ -3650,14 +3681,16 @@ tr:hover td {
   margin-top: 24px;
   padding: 18px 20px;
   border-radius: var(--radius-md);
-  background: #f8fdf8;
-  border: 1.5px solid #e3f2e4;
+  background: rgba(14, 40, 25, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .calendar-day-picker h3 {
   margin: 0 0 12px;
   font-size: 0.95rem;
-  color: var(--ink-soft);
+  color: var(--text-on-dark-soft);
 }
 
 .calendar-day-picker-list {
@@ -3672,13 +3705,19 @@ tr:hover td {
   gap: 12px;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  border: 1.5px solid #e3f2e4;
-  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
   font-size: 0.9rem;
-  color: var(--ink);
+  color: var(--text-on-dark);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.calendar-day-picker-item:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .calendar-day-picker-item img {
@@ -3690,8 +3729,8 @@ tr:hover td {
 }
 
 .calendar-day-picker-item.is-glowing {
-  border-color: var(--green-mid, #3aa35a);
-  box-shadow: 0 0 10px rgba(58, 163, 90, 0.5);
+  border-color: #ffb020;
+  box-shadow: 0 0 12px rgba(255, 176, 32, 0.4);
 }
 
 .announcements-weekly {
@@ -3706,8 +3745,8 @@ tr:hover td {
   font-size: 1.05rem;
   margin: 0 0 14px;
   padding-bottom: 8px;
-  border-bottom: 1.5px solid #e3f2e4;
-  color: var(--green-dark);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--green-light);
 }
 
 .announcements-week-list {
@@ -3720,18 +3759,23 @@ tr:hover td {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: var(--radius-md);
-  border: 1.5px solid #eef6ef;
-  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(14, 40, 25, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .announcements-week-card:hover {
-  border-color: #bfe3c2;
+  border-color: rgba(143, 217, 138, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.26);
 }
 
 .announcements-week-card img {
@@ -3744,18 +3788,18 @@ tr:hover td {
 
 .announcements-week-card-caption {
   font-weight: 700;
-  color: var(--ink);
+  color: var(--text-on-dark);
 }
 
 .announcements-week-card-date {
   font-size: 0.8rem;
-  color: var(--ink-soft);
+  color: var(--text-on-dark-soft);
   margin-top: 2px;
 }
 
 .announcements-week-card.is-glowing {
-  border-color: var(--green-mid, #3aa35a);
-  box-shadow: 0 0 0 2px rgba(58, 163, 90, 0.25), 0 0 14px rgba(58, 163, 90, 0.55);
+  border-color: #ffb020;
+  box-shadow: 0 0 0 2px rgba(255, 176, 32, 0.2), 0 0 16px rgba(255, 176, 32, 0.45);
   animation: announcement-glow 1.8s ease-in-out infinite;
 }
 

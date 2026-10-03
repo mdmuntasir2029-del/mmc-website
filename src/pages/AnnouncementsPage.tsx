@@ -8,8 +8,20 @@ import { getReadIds } from "../lib/announcementReadTracking";
 
 type ViewMode = "calendar" | "week";
 
+// Local-calendar-date keys, not UTC — toISOString() always returns UTC,
+// which silently shifts every date by a day for any timezone ahead of
+// UTC (e.g. Dhaka, UTC+6, where this club is based): local midnight
+// Oct 3 is still Oct 2 in UTC, so a cell visually labelled "3" would
+// otherwise key itself as "2" and never match that day's announcements.
+function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 function dateKey(iso: string): string {
-  return iso.slice(0, 10);
+  return localDateKey(new Date(iso));
 }
 
 function startOfWeek(d: Date): Date {
@@ -88,7 +100,7 @@ export default function AnnouncementsPage() {
     const map = new Map<string, { weekStart: Date; items: Announcement[] }>();
     for (const a of announcements) {
       const ws = startOfWeek(new Date(a.createdAt));
-      const key = ws.toISOString().slice(0, 10);
+      const key = localDateKey(ws);
       if (!map.has(key)) map.set(key, { weekStart: ws, items: [] });
       map.get(key)!.items.push(a);
     }
@@ -98,6 +110,8 @@ export default function AnnouncementsPage() {
   if (sectionsLoaded && !sections.announcements) {
     return <SectionUnavailable />;
   }
+
+  const todayKey = localDateKey(new Date());
 
   // Calendar grid: Monday-start, 6 rows x 7 days, including the
   // leading/trailing days of adjacent months so the grid is always full.
@@ -177,17 +191,18 @@ export default function AnnouncementsPage() {
 
               <div className="calendar-grid">
                 {days.map((d) => {
-                  const key = d.toISOString().slice(0, 10);
+                  const key = localDateKey(d);
                   const list = byDay.get(key);
                   const inMonth = d.getMonth() === month;
                   const unread = dayHasUnread(list);
+                  const isToday = key === todayKey;
                   return (
                     <button
                       type="button"
                       key={key}
                       className={`calendar-day${inMonth ? "" : " is-outside"}${
                         list ? " has-announcements" : ""
-                      }${unread ? " is-glowing" : ""}`}
+                      }${unread ? " is-glowing" : ""}${isToday ? " is-today" : ""}`}
                       onClick={() => handleDayClick(key)}
                       disabled={!list}
                     >
