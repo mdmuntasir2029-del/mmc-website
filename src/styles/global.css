@@ -1251,11 +1251,31 @@ button {
     padding: 24px 24px 0;
   }
 
-  .pi-intro-row .pi-trail--inline {
-    flex: 1 1 0;
+  /* Sized from its own aspect-ratio (matching CurvedPiTrail's 600x1530
+     viewBox) rather than growing to fill the flex row — with
+     preserveAspectRatio="xMidYMid meet", a box wider than the curve's
+     own content just letterboxes empty space on both sides, which
+     used to push the side-rail cards (.pi-trail-cards) much further
+     from the curve than the row's actual 24px gap suggested. Matching
+     the box to the content exactly means the gap you see is the gap
+     that's actually set. */
+  /* Width computed directly from the same height formula .pin-sticky
+     uses (height * 600/1530, matching CurvedPiTrail's viewBox) rather
+     than via `aspect-ratio` on a cross-axis-stretched flex item —
+     that combination doesn't reliably resolve (it was still landing
+     at the old max-width instead of shrinking to fit), so the box
+     stayed far wider than the curve it draws, pushing the side-rail
+     cards much further out than intended. */
+  /* .pi-trail.pi-trail--inline (below) sets width: 100% at equal
+     specificity but later source order, which was silently winning
+     over this rule's width — stacking both classes here to outrank
+     it rather than relying on source order. */
+  .pi-intro-row .pi-trail.pi-trail--inline {
+    flex: 0 0 auto;
+    width: calc((100vh - var(--navbar-h)) * 600 / 1530);
+    width: calc((100dvh - var(--navbar-h)) * 600 / 1530);
+    height: 100%;
     max-width: 640px;
-    min-width: 0;
-    width: auto;
     will-change: transform;
   }
 
@@ -1285,6 +1305,29 @@ button {
     max-width: 210px;
     min-width: 0;
     height: 100%;
+  }
+
+  /* Even with the SVG box now sized exactly to its content (see
+     .pi-intro-row .pi-trail.pi-trail--inline above), the actual drawn
+     curve (a cubic bezier through x=130/470 control points starting
+     and ending at the center x=300) only sways within a narrower band
+     around its own center than those control points suggest — real
+     on-curve extremes measured via getBBox() during tuning, not
+     derived from the control points. That leaves a built-in dead zone
+     between the curve and the SVG box's edge on each side. Pull each
+     card column in by that same fraction (expressed against the
+     shared row height, since SVG width is itself height * 600/1530)
+     so the cards sit next to the curve itself, not next to the SVG's
+     empty margin. Calibrated by measurement, not geometry — if
+     CURVE_D ever changes, re-measure and update this fraction. */
+  .pi-trail-cards--left {
+    margin-right: calc((100vh - var(--navbar-h)) * -0.164);
+    margin-right: calc((100dvh - var(--navbar-h)) * -0.164);
+  }
+
+  .pi-trail-cards--right {
+    margin-left: calc((100vh - var(--navbar-h)) * -0.164);
+    margin-left: calc((100dvh - var(--navbar-h)) * -0.164);
   }
 
   .pi-trail-card-slot {
