@@ -3252,15 +3252,10 @@ tr:hover td {
   margin-bottom: 20px;
 }
 
-.hof-roster-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 22px;
-}
-
+.hof-roster-grid,
 .lineup-cards-row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 22px;
 }
 
@@ -3283,12 +3278,13 @@ tr:hover td {
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
 }
 
-/* Legacy Contributors gets a bigger avatar than the About page's
-   Current Year Lineup (which shares this card markup/style otherwise)
-   — sized up from 96px so faces actually read at a glance instead of
-   needing a click-through to tell who's who. */
+/* Sized up from 96px so faces actually read at a glance instead of
+   needing a click-through to tell who's who — both Legacy Contributors
+   and the About page's Current Year Lineup, which share this card. */
 .hof-roster-card img,
-.hof-roster-avatar {
+.lineup-person-card img,
+.hof-roster-avatar,
+.lineup-person-avatar {
   width: 140px;
   height: 140px;
   border-radius: 50%;
@@ -3296,33 +3292,14 @@ tr:hover td {
   margin: 0 auto 14px;
 }
 
-.lineup-person-card img,
-.lineup-person-avatar {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin: 0 auto 14px;
-}
-
-.hof-roster-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading-modern);
-  font-weight: 700;
-  font-size: 2.8rem;
-  color: #fff;
-  background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
-}
-
+.hof-roster-avatar,
 .lineup-person-avatar {
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-heading-modern);
   font-weight: 700;
-  font-size: 2rem;
+  font-size: 2.6rem;
   color: #fff;
   background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
 }

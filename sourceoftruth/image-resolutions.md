@@ -35,7 +35,7 @@ regardless of resolution.
 | **Announcements** — Announcements | **Not cropped** — shown at its own native aspect ratio (the admin upload's real pixel dimensions are stored and used directly) | up to ~430px wide (teaser/calendar/week views), ~400px in the detail popup | **≥1000px on the longer side** | Any — portrait, landscape, or square all work as-is, nothing gets cut off |
 | **Awards** | Cropped to a **circle** (`object-fit: cover`) | 64px on the track, 160px in the detail popup | **≥640×640**, square | 1:1 — center the face, since the circle crop removes the corners |
 | **Activity Slideshow** (About page) — Activity Slideshow | Cropped to fill (`cover`) | up to 1180×664 | **1920×1080 or larger**, landscape | 16:9 |
-| **Hall of Fame roster photo** — Hall of Fame | See note below — **one upload, three possible crops** | 140px circle (Legacy Contributors) **or** up to ~370×460 portrait (this year's scrapbook card) **or** 96px circle (About page Current Year Lineup) **or** 76px circle (FRD mode Executive Board) | **≥900×1125** (portrait), subject centered and not too tight a crop | Portrait, ~4:5 — see below |
+| **Hall of Fame roster photo** — Hall of Fame | See note below — **one upload, three possible crops** | 140px circle (Legacy Contributors **and** About page Current Year Lineup) **or** up to ~370×460 portrait (this year's scrapbook card) **or** 76px circle (FRD mode Executive Board) | **≥900×1125** (portrait), subject centered and not too tight a crop | Portrait, ~4:5 — see below |
 
 ## Note: Hall of Fame photos serve multiple crops from one upload
 
@@ -48,7 +48,7 @@ current one (see [feature-map.md](feature-map.md) and
 - **This year's entries** show as a **portrait 4:5 rectangle** on the
   `/hall-of-fame` scrapbook cards (and the compact version riding the
   pi-wave), but the *exact same photo* also shows as a **circle** on the
-  About page's Current Year Lineup (96px) and in FRD mode's Executive
+  About page's Current Year Lineup (140px) and in FRD mode's Executive
   Board (76px).
 - **Legacy (past-year) entries** only ever show as a **140px circle**
   on `/hall-of-fame`'s Legacy Contributors.
