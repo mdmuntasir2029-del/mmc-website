@@ -20,6 +20,30 @@ function groupByYear(entries: HallOfFameEntry[]): [string, HallOfFameEntry[]][] 
   return Array.from(groups.entries());
 }
 
+// Where each "this year" card sits along CurvedPiTrail's fixed S-curve
+// (viewBox 0 0 600 1530 — see CurvedPiTrail.tsx's CURVE_D), alternating
+// right/left at the curve's actual crests/troughs: right ~y175, left
+// ~y345, right ~y675, left ~y845, and so on every ~501 viewBox units —
+// so cards one by one "ride" the wave instead of sitting in a grid
+// below it. Approximate (bezier control points, not exact on-curve
+// extrema) — fine for decorative placement, same rigor as the
+// sine-wave card offsets on the Home page lineup.
+const PI_TRAIL_RIGHT_Y = 175;
+const PI_TRAIL_LEFT_Y = 345;
+const PI_TRAIL_Y_STEP = 501;
+
+function slotForCard(i: number): { side: "left" | "right"; y: number } {
+  const side = i % 2 === 0 ? "right" : "left";
+  const k = Math.floor(i / 2);
+  const y = (side === "right" ? PI_TRAIL_RIGHT_Y : PI_TRAIL_LEFT_Y) + k * PI_TRAIL_Y_STEP;
+  return { side, y };
+}
+
+// Reveal thresholds spaced across the pinned scrub's 0..1 progress,
+// same "+ a little headroom" pattern as the Home page lineup's
+// revealAt — a card pops in roughly as the drawn wavefront reaches it.
+const revealAt = (i: number, count: number) => (i + 0.4) / count;
+
 export default function HallOfFame() {
   const { sections, loaded } = useSiteSections();
   const pinned = usePinnedScrollEnabled();
@@ -52,6 +76,14 @@ export default function HallOfFame() {
   );
   const legacyGroups = groupByYear(legacyEntries);
 
+  const slottedCurrentYear = currentYearEntries.map((entry, i) => ({
+    entry,
+    i,
+    ...slotForCard(i),
+  }));
+  const leftCards = slottedCurrentYear.filter((c) => c.side === "left");
+  const rightCards = slottedCurrentYear.filter((c) => c.side === "right");
+
   return (
     <div className={pinned ? "hall-of-fame-page hall-of-fame-page--pinned" : "hall-of-fame-page"}>
       <section className="section">
@@ -67,29 +99,52 @@ export default function HallOfFame() {
       {pinned ? (
         <div className="pin-outer pi-intro-outer" ref={piScrub.outerRef}>
           <div className="pin-sticky">
+            {currentYearEntries.length > 0 && (
+              <span className="pi-trail-year-label">At the club this year:</span>
+            )}
             <div className="pi-intro-row">
+              <div className="pi-trail-cards pi-trail-cards--left">
+                {leftCards.map(({ entry, i, y }) => (
+                  <div
+                    className={`pi-trail-card-slot${
+                      piScrub.progress >= revealAt(i, currentYearEntries.length) ? " is-in" : ""
+                    }`}
+                    style={{ top: `${(y / 1530) * 100}%` }}
+                    key={entry.id}
+                  >
+                    <HallOfFameScrapbookCard entry={entry} index={i} compact />
+                  </div>
+                ))}
+              </div>
+
               <CurvedPiTrail progress={piScrub.progress} />
+
+              <div className="pi-trail-cards pi-trail-cards--right">
+                {rightCards.map(({ entry, i, y }) => (
+                  <div
+                    className={`pi-trail-card-slot${
+                      piScrub.progress >= revealAt(i, currentYearEntries.length) ? " is-in" : ""
+                    }`}
+                    style={{ top: `${(y / 1530) * 100}%` }}
+                    key={entry.id}
+                  >
+                    <HallOfFameScrapbookCard entry={entry} index={i} compact />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       ) : (
-        <section className="section pi-intro-static">
-          <div className="container">
-            <div className="pi-intro-wave-mobile" aria-hidden="true">
-              <CurvedPiTrail progress={1} />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {entriesLoaded && entries.length === 0 ? (
-        <section className="section section-hof-roster">
-          <div className="container">
-            <p className="empty-state">No roster entries added yet.</p>
-          </div>
-        </section>
-      ) : (
         <>
+          <section className="section pi-intro-static">
+            <div className="container">
+              <div className="pi-intro-wave-mobile" aria-hidden="true">
+                <CurvedPiTrail progress={1} />
+              </div>
+            </div>
+          </section>
+
           {currentYearEntries.length > 0 && (
             <section className="section section-hof-scrapbook">
               <div className="container">
@@ -104,7 +159,17 @@ export default function HallOfFame() {
               </div>
             </section>
           )}
+        </>
+      )}
 
+      {entriesLoaded && entries.length === 0 ? (
+        <section className="section section-hof-roster">
+          <div className="container">
+            <p className="empty-state">No roster entries added yet.</p>
+          </div>
+        </section>
+      ) : (
+        <>
           {legacyGroups.length > 0 && (
             <section className="section section-hof-roster">
               <div className="container">

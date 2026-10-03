@@ -17,15 +17,19 @@ const TILTS = [-2.5, 2, -1.5, 2.5, -2, 1.5];
 export default function HallOfFameScrapbookCard({
   entry,
   index,
+  compact = false,
 }: {
   entry: HallOfFameEntry;
   index: number;
+  /** Smaller footprint for the pi-trail side rails — same visual
+   *  elements, tighter sizing (see the .scrapbook-card--compact CSS). */
+  compact?: boolean;
 }) {
   const tilt = TILTS[index % TILTS.length];
 
   return (
     <figure
-      className="scrapbook-card"
+      className={`scrapbook-card${compact ? " scrapbook-card--compact" : ""}`}
       style={{ "--tilt": `${tilt}deg` } as CSSProperties}
     >
       <div className="scrapbook-spine" aria-hidden="true">
