@@ -8,7 +8,7 @@ contributor, this folder is the detailed reference you come back to when
 you need to know exactly how something works before changing it.
 
 **These are hand-maintained markdown files, not generated from the code.**
-They were last verified against the codebase on **2026-10-02**. If you
+They were last verified against the codebase on **2026-10-03**. If you
 change a table, a route, a section key, or an admin permission, update the
 relevant file here in the same pull request — a stale "source of truth" is
 worse than none, so treat drift here as a bug.
@@ -39,6 +39,9 @@ worse than none, so treat drift here as a bug.
   (super admin vs. per-section admins vs. reusable roles), the sidebar
   navigation groups, and the step-by-step recipe for adding a new
   admin-managed feature end to end.
+- **[image-resolutions.md](image-resolutions.md)** — what size photo to
+  upload for every image field in the admin panel, grounded in each
+  one's actual crop shape and display size (not guesswork).
 
 ## How these relate to the rest of the repo
 
