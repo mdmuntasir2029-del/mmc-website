@@ -67,15 +67,69 @@ export default function HallOfFame() {
     load();
   }
 
+  const thisYearEntries = entries.filter(
+    (e) => e.sessionYear === CURRENT_SESSION_YEAR
+  );
+  const legacyEntries = entries.filter(
+    (e) => e.sessionYear !== CURRENT_SESSION_YEAR
+  );
+
+  function renderTable(rows: HallOfFameEntry[]) {
+    return (
+      <table>
+        <thead>
+          <tr>
+            <th style={{ width: 56 }} />
+            <th>Name</th>
+            <th>Role</th>
+            <th>Session Year</th>
+            <th style={{ width: 90 }} />
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((e) => (
+            <tr key={e.id}>
+              <td>
+                {e.imageUrl && (
+                  <img
+                    src={e.imageUrl}
+                    alt=""
+                    width={40}
+                    height={40}
+                    style={{ borderRadius: "50%", objectFit: "cover" }}
+                  />
+                )}
+              </td>
+              <td>{e.name}</td>
+              <td>{e.roleTitle}</td>
+              <td>{e.sessionYear}</td>
+              <td>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDelete(e.id)}
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
   return (
     <>
       <div className="admin-content-header">
         <div>
           <h2>Hall of Fame Roster</h2>
           <p>
-            Photos shown on the /hall-of-fame page, grouped by session year.
-            The current year's ({CURRENT_SESSION_YEAR}) entries also appear
-            on the About page's "Current Year Lineup".
+            Photos shown on the /hall-of-fame page. An entry's Session Year
+            decides which of the two parts below it lands in: entries
+            matching {CURRENT_SESSION_YEAR} show as the full-resolution "At
+            the club this year" scrapbook cards (and also on the About
+            page's "Current Year Lineup") — every other year shows as a
+            compact "Legacy contributors" mini-profile instead.
           </p>
         </div>
       </div>
@@ -171,50 +225,35 @@ export default function HallOfFame() {
       </div>
 
       <div className="panel">
+        <div className="panel-title-row">
+          <h3 style={{ margin: 0 }}>
+            At the club this year ({CURRENT_SESSION_YEAR})
+          </h3>
+        </div>
         {loading ? (
           <p>Loading...</p>
-        ) : entries.length === 0 ? (
-          <div className="empty-state">No entries added yet.</div>
+        ) : thisYearEntries.length === 0 ? (
+          <div className="empty-state">
+            No entries yet for {CURRENT_SESSION_YEAR}.
+          </div>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 56 }} />
-                <th>Name</th>
-                <th>Role</th>
-                <th>Session Year</th>
-                <th style={{ width: 90 }} />
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((e) => (
-                <tr key={e.id}>
-                  <td>
-                    {e.imageUrl && (
-                      <img
-                        src={e.imageUrl}
-                        alt=""
-                        width={40}
-                        height={40}
-                        style={{ borderRadius: "50%", objectFit: "cover" }}
-                      />
-                    )}
-                  </td>
-                  <td>{e.name}</td>
-                  <td>{e.roleTitle}</td>
-                  <td>{e.sessionYear}</td>
-                  <td>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDelete(e.id)}
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          renderTable(thisYearEntries)
+        )}
+      </div>
+
+      <div className="panel">
+        <div className="panel-title-row">
+          <h3 style={{ margin: 0 }}>Legacy contributors</h3>
+        </div>
+        {loading ? (
+          <p>Loading...</p>
+        ) : legacyEntries.length === 0 ? (
+          <div className="empty-state">
+            No legacy entries yet — anything not tagged{" "}
+            {CURRENT_SESSION_YEAR} lands here.
+          </div>
+        ) : (
+          renderTable(legacyEntries)
         )}
       </div>
     </>

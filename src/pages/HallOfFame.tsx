@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import CurvedPiTrail from "../components/CurvedPiTrail";
 import SectionUnavailable from "../components/SectionUnavailable";
+import HallOfFameScrapbookCard from "../components/HallOfFameScrapbookCard";
 import * as db from "../lib/db";
 import type { HallOfFameEntry } from "../lib/types";
 import { useScrollScrub, usePinnedScrollEnabled } from "../hooks/useScrollScrub";
 import { useSiteSections } from "../hooks/useSiteSections";
+import { CURRENT_SESSION_YEAR } from "../lib/constants";
 
 function groupByYear(entries: HallOfFameEntry[]): [string, HallOfFameEntry[]][] {
   const groups = new Map<string, HallOfFameEntry[]>();
@@ -37,7 +39,18 @@ export default function HallOfFame() {
     return <SectionUnavailable />;
   }
 
-  const groups = groupByYear(entries);
+  // "At the club this year" gets the full-resolution scrapbook
+  // treatment; every other session year is a "Legacy contributor,"
+  // shown in the existing compact mini-profile style — the same
+  // session_year / CURRENT_SESSION_YEAR split the About page's Current
+  // Year Lineup already uses, so this needs no schema change.
+  const currentYearEntries = entries.filter(
+    (e) => e.sessionYear === CURRENT_SESSION_YEAR
+  );
+  const legacyEntries = entries.filter(
+    (e) => e.sessionYear !== CURRENT_SESSION_YEAR
+  );
+  const legacyGroups = groupByYear(legacyEntries);
 
   return (
     <div className={pinned ? "hall-of-fame-page hall-of-fame-page--pinned" : "hall-of-fame-page"}>
@@ -69,42 +82,68 @@ export default function HallOfFame() {
         </section>
       )}
 
-      <section className="section section-hof-roster">
-        <div className="container">
-          {entriesLoaded && entries.length === 0 ? (
+      {entriesLoaded && entries.length === 0 ? (
+        <section className="section section-hof-roster">
+          <div className="container">
             <p className="empty-state">No roster entries added yet.</p>
-          ) : (
-            groups.map(([year, yearEntries]) => (
-              <div className="hof-year-group" key={year}>
-                <h2 className="hof-year-title">{year}</h2>
-                <div className="hof-roster-grid">
-                  {yearEntries.map((entry) => (
-                    <figure className="hof-roster-card" key={entry.id}>
-                      {entry.imageUrl ? (
-                        <img
-                          src={entry.imageUrl}
-                          srcSet={entry.imageSrcSet ?? undefined}
-                          sizes="180px"
-                          alt=""
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="hof-roster-avatar" aria-hidden="true">
-                          {entry.name.slice(0, 1).toUpperCase()}
-                        </div>
-                      )}
-                      <figcaption>
-                        <div className="hof-roster-name">{entry.name}</div>
-                        <div className="hof-roster-role">{entry.roleTitle}</div>
-                      </figcaption>
-                    </figure>
+          </div>
+        </section>
+      ) : (
+        <>
+          {currentYearEntries.length > 0 && (
+            <section className="section section-hof-scrapbook">
+              <div className="container">
+                <div className="section-heading">
+                  <h2>At the club this year:</h2>
+                </div>
+                <div className="scrapbook-grid">
+                  {currentYearEntries.map((entry, i) => (
+                    <HallOfFameScrapbookCard entry={entry} index={i} key={entry.id} />
                   ))}
                 </div>
               </div>
-            ))
+            </section>
           )}
-        </div>
-      </section>
+
+          {legacyGroups.length > 0 && (
+            <section className="section section-hof-roster">
+              <div className="container">
+                <div className="section-heading">
+                  <h2>Legacy contributors:</h2>
+                </div>
+                {legacyGroups.map(([year, yearEntries]) => (
+                  <div className="hof-year-group" key={year}>
+                    <h3 className="hof-year-title">{year}</h3>
+                    <div className="hof-roster-grid">
+                      {yearEntries.map((entry) => (
+                        <figure className="hof-roster-card" key={entry.id}>
+                          {entry.imageUrl ? (
+                            <img
+                              src={entry.imageUrl}
+                              srcSet={entry.imageSrcSet ?? undefined}
+                              sizes="180px"
+                              alt=""
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="hof-roster-avatar" aria-hidden="true">
+                              {entry.name.slice(0, 1).toUpperCase()}
+                            </div>
+                          )}
+                          <figcaption>
+                            <div className="hof-roster-name">{entry.name}</div>
+                            <div className="hof-roster-role">{entry.roleTitle}</div>
+                          </figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
     </div>
   );
 }
