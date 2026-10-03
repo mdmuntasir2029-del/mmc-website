@@ -3252,7 +3252,12 @@ tr:hover td {
   margin-bottom: 20px;
 }
 
-.hof-roster-grid,
+.hof-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 22px;
+}
+
 .lineup-cards-row {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -3278,9 +3283,20 @@ tr:hover td {
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
 }
 
+/* Legacy Contributors gets a bigger avatar than the About page's
+   Current Year Lineup (which shares this card markup/style otherwise)
+   — sized up from 96px so faces actually read at a glance instead of
+   needing a click-through to tell who's who. */
 .hof-roster-card img,
+.hof-roster-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 14px;
+}
+
 .lineup-person-card img,
-.hof-roster-avatar,
 .lineup-person-avatar {
   width: 96px;
   height: 96px;
@@ -3289,7 +3305,17 @@ tr:hover td {
   margin: 0 auto 14px;
 }
 
-.hof-roster-avatar,
+.hof-roster-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading-modern);
+  font-weight: 700;
+  font-size: 2.8rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+}
+
 .lineup-person-avatar {
   display: flex;
   align-items: center;
@@ -3392,8 +3418,9 @@ tr:hover td {
 
 .scrapbook-top-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 8px;
   margin-bottom: 10px;
 }
 
@@ -3417,10 +3444,13 @@ tr:hover td {
   border: 1.5px solid var(--green-dark);
   border-radius: 4px;
   padding: 3px 8px;
-  white-space: nowrap;
-  max-width: 55%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.3;
+  text-align: right;
+  /* Long role titles ("General Secretary") wrap instead of truncating
+     with an ellipsis — the whole title should always be readable. */
+  white-space: normal;
+  max-width: 62%;
+  flex-shrink: 0;
 }
 
 .scrapbook-photo-wrap {
@@ -3486,13 +3516,17 @@ tr:hover td {
   right: 10px;
   bottom: 8px;
   font-family: var(--font-cursive);
-  font-size: 1.3rem;
+  font-size: 1.15rem;
+  line-height: 1.15;
+  text-align: center;
   color: #fff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
   transform: rotate(-2deg);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* A long full name wraps instead of truncating with an ellipsis —
+     the whole signature should always be readable, not just a snippet
+     of it. Bottom-anchored, so a wrapped line just grows upward. */
+  white-space: normal;
+  word-break: break-word;
 }
 
 .scrapbook-caption {
