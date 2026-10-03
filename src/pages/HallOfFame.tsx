@@ -23,14 +23,19 @@ function groupByYear(entries: HallOfFameEntry[]): [string, HallOfFameEntry[]][] 
 // Where each "this year" card sits along CurvedPiTrail's fixed S-curve
 // (viewBox 0 0 600 1530 — see CurvedPiTrail.tsx's CURVE_D), alternating
 // right/left at the curve's actual crests/troughs: right ~y175, left
-// ~y345, right ~y675, left ~y845, and so on every ~501 viewBox units —
-// so cards one by one "ride" the wave instead of sitting in a grid
-// below it. Approximate (bezier control points, not exact on-curve
-// extrema) — fine for decorative placement, same rigor as the
-// sine-wave card offsets on the Home page lineup.
+// ~y345, right ~y675, left ~y845, and so on — so cards one by one
+// "ride" the wave instead of sitting in a grid below it. The step
+// between two same-side cards (680 viewBox units) is tuned against the
+// *compact* scrapbook card's real rendered height (~317px measured at
+// a typical sticky height) so consecutive cards on the same side don't
+// overlap — if the compact card's size changes again, re-measure and
+// adjust this. With more than ~4 "this year" entries the sequence can
+// run past the curve's own 1530-unit height (cards would render below
+// the visible curve) — fine for a typical club board, but a known
+// limit if the roster grows a lot larger.
 const PI_TRAIL_RIGHT_Y = 175;
 const PI_TRAIL_LEFT_Y = 345;
-const PI_TRAIL_Y_STEP = 501;
+const PI_TRAIL_Y_STEP = 680;
 
 function slotForCard(i: number): { side: "left" | "right"; y: number } {
   const side = i % 2 === 0 ? "right" : "left";

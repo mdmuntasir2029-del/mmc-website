@@ -1301,8 +1301,8 @@ button {
 
   .pi-trail-cards {
     position: relative;
-    flex: 0 1 210px;
-    max-width: 210px;
+    flex: 0 1 240px;
+    max-width: 240px;
     min-width: 0;
     height: 100%;
   }
@@ -1321,13 +1321,13 @@ button {
      empty margin. Calibrated by measurement, not geometry — if
      CURVE_D ever changes, re-measure and update this fraction. */
   .pi-trail-cards--left {
-    margin-right: calc((100vh - var(--navbar-h)) * -0.164);
-    margin-right: calc((100dvh - var(--navbar-h)) * -0.164);
+    margin-right: calc((100vh - var(--navbar-h)) * -0.12);
+    margin-right: calc((100dvh - var(--navbar-h)) * -0.12);
   }
 
   .pi-trail-cards--right {
-    margin-left: calc((100vh - var(--navbar-h)) * -0.164);
-    margin-left: calc((100dvh - var(--navbar-h)) * -0.164);
+    margin-left: calc((100vh - var(--navbar-h)) * -0.12);
+    margin-left: calc((100dvh - var(--navbar-h)) * -0.12);
   }
 
   .pi-trail-card-slot {
@@ -1347,12 +1347,12 @@ button {
   }
 
   .pi-trail-cards--left .pi-trail-card-slot {
-    --slide-from: -36px;
+    --slide-from: -90px;
     justify-content: flex-end;
   }
 
   .pi-trail-cards--right .pi-trail-card-slot {
-    --slide-from: 36px;
+    --slide-from: 90px;
     justify-content: flex-start;
   }
 
@@ -3587,43 +3587,43 @@ tr:hover td {
    is dropped since there isn't enough side-margin to let it overflow
    the card legibly at this width. */
 .scrapbook-card--compact {
-  width: 160px;
-  padding: 8px 8px 12px 26px;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.32);
+  width: 210px;
+  padding: 11px 11px 16px 32px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.34);
 }
 
 .scrapbook-card--compact .scrapbook-spine {
-  width: 18px;
-  border-radius: 8px 0 0 8px;
-  padding: 10px 0;
+  width: 22px;
+  border-radius: 9px 0 0 9px;
+  padding: 12px 0;
 }
 
 .scrapbook-card--compact .scrapbook-spine-holes {
-  gap: 7px;
+  gap: 8px;
 }
 
 .scrapbook-card--compact .scrapbook-spine-hole {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
 }
 
 .scrapbook-card--compact .scrapbook-spine-text {
-  font-size: 0.5rem;
+  font-size: 0.58rem;
   letter-spacing: 0.18em;
 }
 
 .scrapbook-card--compact .scrapbook-top-row {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .scrapbook-card--compact .scrapbook-badge {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
 }
 
 .scrapbook-card--compact .scrapbook-tag {
-  font-size: 0.5rem;
-  padding: 2px 5px;
+  font-size: 0.58rem;
+  padding: 3px 6px;
 }
 
 .scrapbook-card--compact .scrapbook-number {
@@ -3631,28 +3631,28 @@ tr:hover td {
 }
 
 .scrapbook-card--compact .scrapbook-photo-fallback {
-  font-size: 1.6rem;
+  font-size: 2rem;
 }
 
 .scrapbook-card--compact .scrapbook-sparkle {
-  font-size: 0.85rem;
+  font-size: 1rem;
 }
 
 .scrapbook-card--compact .scrapbook-signature {
-  font-size: 0.85rem;
-  bottom: 6px;
+  font-size: 1rem;
+  bottom: 7px;
 }
 
 .scrapbook-card--compact .scrapbook-caption {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .scrapbook-card--compact .scrapbook-name {
-  font-size: 0.78rem;
+  font-size: 0.92rem;
 }
 
 .scrapbook-card--compact .scrapbook-role {
-  font-size: 0.56rem;
+  font-size: 0.64rem;
 }
 
 /* ===================== Testimonials ===================== */
