@@ -55,6 +55,13 @@ mediates everything" pattern as `admins`/`admin_permissions` — see
 | `cancel_my_registration(ticket_code, email)` | Sets `status = 'cancelled'`, scoped to the matching row only. |
 | `get_event_seat_counts()` | Returns `{event_id, taken}` for every event (`confirmed`+`attended` counts) — lets the directory show "N seats left" without any participant data leaking. |
 
+Alongside those four, a trigger function fires on every
+`event_registrations` update:
+
+| Trigger | What it does |
+|---|---|
+| `promote_waitlist()` (via `trg_promote_waitlist`, `after update for each row`) | If a row's status just moved from `confirmed` to `cancelled`/`rejected`, finds the oldest `waitlisted` row for the same event (`order by created_at asc ... for update skip locked`) and bumps it to `confirmed`. `security definer` so it works identically whether the triggering update came from `cancel_my_registration` (runs as the function owner) or a direct admin table write — both paths end up bypassing `event_registrations_admin_all` the same way every other write here does. No notification is sent; the promoted visitor finds out by checking `/my-registrations` (no email infra — see Known gaps). |
+
 Admins read/write `event_registrations` directly (`db.getEventRegistrations`,
 `updateRegistrationStatus`, `bulkUpdateRegistrationStatus` in `db.ts`),
 gated by a plain `is_admin()` policy — same as `olympiad_registrations`.
@@ -99,13 +106,33 @@ on (via `supabase/seed.sql`, which must never be run against the real
 project) per deployment, and only one of them has the `fests` toggle
 and the mock data.
 
+## Bonus tier (P1)
+
+All three implemented:
+
+- **QR ticket**: `src/lib/qr.ts` (`qrcode` npm package) encodes just the
+  ticket code — not a URL — as a PNG data URL, rendered on
+  `RegistrationConfirmation.tsx`. Check-in is lookup-based rather than
+  an in-app camera scanner: an organizer decodes it with a phone's
+  native camera and pastes the code into `EventParticipants.tsx`'s
+  existing search box, then marks the row attended.
+- **Automatic waitlist promotion**: see `promote_waitlist()` above.
+- **Calendar export**: `src/lib/ics.ts`'s `downloadIcsForEvent()`
+  builds a minimal `VCALENDAR`/`VEVENT` client-side (no server
+  round-trip) and triggers a `.ics` download — same Blob +
+  `createObjectURL` + synthetic-click pattern `EventParticipants.tsx`'s
+  CSV export already used, reused rather than reinvented. Wired to a
+  button on both `EventPage.tsx` and `RegistrationConfirmation.tsx`.
+  `endsAt` is nullable in the data model, so a missing end time falls
+  back to a 2-hour block rather than a zero-length calendar entry.
+
 ## Known gaps
 
-- **Bonus tier not built**: QR ticket/check-in, automatic waitlist
-  promotion on cancellation, and `.ics` calendar export were scoped as
-  P1 bonus work and cut for time — see the README's Known Limitations.
-- **No confirmation email** — the confirmation page is the only record
-  of a successful registration; nothing emails the ticket code.
+- **No confirmation email** — the confirmation page (plus the `.ics`
+  file and QR code on it) is the only record of a successful
+  registration; nothing emails the ticket code, and a promoted
+  waitlisted visitor isn't notified either — they'd find out by
+  checking `/my-registrations` again.
 - **Registration-count scalability**: `getEvents()`/`getFests()` have no
   pagination — fine for a club's scale (dozens of events), would need
   revisiting at real scale.

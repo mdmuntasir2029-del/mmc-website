@@ -23,25 +23,36 @@ Grants: Fests & Events, Event Participants (not super admin).
    "open only" and notice the URL gains a `?q=...&category=...`query
    string you can copy/reload (A4).
 4. Open any **Open** event → full details, a live deadline countdown,
-   a capacity bar, and the registration form (A5). Try it on a phone-
-   width browser window — no horizontal scroll (A6).
+   a capacity bar, and the registration form (A5). Click **Add to
+   calendar** — downloads a working `.ics` file (D4). Try it on a
+   phone-width browser window — no horizontal scroll (A6).
 5. Register with a real-looking email → lands on
-   `/registration/:ticketCode` with your ticket code, bookmarkable
-   (B1–B3). Try registering the same email twice — rejected with a
-   clear message (B2/B6).
+   `/registration/:ticketCode` with your ticket code, a scannable QR
+   code of it (D1), and its own **Add to calendar** button (B1–B3,
+   D4). Try registering the same email twice — rejected with a clear
+   message (B2/B6).
 6. Open the **Robotics Challenge** event (seeded full, waitlist off) —
-   registration is refused with a "Full" pill, no form shown (B4).
+   registration is refused with a "Full" pill, no form shown (B4). Then
+   open **Gaming Tournament** (seeded full, waitlist on) and register —
+   you land on the confirmation page with a **waitlisted** status pill
+   instead of being refused.
 7. Go to `/my-registrations`, enter `judge@example.com` +
    `MMC-DEMO01` — see all three judge registrations with different
-   statuses; cancel one and see its seat free up (B5).
+   statuses; cancel one and see its seat free up (B5). To see
+   auto-promotion specifically: open Gaming Tournament's participants
+   page as the demo admin (next step), cancel any one **confirmed**
+   registration, and reload the list — the longest-waiting waitlisted
+   row is now confirmed, with no admin action beyond the cancellation
+   itself (D3).
 8. Sign in as the demo admin → `/admin/events`: overview stats, fest/
    event CRUD, publish/archive (C1).
 9. Click **Participants** on any seeded event →
    `/admin/events/:id/participants`: search, filter by status/school,
    per-row status change, bulk actions, the sign-ups-per-day chart and
-   school breakdown, CSV export (C2–C5). Try it at a narrower browser
-   width — the table scrolls inside its own box instead of the page
-   (C6).
+   school breakdown, CSV export (C2–C5). Paste a ticket code into the
+   search box and set its status to "attended" to simulate a door
+   check-in (D2). Try it at a narrower browser width — the table
+   scrolls inside its own box instead of the page (C6).
 
 ## Rubric map
 
@@ -80,10 +91,15 @@ Grants: Fests & Events, Event Participants (not super admin).
 
 ### D. Bonus — up to 30 pts
 
-Not implemented this round — core (A+B+C) was prioritized over bonus
-given the timeline, per the PRD's own risk table ("a complete, polished
-core outscores a half-built bonus"). See `README.md`'s Known
-Limitations.
+| ID | Requirement | Where |
+|---|---|---|
+| D1 | QR ticket | Registration confirmation page renders a scannable QR code of the ticket code — `src/lib/qr.ts` (`qrcode` package), `RegistrationConfirmation.tsx` |
+| D2 | Check-in flow | Organizer looks up a ticket code in the participants search box (same box as C3) and sets its status to "attended" via the status dropdown — no separate camera-scanning UI was built; the QR code is there for a phone's native scanner to decode, then typed/pasted in |
+| D3 | Automatic waitlist promotion | `promote_waitlist()` trigger on `event_registrations` (`supabase/schema.sql`) — fires on any confirmed→cancelled/rejected transition, whether via a visitor cancelling or an organizer changing status, and bumps the longest-waiting waitlisted registration to confirmed |
+| D4 | Calendar export | "Add to calendar" button on both the event page and the confirmation page, downloads a `.ics` file — `src/lib/ics.ts` |
+
+Not implemented: confirmation emails (no email provider wired up for
+Fest Hub — see `README.md`'s Known Limitations).
 
 ## Responsiveness
 

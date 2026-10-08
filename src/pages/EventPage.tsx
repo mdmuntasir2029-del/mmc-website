@@ -5,6 +5,7 @@ import * as db from "../lib/db";
 import type { Fest, FestEvent } from "../lib/types";
 import { canRegister, eventPill, seatsLeftLabel } from "../lib/festStatus";
 import { validateEmail, validatePhone } from "../lib/validation";
+import { downloadIcsForEvent } from "../lib/ics";
 import SectionUnavailable from "../components/SectionUnavailable";
 import { useSiteSections } from "../hooks/useSiteSections";
 
@@ -176,6 +177,14 @@ export default function EventPage() {
                   <span>{seatsLeftLabel(event, seatsTaken)}</span>
                 </div>
               )}
+
+              <button
+                className="btn btn-secondary"
+                style={{ marginTop: 16 }}
+                onClick={() => downloadIcsForEvent(event)}
+              >
+                Add to calendar
+              </button>
             </div>
 
             <div className="event-register-panel">

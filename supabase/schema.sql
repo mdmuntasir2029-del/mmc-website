@@ -1105,6 +1105,43 @@ $$;
 
 grant execute on function cancel_my_registration(text, text) to anon, authenticated;
 
+-- Bonus: automatic waitlist promotion. Whenever a confirmed registration
+-- frees up (cancelled by the visitor, or rejected by an organizer), the
+-- longest-waiting "waitlisted" row for the same event is bumped to
+-- "confirmed" automatically — no admin action needed. security definer
+-- so this fires correctly whether the triggering update came from
+-- cancel_my_registration (runs as the function owner) or a direct admin
+-- table update (runs as the signed-in admin); either way this trigger's
+-- own update bypasses event_registrations' admin-only RLS policy, same
+-- bypass pattern as every other security definer function above.
+create or replace function promote_waitlist() returns trigger
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  next_row event_registrations%rowtype;
+begin
+  if new.status in ('cancelled', 'rejected') and old.status = 'confirmed' then
+    select * into next_row from event_registrations
+      where event_id = new.event_id and status = 'waitlisted'
+      order by created_at asc
+      limit 1
+      for update skip locked;
+    if found then
+      update event_registrations
+        set status = 'confirmed', updated_at = now()
+        where id = next_row.id;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_promote_waitlist on event_registrations;
+create trigger trg_promote_waitlist
+  after update on event_registrations
+  for each row execute function promote_waitlist();
+
 -- Lets the public directory show "12 seats left" without exposing any
 -- participant row.
 create or replace function get_event_seat_counts()

@@ -5478,6 +5478,17 @@ tr:hover td {
   margin: 16px 0;
 }
 
+.registration-ticket-qr {
+  display: block;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 16px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
 .my-registrations-lookup {
   display: flex;
   flex-wrap: wrap;

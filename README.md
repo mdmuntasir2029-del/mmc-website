@@ -52,15 +52,24 @@ regardless.
   per-day chart, school breakdown
 
 **Bonus**
-- Not implemented this round — see [Known Limitations](#known-limitations).
+- Scannable QR code of the ticket code on the registration confirmation
+  page; an organizer checks someone in by searching their ticket code in
+  the participants table (same search box used for everything else) and
+  marking it "attended"
+- Automatic waitlist promotion — a database trigger bumps the
+  longest-waiting waitlisted registration to confirmed the instant a
+  confirmed one is cancelled or rejected, no admin action needed
+- "Add to calendar" (.ics download) on both the event page and the
+  registration confirmation page
 
 ## Tech Stack
 
 - React 19, TypeScript, Vite, React Router
 - Supabase (Postgres, Auth, Storage, Row Level Security)
 - Vercel (hosting + auto-deploy)
-- No new npm packages were added for this build — see `package.json`
-  for exact versions.
+- `qrcode` — the only new npm package added for this build, used
+  client-side to render the ticket QR code (no server/API involved); see
+  `package.json` for exact versions.
 
 ## Setup
 
@@ -105,7 +114,9 @@ rubric-to-feature walkthrough.
   confirmation/reset emails; see `docs/SETUP.md`.
 - **Fonts** — several families are self-hosted under `public/fonts/`
   with their SIL Open Font License files alongside them.
-- No paid APIs, no new npm packages added for the Fest Hub build.
+- **qrcode** (npm, MIT license) — generates the ticket QR code entirely
+  client-side; no external QR service or API call.
+- No paid APIs.
 
 ## AI Tools/Features Used
 
@@ -129,10 +140,11 @@ the registration confirmation, and the organizer dashboard.)*
 - **No confirmation emails** — the confirmation page is the only
   record; Brevo/SMTP wiring for registration emails wasn't built this
   round (P2 in the project's scheme of work).
-- **No bonus tier implemented** — QR ticket/check-in, automatic waitlist
-  promotion, and calendar (.ics) export were scoped as bonus work and
-  didn't make the cut against the deadline; a complete, tested core was
-  prioritized over a partial bonus.
+- **Check-in is lookup-based, not camera-scanning** — the QR code is
+  there for a phone's native camera/scanner to decode, but the admin
+  participants page itself only has a text search box, not an in-app
+  camera scanner; an organizer pastes the decoded ticket code in and
+  marks it attended.
 - **Free-tier hosting** — the contest deployment runs on Supabase/Vercel
   free tiers; a long-idle Supabase project can pause and need a visit to
   wake it back up.

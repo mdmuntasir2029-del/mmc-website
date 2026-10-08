@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import * as db from "../lib/db";
 import type { EventRegistration, FestEvent } from "../lib/types";
+import { ticketQrDataUrl } from "../lib/qr";
+import { downloadIcsForEvent } from "../lib/ics";
 
 export default function RegistrationConfirmation() {
   const { ticketCode } = useParams<{ ticketCode: string }>();
@@ -10,6 +12,7 @@ export default function RegistrationConfirmation() {
 
   const [registration, setRegistration] = useState<EventRegistration | null>(null);
   const [event, setEvent] = useState<FestEvent | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,6 +30,7 @@ export default function RegistrationConfirmation() {
         if (match) {
           const ev = await db.getEventById(match.eventId);
           setEvent(ev);
+          ticketQrDataUrl(match.ticketCode).then(setQrDataUrl).catch(() => {});
         } else {
           setError("No registration found for that ticket code and email.");
         }
@@ -62,7 +66,10 @@ export default function RegistrationConfirmation() {
           <span className={`status-pill status-pill--${registration.status}`}>{registration.status}</span>
           <h1>You're registered!</h1>
           <div className="registration-ticket-code">{registration.ticketCode}</div>
-          <p>Keep this ticket code and the email you registered with — you'll need both to look up or cancel this registration.</p>
+          {qrDataUrl && (
+            <img className="registration-ticket-qr" src={qrDataUrl} alt={`QR code for ticket ${registration.ticketCode}`} />
+          )}
+          <p>Keep this ticket code and the email you registered with — you'll need both to look up or cancel this registration. Show the QR code at check-in.</p>
 
           <div className="event-details-list" style={{ textAlign: "left" }}>
             {event && (
@@ -77,8 +84,13 @@ export default function RegistrationConfirmation() {
             <div><strong>Status:</strong> {registration.status}</div>
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "center" }}>
+          <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "center", flexWrap: "wrap" }}>
             <button className="btn btn-secondary" onClick={() => window.print()}>Print / Save</button>
+            {event && (
+              <button className="btn btn-secondary" onClick={() => downloadIcsForEvent(event)}>
+                Add to calendar
+              </button>
+            )}
             <Link
               className="btn btn-primary"
               to={`/my-registrations?email=${encodeURIComponent(registration.email)}&ticket=${registration.ticketCode}`}
