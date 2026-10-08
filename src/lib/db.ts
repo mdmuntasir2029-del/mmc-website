@@ -25,6 +25,11 @@ import type {
   UpcomingCompetition,
   CompetitionArchiveEntry,
   SectionKey,
+  Fest,
+  FestStatus,
+  FestEvent,
+  EventCategory,
+  EventRegistration,
 } from "./types";
 
 const SIGNED_URL_TTL_SECONDS = 60 * 10;
@@ -1512,5 +1517,540 @@ export async function setSectionVisible(
   const { error } = await supabase
     .from("site_sections")
     .upsert({ key, visible, updated_at: new Date().toISOString() }, { onConflict: "key" });
+  if (error) throw error;
+}
+
+// ---------- Fest Hub (Organization -> Fest -> Event -> Registration) ----------
+// See sourceoftruth/fest-hub.md. RLS shows admins every status (draft
+// included) and shows everyone else only published/archived rows, so
+// the SAME getFests()/getEvents() calls serve both the public directory
+// and the admin dashboard — no separate "admin" fetch functions needed.
+
+interface FestRow {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string | null;
+  description: string | null;
+  cover_path: string | null;
+  starts_on: string;
+  ends_on: string;
+  venue: string | null;
+  status: FestStatus;
+  created_at: string;
+}
+
+function fromFestRow(row: FestRow): Fest {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    tagline: row.tagline,
+    description: row.description,
+    coverPath: row.cover_path,
+    coverUrl: row.cover_path ? publicImageUrl(row.cover_path, 960) : null,
+    coverSrcSet: row.cover_path ? gallerySrcSet(row.cover_path) : null,
+    startsOn: row.starts_on,
+    endsOn: row.ends_on,
+    venue: row.venue,
+    status: row.status,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getFests(): Promise<Fest[]> {
+  const { data, error } = await supabase
+    .from("fests")
+    .select("*")
+    .order("starts_on", { ascending: false });
+  if (error) throw error;
+  return (data as FestRow[]).map(fromFestRow);
+}
+
+export async function getFestBySlug(slug: string): Promise<Fest | null> {
+  const { data, error } = await supabase
+    .from("fests")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? fromFestRow(data as FestRow) : null;
+}
+
+export async function addFest(
+  data: {
+    slug: string;
+    name: string;
+    tagline: string | null;
+    description: string | null;
+    startsOn: string;
+    endsOn: string;
+    venue: string | null;
+    status: FestStatus;
+  },
+  file: File | null
+): Promise<Fest> {
+  let coverPath: string | null = null;
+  if (file) {
+    coverPath = `fests/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+    const { error: uploadError } = await supabase.storage
+      .from(PUBLIC_BUCKET)
+      .upload(coverPath, file, { upsert: false });
+    if (uploadError) throw uploadError;
+  }
+  const { data: row, error } = await supabase
+    .from("fests")
+    .insert({
+      slug: data.slug,
+      name: data.name,
+      tagline: data.tagline,
+      description: data.description,
+      starts_on: data.startsOn,
+      ends_on: data.endsOn,
+      venue: data.venue,
+      status: data.status,
+      cover_path: coverPath,
+    })
+    .select("*")
+    .single();
+  if (error) {
+    if (coverPath) await supabase.storage.from(PUBLIC_BUCKET).remove([coverPath]);
+    throw error;
+  }
+  return fromFestRow(row as FestRow);
+}
+
+export async function updateFest(
+  id: string,
+  data: Partial<{
+    name: string;
+    tagline: string | null;
+    description: string | null;
+    startsOn: string;
+    endsOn: string;
+    venue: string | null;
+    status: FestStatus;
+  }>,
+  file?: File | null
+): Promise<Fest> {
+  const patch: Record<string, unknown> = {};
+  if (data.name !== undefined) patch.name = data.name;
+  if (data.tagline !== undefined) patch.tagline = data.tagline;
+  if (data.description !== undefined) patch.description = data.description;
+  if (data.startsOn !== undefined) patch.starts_on = data.startsOn;
+  if (data.endsOn !== undefined) patch.ends_on = data.endsOn;
+  if (data.venue !== undefined) patch.venue = data.venue;
+  if (data.status !== undefined) patch.status = data.status;
+
+  if (file) {
+    const coverPath = `fests/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+    const { error: uploadError } = await supabase.storage
+      .from(PUBLIC_BUCKET)
+      .upload(coverPath, file, { upsert: false });
+    if (uploadError) throw uploadError;
+    patch.cover_path = coverPath;
+  }
+
+  const { data: row, error } = await supabase
+    .from("fests")
+    .update(patch)
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return fromFestRow(row as FestRow);
+}
+
+export async function deleteFest(id: string): Promise<void> {
+  const { data: row } = await supabase
+    .from("fests")
+    .select("cover_path")
+    .eq("id", id)
+    .single();
+  const { error } = await supabase.from("fests").delete().eq("id", id);
+  if (error) throw error;
+  const path = (row as { cover_path: string | null } | null)?.cover_path;
+  if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
+}
+
+interface EventRow {
+  id: string;
+  fest_id: string;
+  slug: string;
+  name: string;
+  category: EventCategory;
+  summary: string | null;
+  description: string | null;
+  starts_at: string;
+  ends_at: string | null;
+  venue: string | null;
+  eligibility: string | null;
+  registration_opens_at: string;
+  registration_deadline: string;
+  capacity: number | null;
+  waitlist_enabled: boolean;
+  cover_path: string | null;
+  status: FestStatus;
+  created_at: string;
+}
+
+function fromEventRow(row: EventRow): FestEvent {
+  return {
+    id: row.id,
+    festId: row.fest_id,
+    slug: row.slug,
+    name: row.name,
+    category: row.category,
+    summary: row.summary,
+    description: row.description,
+    startsAt: row.starts_at,
+    endsAt: row.ends_at,
+    venue: row.venue,
+    eligibility: row.eligibility,
+    registrationOpensAt: row.registration_opens_at,
+    registrationDeadline: row.registration_deadline,
+    capacity: row.capacity,
+    waitlistEnabled: row.waitlist_enabled,
+    coverPath: row.cover_path,
+    coverUrl: row.cover_path ? publicImageUrl(row.cover_path, 960) : null,
+    coverSrcSet: row.cover_path ? gallerySrcSet(row.cover_path) : null,
+    status: row.status,
+    createdAt: row.created_at,
+  };
+}
+
+/** All events, or only one fest's — the fest directory's search/filter
+ *  works across every fest, so most callers want the unfiltered list. */
+export async function getEvents(festId?: string): Promise<FestEvent[]> {
+  let query = supabase.from("events").select("*").order("starts_at", { ascending: true });
+  if (festId) query = query.eq("fest_id", festId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data as EventRow[]).map(fromEventRow);
+}
+
+export async function getEventBySlug(slug: string): Promise<FestEvent | null> {
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? fromEventRow(data as EventRow) : null;
+}
+
+export async function getEventById(id: string): Promise<FestEvent | null> {
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? fromEventRow(data as EventRow) : null;
+}
+
+export async function addEvent(
+  data: {
+    festId: string;
+    slug: string;
+    name: string;
+    category: EventCategory;
+    summary: string | null;
+    description: string | null;
+    startsAt: string;
+    endsAt: string | null;
+    venue: string | null;
+    eligibility: string | null;
+    registrationOpensAt: string;
+    registrationDeadline: string;
+    capacity: number | null;
+    waitlistEnabled: boolean;
+    status: FestStatus;
+  },
+  file: File | null
+): Promise<FestEvent> {
+  let coverPath: string | null = null;
+  if (file) {
+    coverPath = `events/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+    const { error: uploadError } = await supabase.storage
+      .from(PUBLIC_BUCKET)
+      .upload(coverPath, file, { upsert: false });
+    if (uploadError) throw uploadError;
+  }
+  const { data: row, error } = await supabase
+    .from("events")
+    .insert({
+      fest_id: data.festId,
+      slug: data.slug,
+      name: data.name,
+      category: data.category,
+      summary: data.summary,
+      description: data.description,
+      starts_at: data.startsAt,
+      ends_at: data.endsAt,
+      venue: data.venue,
+      eligibility: data.eligibility,
+      registration_opens_at: data.registrationOpensAt,
+      registration_deadline: data.registrationDeadline,
+      capacity: data.capacity,
+      waitlist_enabled: data.waitlistEnabled,
+      status: data.status,
+      cover_path: coverPath,
+    })
+    .select("*")
+    .single();
+  if (error) {
+    if (coverPath) await supabase.storage.from(PUBLIC_BUCKET).remove([coverPath]);
+    throw error;
+  }
+  return fromEventRow(row as EventRow);
+}
+
+export async function updateEvent(
+  id: string,
+  data: Partial<{
+    name: string;
+    category: EventCategory;
+    summary: string | null;
+    description: string | null;
+    startsAt: string;
+    endsAt: string | null;
+    venue: string | null;
+    eligibility: string | null;
+    registrationOpensAt: string;
+    registrationDeadline: string;
+    capacity: number | null;
+    waitlistEnabled: boolean;
+    status: FestStatus;
+  }>,
+  file?: File | null
+): Promise<FestEvent> {
+  const patch: Record<string, unknown> = {};
+  if (data.name !== undefined) patch.name = data.name;
+  if (data.category !== undefined) patch.category = data.category;
+  if (data.summary !== undefined) patch.summary = data.summary;
+  if (data.description !== undefined) patch.description = data.description;
+  if (data.startsAt !== undefined) patch.starts_at = data.startsAt;
+  if (data.endsAt !== undefined) patch.ends_at = data.endsAt;
+  if (data.venue !== undefined) patch.venue = data.venue;
+  if (data.eligibility !== undefined) patch.eligibility = data.eligibility;
+  if (data.registrationOpensAt !== undefined) patch.registration_opens_at = data.registrationOpensAt;
+  if (data.registrationDeadline !== undefined) patch.registration_deadline = data.registrationDeadline;
+  if (data.capacity !== undefined) patch.capacity = data.capacity;
+  if (data.waitlistEnabled !== undefined) patch.waitlist_enabled = data.waitlistEnabled;
+  if (data.status !== undefined) patch.status = data.status;
+
+  if (file) {
+    const coverPath = `events/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+    const { error: uploadError } = await supabase.storage
+      .from(PUBLIC_BUCKET)
+      .upload(coverPath, file, { upsert: false });
+    if (uploadError) throw uploadError;
+    patch.cover_path = coverPath;
+  }
+
+  const { data: row, error } = await supabase
+    .from("events")
+    .update(patch)
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return fromEventRow(row as EventRow);
+}
+
+export async function deleteEvent(id: string): Promise<void> {
+  const { data: row } = await supabase
+    .from("events")
+    .select("cover_path")
+    .eq("id", id)
+    .single();
+  const { error } = await supabase.from("events").delete().eq("id", id);
+  if (error) throw error;
+  const path = (row as { cover_path: string | null } | null)?.cover_path;
+  if (path) await supabase.storage.from(PUBLIC_BUCKET).remove([path]);
+}
+
+/** Seats taken per event (confirmed + attended) — public RPC, used by
+ *  the directory to show "N seats left" without exposing participant
+ *  rows (there's no public select policy on event_registrations at all). */
+export async function getEventSeatCounts(): Promise<Record<string, number>> {
+  const { data, error } = await supabase.rpc("get_event_seat_counts");
+  if (error) throw error;
+  const result: Record<string, number> = {};
+  for (const row of data as { event_id: string; taken: number }[]) {
+    result[row.event_id] = row.taken;
+  }
+  return result;
+}
+
+/** The only way the public creates a registration — goes through the
+ *  register_for_event RPC, never a direct insert (see schema.sql). */
+export async function registerForEvent(
+  eventId: string,
+  data: {
+    fullName: string;
+    email: string;
+    phone: string;
+    school: string | null;
+    className: string | null;
+  }
+): Promise<{ ticketCode: string; status: string }> {
+  const { data: rows, error } = await supabase.rpc("register_for_event", {
+    p_event_id: eventId,
+    p_full_name: data.fullName,
+    p_email: data.email,
+    p_phone: data.phone,
+    p_school: data.school,
+    p_class_name: data.className,
+  });
+  if (error) throw error;
+  const row = (rows as { ticket_code: string; status: string }[])[0];
+  return { ticketCode: row.ticket_code, status: row.status };
+}
+
+interface MyRegistrationRow {
+  id: string;
+  event_id: string;
+  ticket_code: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  school: string | null;
+  class_name: string | null;
+  status: EventRegistration["status"];
+  checked_in_at: string | null;
+  created_at: string;
+}
+
+function fromMyRegistrationRow(row: MyRegistrationRow): EventRegistration {
+  return {
+    id: row.id,
+    eventId: row.event_id,
+    ticketCode: row.ticket_code,
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    school: row.school,
+    className: row.class_name,
+    status: row.status,
+    checkedInAt: row.checked_in_at,
+    adminNote: null,
+    createdAt: row.created_at,
+    updatedAt: row.created_at,
+  };
+}
+
+/** The "login" for visitors without accounts — only returns rows if
+ *  ticketCode matches one of that email's own registrations. Powers
+ *  both /my-registrations and the bookmarkable /registration/:ticketCode
+ *  confirmation page (which passes ?email= in the URL). */
+export async function getMyRegistrations(
+  email: string,
+  ticketCode: string
+): Promise<EventRegistration[]> {
+  const { data, error } = await supabase.rpc("get_my_registrations", {
+    p_email: email,
+    p_ticket_code: ticketCode,
+  });
+  if (error) throw error;
+  return (data as MyRegistrationRow[]).map(fromMyRegistrationRow);
+}
+
+export async function cancelMyRegistration(
+  ticketCode: string,
+  email: string
+): Promise<void> {
+  const { error } = await supabase.rpc("cancel_my_registration", {
+    p_ticket_code: ticketCode,
+    p_email: email,
+  });
+  if (error) throw error;
+}
+
+// ---------- Fest Hub admin: participant management ----------
+// Direct table access (not RPCs) — same is_admin()-gated pattern as
+// every other admin table (e.g. olympiad_registrations).
+
+interface EventRegistrationRow {
+  id: string;
+  event_id: string;
+  ticket_code: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  school: string | null;
+  class_name: string | null;
+  status: EventRegistration["status"];
+  checked_in_at: string | null;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+function fromEventRegistrationRow(row: EventRegistrationRow): EventRegistration {
+  return {
+    id: row.id,
+    eventId: row.event_id,
+    ticketCode: row.ticket_code,
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    school: row.school,
+    className: row.class_name,
+    status: row.status,
+    checkedInAt: row.checked_in_at,
+    adminNote: row.admin_note,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function getEventRegistrations(eventId: string): Promise<EventRegistration[]> {
+  const { data, error } = await supabase
+    .from("event_registrations")
+    .select("*")
+    .eq("event_id", eventId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as EventRegistrationRow[]).map(fromEventRegistrationRow);
+}
+
+/** Every registration across every event — for the organizer dashboard's
+ *  overview cards (total registrations, today's sign-ups). */
+export async function getAllEventRegistrations(): Promise<EventRegistration[]> {
+  const { data, error } = await supabase
+    .from("event_registrations")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as EventRegistrationRow[]).map(fromEventRegistrationRow);
+}
+
+export async function updateRegistrationStatus(
+  id: string,
+  status: EventRegistration["status"],
+  adminNote?: string | null
+): Promise<void> {
+  const patch: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
+  if (status === "attended") patch.checked_in_at = new Date().toISOString();
+  if (adminNote !== undefined) patch.admin_note = adminNote;
+  const { error } = await supabase
+    .from("event_registrations")
+    .update(patch)
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export async function bulkUpdateRegistrationStatus(
+  ids: string[],
+  status: EventRegistration["status"]
+): Promise<void> {
+  const patch: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
+  if (status === "attended") patch.checked_in_at = new Date().toISOString();
+  const { error } = await supabase
+    .from("event_registrations")
+    .update(patch)
+    .in("id", ids);
   if (error) throw error;
 }
