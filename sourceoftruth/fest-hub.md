@@ -126,6 +126,45 @@ All three implemented:
   `endsAt` is nullable in the data model, so a missing end time falls
   back to a 2-hour block rather than a zero-length calendar entry.
 
+## Verification: a real Postgres dry run caught two critical bugs
+
+`schema.sql`/`seed.sql` were never executed against a real Postgres
+engine before — every prior check was a manual read-through plus
+mocked-REST Playwright tests, neither of which actually *runs* the SQL.
+To close that gap without a live Supabase project, both files were run
+end to end against [PGlite](https://pglite.dev/) (a WASM Postgres build)
+in a throwaway scratch script, with a minimal stub of the `auth`/
+`storage` schemas and `anon`/`authenticated` roles that only Supabase's
+real project provisioning normally supplies.
+
+This caught two bugs that no amount of reading would have, because
+they're a class of error Postgres only raises at execution time, not at
+`create function` time:
+
+- **`register_for_event()`**: its own `returns table (ticket_code text,
+  status text)` output column named `status` silently shadowed the
+  `event_registrations.status` column inside the capacity-count query
+  (`where status in ('confirmed','attended')`) — every single
+  registration attempt would have failed with "column reference status
+  is ambiguous" the moment it ran against real Postgres.
+- **`get_my_registrations()`**: its `returns table` lists every
+  `event_registrations` column by its exact name, so the function's own
+  initial existence check (`where email = ... and ticket_code = ...`)
+  had the same ambiguity on two columns at once — the confirmation
+  page, cancel flow, and "my registrations" lookup all depend on this
+  RPC.
+
+Both are fixed by table-qualifying the bare column references (see the
+comments at each site in `schema.sql`). After the fix, a full pass
+(schema create → seed → `register_for_event` happy path, duplicate-email
+rejection, full-without-waitlist rejection, full-with-waitlist →
+waitlisted, `get_my_registrations`, and the `promote_waitlist()` trigger
+firing on a real cancellation) ran clean. The PGlite script itself was
+scratch-only (not committed — it's a verification tool, not part of the
+product), so this is a one-time confidence check, not a regression
+suite; a real schema change later should get the same treatment again
+rather than trusting a read-through alone.
+
 ## Known gaps
 
 - **No confirmation email** — the confirmation page (plus the `.ics`

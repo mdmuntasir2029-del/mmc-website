@@ -1021,8 +1021,11 @@ begin
     raise exception 'This email is already registered for this event.';
   end if;
 
+  -- Table-qualified: this function's own `returns table (..., status text)`
+  -- output column would otherwise make a bare `status` ambiguous here.
   select count(*) into taken from event_registrations
-    where event_id = p_event_id and status in ('confirmed', 'attended');
+    where event_registrations.event_id = p_event_id
+      and event_registrations.status in ('confirmed', 'attended');
 
   if ev.capacity is null or taken < ev.capacity then
     new_status := 'confirmed';
@@ -1068,9 +1071,13 @@ language plpgsql security definer
 set search_path = public
 as $$
 begin
+  -- Table-qualified throughout this function: every RETURNS TABLE output
+  -- column here is named identically to an event_registrations column, so
+  -- a bare `email`/`ticket_code`/etc. is ambiguous between the two.
   if not exists (
     select 1 from event_registrations
-    where lower(email) = lower(p_email) and ticket_code = p_ticket_code
+    where lower(event_registrations.email) = lower(p_email)
+      and event_registrations.ticket_code = p_ticket_code
   ) then
     return;
   end if;
