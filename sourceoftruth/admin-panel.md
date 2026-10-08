@@ -3,6 +3,10 @@
 How `/admin` decides who gets in, what they can see, and how to extend it
 with a new admin-managed feature.
 
+> The two Fest Hub `AdminSection`s (`fests_events`, `event_registrations`)
+> follow this exact model — see **[fest-hub.md](fest-hub.md)** for their
+> routes and what each gates.
+
 ## The three layers of gating
 
 Every `/admin/*` route passes through up to three checks, each handled by

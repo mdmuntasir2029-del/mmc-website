@@ -1,144 +1,155 @@
-# Manarat Mathletes Club — Website
+# MMC Fest Hub — Smart Club Operations for Manarat Mathletes Club
 
-React + TypeScript + Vite, backed by Supabase (Postgres + Auth + Storage).
+Submitted to the **9th DRMC International Tech Carnival 2026 — AI Web
+Development Contest** ("Smart Club Operations").
 
-**Looking for how the system actually works** — the full schema, every
-page/section mapped out, data-flow walkthroughs, the admin permissions
-model? See **[sourceoftruth/](sourceoftruth/)**. This README is just local
-setup.
+## Description
 
-## Run locally
+Clubs that run multiple events (fests, workshops, quizzes, contests)
+usually fall back on Google Forms for registration — no directory, no
+capacity limits, no way for an organizer to see everything in one place,
+no way for a registrant to look up or cancel what they signed up for.
+This project replaces that with a full **Organization → Fest → Event →
+Registration** platform: visitors browse fests and their events, search
+and filter across all of them, register with live capacity/deadline
+enforcement, and look up or cancel their own registrations by email +
+ticket code (no visitor accounts). Organizers get a dashboard to create
+and publish fests/events and manage every participant.
+
+It's built as a new module on top of the Manarat Mathletes Club's
+existing website (home, about, announcements, leaderboards, hall of
+fame, admin panel) rather than a separate project — see
+[Deployment](#deployment-url) for why it runs as its own deployment
+regardless.
+
+## Features
+
+**Fest Directory**
+- Fest cards grouped into Upcoming / Ongoing / Past tabs
+- Event cards with category, date/time, venue, deadline, seats left, and
+  a live status pill (Open / Closing soon / Full / Closed / Not yet open)
+- Search across every event by name, category, venue, or fest
+- Category, fest, and "open for registration only" filters, kept in the
+  URL query string
+
+**Registration**
+- Per-event registration with capacity and deadline enforcement,
+  enforced server-side (not just in the UI)
+- Automatic waitlisting when an event is full and its organizer has
+  enabled one
+- A bookmarkable confirmation page with the registration's ticket code
+- "My Registrations": look yourself up by email + any one ticket code
+  (no account/password), view every registration, cancel any of them
+
+**Organizer tools**
+- A dashboard with overview stats (fests, events, total registrations,
+  today's sign-ups)
+- Fest and event CRUD: create, edit, publish/unpublish/archive, cover
+  image upload
+- Per-event participant management: search, filter by status/school/
+  class, per-row and bulk status changes, CSV export
+- Per-event statistics: capacity fill %, status breakdown, sign-ups-
+  per-day chart, school breakdown
+
+**Bonus**
+- Not implemented this round — see [Known Limitations](#known-limitations).
+
+## Tech Stack
+
+- React 19, TypeScript, Vite, React Router
+- Supabase (Postgres, Auth, Storage, Row Level Security)
+- Vercel (hosting + auto-deploy)
+- No new npm packages were added for this build — see `package.json`
+  for exact versions.
+
+## Setup
 
 ```bash
 npm install
-cp .env.example .env.local   # then fill in your Supabase URL + anon key
+cp .env.example .env.local   # fill in your Supabase URL + anon key
 npm run dev
 ```
 
-## Supabase setup (one-time)
+Full Supabase project setup, the Fest Hub's separate-deployment setup,
+email delivery, and admin management: see **[docs/SETUP.md](docs/SETUP.md)**.
 
-1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor → New query**, paste in the contents of
-   [`supabase/schema.sql`](supabase/schema.sql), and run it. This creates
-   the `members`, `activity_log`, `resources`, `forum_posts`, `articles`,
-   `session_photos`, `leaderboards`, `leaderboard_entries`, and `admins`
-   tables, their row-level security policies, the private `mmc-files`
-   storage bucket for admin uploads, and the public `mmc-public` bucket
-   for session photos (which need permanent URLs). It's safe to re-run
-   any time (e.g. after pulling changes to this file) — **re-run it after
-   this update** to pick up the new tables and bucket.
-3. Set up Brevo as the SMTP provider so Supabase's confirmation and
-   password-reset emails actually deliver reliably (Supabase's own
-   default mailer is low-volume and rate-limited) — see **Brevo email
-   setup** below. Do this before adding real admins.
-4. `schema.sql` already seeds `mdmuntasir.2029@gmail.com` into the
-   `admins` table — that email just needs to set its password once via
-   the "First time signing in?" link on `/signin` (see below).
-5. Grab your keys from **Project Settings → API**: the **Project URL** and
-   the **anon / public** key (not the service role key — that one should
-   never end up in frontend code).
-6. Put them in `.env.local` for local dev:
-   ```
-   VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-   VITE_SUPABASE_ANON_KEY=your-anon-public-key
-   ```
-7. Add the same two variables in Vercel: **Project Settings → Environment
-   Variables**, then redeploy so the build picks them up.
+## Deployment URL
 
-## Brevo email setup
+*(Fest Hub contest deployment — add the live `*.vercel.app` or custom
+subdomain URL here once deployed; see `docs/SETUP.md`.)*
 
-Supabase Auth sends its own emails (signup confirmation, password reset)
-through whatever mailer is configured — by default that's Supabase's own
-low-volume sender, which is rate-limited and can land in spam. Routing
-it through Brevo instead is a one-time dashboard setting, no code:
+The main club site (unaffected by this feature, which stays hidden
+there) is at [manaratmath.club](https://manaratmath.club).
 
-1. In [Brevo](https://www.brevo.com), go to **SMTP & API → SMTP** to get
-   your SMTP login (your Brevo account email) and **generate an SMTP
-   key** (this is different from Brevo's API key — it's the one used
-   here). Also verify a sender address/domain under **Senders** — Brevo
-   won't relay mail from an unverified sender.
-2. In Supabase Dashboard → **Project Settings → Authentication → SMTP
-   Settings**, enable **Custom SMTP** and fill in:
-   - Host: `smtp-relay.brevo.com`
-   - Port: `587`
-   - Username: your Brevo account email
-   - Password: the SMTP key from step 1 (not your Brevo login password)
-   - Sender email / name: your verified sender
-3. Save. From then on, every Supabase Auth email goes through Brevo.
-4. Now that delivery is reliable, turn **Confirm email** on:
-   **Authentication → Providers → Email → Confirm email**. This closes a
-   real gap — with it off, someone who knows or guesses a listed admin's
-   email could claim that account before the real person does (see the
-   note in `src/lib/auth.ts`'s `claimAccount`); with it on, the account
-   isn't usable until a confirmation link reaches the actual inbox. The
-   self-serve setup flow and the sign-in form both already adapt to
-   whichever setting is active — no code changes needed either way.
+## Demo Credentials
 
-## Adding another admin
+**Organizer login** (for `/admin/events`): `demo-admin@example.com` —
+password set at deployment time (see the submission form / repository
+owner). Demo-only; granted only the Fest Hub admin sections, not super
+admin.
 
-Admin access is controlled entirely by the `admins` table in Supabase —
-nothing in the code needs to change, and there's no separate step to
-create their Supabase Auth account.
+**Visitor lookup** (for `/my-registrations`, no account needed): email
+`judge@example.com` with any of these ticket codes —
+`MMC-DEMO01` (confirmed), `MMC-DEMO02` (waitlisted), `MMC-DEMO03`
+(attended).
 
-1. In the SQL Editor, run:
-   ```sql
-   insert into admins (email) values ('newadmin@example.com');
-   ```
-2. Tell them to go to `/signin` and click **"First time signing in with
-   this email? Set your password"**. With Brevo + Confirm email set up
-   as above, they'll get a confirmation email to click before the
-   account is usable; without it, they're signed in immediately.
+See **[docs/JUDGING_GUIDE.md](docs/JUDGING_GUIDE.md)** for a full
+rubric-to-feature walkthrough.
 
-That self-serve setup is really `supabase.auth.signUp()` under the hood,
-which Supabase refuses to run a second time for the same email once it
-already has a password — so this only ever works once per address, not
-as a way to reset an existing one. Before calling it, the sign-in form
-first checks the email against `admins` via `is_email_admin()` (another
-SECURITY DEFINER function, returns true/false for one specific email
-without exposing the list) and refuses outright if it isn't listed —
-so a non-admin email gets an immediate "hasn't been added as an admin"
-message and no Supabase Auth account is created for it at all.
+## Third-party Services/APIs
 
-To remove an admin: `delete from admins where email = 'old@example.com';`
-(this only revokes access — it doesn't delete their Supabase Auth
-account. Any stray accounts created while this project's admin auth was
-being built/tested — before the is_email_admin() pre-check existed —
-are harmless but can be cleaned up manually under **Authentication →
-Users** if you want the list tidy.)
-(this doesn't delete their Supabase Auth account, just their access —
-their old password stops meaning anything for this site either way).
+- **Supabase** — Postgres database, Auth, Storage, and Row Level
+  Security; the entire backend.
+- **Vercel** — hosting and CI/CD (auto-deploy on push).
+- **Brevo** — transactional email (SMTP) for Supabase Auth's
+  confirmation/reset emails; see `docs/SETUP.md`.
+- **Fonts** — several families are self-hosted under `public/fonts/`
+  with their SIL Open Font License files alongside them.
+- No paid APIs, no new npm packages added for the Fest Hub build.
 
-The `admins` table has RLS enabled with no policies on it at all, so it
-isn't readable through the API by anyone — not even signed-in admins.
-Membership checks go through a `is_admin()` SQL function (SECURITY
-DEFINER, see `schema.sql`) that the frontend calls via
-`supabase.rpc('is_admin')`; it only ever returns true/false, never the
-list itself.
+## AI Tools/Features Used
 
-## Architecture notes
+Built almost entirely with **Claude Sonnet 5** via **Claude Code** (an
+AI coding agent), with the product requirements document drafted with
+**Claude Opus 5.5**. The deployed application itself does not call any
+AI model at runtime — AI was used only during development. Full
+disclosure, including what the human team did and did not delegate:
+**[docs/AI_DISCLOSURE.md](docs/AI_DISCLOSURE.md)**.
 
-- `src/lib/db.ts` and `src/lib/auth.ts` are the only files that talk to
-  Supabase — every page/component calls through them, so if the backend
-  ever changes again, this is still the only place that needs to.
-- Uploaded files (activity log documents, resources, article attachments)
-  live in the private `mmc-files` Supabase Storage bucket. Download links
-  are short-lived signed URLs generated on demand, not public links —
-  except files under the `articles/` folder, which have a storage policy
-  allowing public read, since Articles is a public-facing section.
-- Articles (`/articles`) are the one piece of club data that's publicly
-  readable — anyone can view/download published articles, but only
-  admins can publish, edit, or remove them (see the `articles_*` policies
-  in `schema.sql`).
-- `src/pages/Access.tsx`'s sign-in form doesn't pre-check who's allowed
-  in — it attempts a real sign-in, then calls `is_admin()`; if that comes
-  back false it immediately signs the session back out. The actual
-  enforcement is always the RLS policies, never anything client-side.
-- Forgot password: "Forgot your password?" on `/signin` calls
-  `supabase.auth.resetPasswordForEmail()`, which emails a recovery link
-  pointing at `/reset-password` (`src/pages/ResetPassword.tsx`). That
-  page waits for Supabase's `PASSWORD_RECOVERY` auth event (or an
-  already-active session, as a fallback for the case where that event
-  fires before the page finishes mounting) before showing the "choose a
-  new password" form, so it can't be used without a valid link. Passwords
-  set this way go through `supabase.auth.updateUser()`, which — unlike
-  the first-time `claimAccount()` — does update an existing password.
+## Screenshots
+
+*(To be added to `docs/screenshots/` once the contest deployment is
+live — desktop and mobile views of the fest directory, an event page,
+the registration confirmation, and the organizer dashboard.)*
+
+## Known Limitations
+
+- **No visitor accounts** — registration lookup is by email + ticket
+  code, not a password login, by design (see the PRD).
+- **No confirmation emails** — the confirmation page is the only
+  record; Brevo/SMTP wiring for registration emails wasn't built this
+  round (P2 in the project's scheme of work).
+- **No bonus tier implemented** — QR ticket/check-in, automatic waitlist
+  promotion, and calendar (.ics) export were scoped as bonus work and
+  didn't make the cut against the deadline; a complete, tested core was
+  prioritized over a partial bonus.
+- **Free-tier hosting** — the contest deployment runs on Supabase/Vercel
+  free tiers; a long-idle Supabase project can pause and need a visit to
+  wake it back up.
+- **Mock data only** on the contest deployment — see
+  `supabase/seed.sql`; the real club database never receives this data
+  or the `fests` section toggle.
+- **No automated test suite** — verified via manual Playwright-driven
+  click-throughs during development (zero console errors across the
+  full register → confirm → look-up → admin flow), not CI-enforced
+  tests.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+---
+
+**Looking for how the system actually works?** The full schema, every
+page/section mapped out, data-flow walkthroughs, and the admin
+permissions model live in **[sourceoftruth/](sourceoftruth/)**.
