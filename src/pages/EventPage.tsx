@@ -9,6 +9,23 @@ import { downloadIcsForEvent } from "../lib/ics";
 import SectionUnavailable from "../components/SectionUnavailable";
 import { useSiteSections } from "../hooks/useSiteSections";
 
+/**
+ * Supabase's PostgrestError does extend Error, so `err instanceof Error`
+ * normally works — but a generic "Could not complete registration"
+ * fallback with no real reason attached is exactly what hid a real,
+ * every-single-registration-fails bug from view once in production. A
+ * defensive message property check (rather than only instanceof Error)
+ * means any future backend failure surfaces its actual reason instead
+ * of a guess, however it happens to be thrown.
+ */
+function describeRegistrationError(err: unknown): string {
+  if (err instanceof Error && err.message) return err.message;
+  if (typeof err === "object" && err !== null && "message" in err && typeof err.message === "string" && err.message) {
+    return err.message;
+  }
+  return "Could not complete registration. Please try again, or contact the organizers if this keeps happening.";
+}
+
 function useCountdown(targetIso: string) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -89,6 +106,14 @@ export default function EventPage() {
       setFormError(phoneErr);
       return;
     }
+    if (!school.trim()) {
+      setFormError("School is required.");
+      return;
+    }
+    if (!className.trim()) {
+      setFormError("Class is required.");
+      return;
+    }
     for (const field of event.customFields) {
       if (field.required && !(customValues[field.key] ?? "").trim()) {
         setFormError(`"${field.label}" is required.`);
@@ -110,7 +135,7 @@ export default function EventPage() {
       db.sendRegistrationEmail(result.id).catch(() => {});
       navigate(`/registration/${result.ticketCode}?email=${encodeURIComponent(email.trim())}`);
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Could not complete registration.");
+      setFormError(describeRegistrationError(err));
       setSubmitting(false);
     }
   }
@@ -228,11 +253,11 @@ export default function EventPage() {
                     <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                   </div>
                   <div className="form-field">
-                    <label>School</label>
+                    <label>School <span className="required">*</span></label>
                     <input type="text" value={school} onChange={(e) => setSchool(e.target.value)} />
                   </div>
                   <div className="form-field">
-                    <label>Class</label>
+                    <label>Class <span className="required">*</span></label>
                     <input type="text" value={className} onChange={(e) => setClassName(e.target.value)} />
                   </div>
                   {event.customFields.map((field) => (
