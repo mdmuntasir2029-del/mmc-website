@@ -84,7 +84,10 @@ export default function RegistrationConfirmation() {
             <div><strong>Status:</strong> {registration.status}</div>
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "center", flexWrap: "wrap" }}>
+          <div
+            className="registration-actions"
+            style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "center", flexWrap: "wrap" }}
+          >
             <button className="btn btn-secondary" onClick={() => window.print()}>Print / Save</button>
             {event && (
               <button className="btn btn-secondary" onClick={() => downloadIcsForEvent(event)}>
