@@ -5604,3 +5604,18 @@ tr:hover td {
   }
 }
 
+/* ===================== Print ===================== */
+/* Site chrome and decoration that never belongs in a printed page —
+   most visibly, the registration confirmation's "Print / Save" button
+   (window.print()), but this applies to printing any page. */
+
+@media print {
+  .navbar,
+  .footer,
+  .digital-rain-bg,
+  .report-issue-fab,
+  .registration-actions {
+    display: none !important;
+  }
+}
+
