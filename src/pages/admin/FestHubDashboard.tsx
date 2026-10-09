@@ -2,8 +2,33 @@ import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 import * as db from "../../lib/db";
-import type { Fest, FestEvent, FestStatus, EventCategory, EventRegistration } from "../../lib/types";
+import type {
+  Fest,
+  FestEvent,
+  FestStatus,
+  EventCategory,
+  EventRegistration,
+  CustomFieldDef,
+  CustomFieldType,
+} from "../../lib/types";
 import { EVENT_CATEGORIES } from "../../lib/types";
+
+/** Form-editing shape for one custom field row — options are kept as a
+ *  raw comma-separated string while editing, and the stable `key` is
+ *  only derived from the label at submit time. */
+interface CustomFieldFormRow {
+  label: string;
+  type: CustomFieldType;
+  required: boolean;
+  optionsText: string;
+}
+
+const EMPTY_CUSTOM_FIELD: CustomFieldFormRow = {
+  label: "",
+  type: "text",
+  required: false,
+  optionsText: "",
+};
 
 const EMPTY_FEST_FORM = {
   slug: "",
@@ -32,6 +57,7 @@ const EMPTY_EVENT_FORM = {
   capacity: "",
   waitlistEnabled: true,
   status: "draft" as FestStatus,
+  customFields: [] as CustomFieldFormRow[],
 };
 
 function toSlug(s: string): string {
@@ -47,6 +73,41 @@ function toSlug(s: string): string {
 function toLocalInput(iso: string | null): string {
   if (!iso) return "";
   return iso.slice(0, 16);
+}
+
+// Rows with no label are treated as not-yet-finished and dropped silently
+// (lets an admin click "+ Add field" without it blocking submission).
+// Keys are derived from the label, de-duplicated so two fields can't
+// silently collide and overwrite each other's stored value.
+function toCustomFieldDefs(rows: CustomFieldFormRow[]): CustomFieldDef[] {
+  const seen = new Map<string, number>();
+  return rows
+    .filter((r) => r.label.trim())
+    .map((r) => {
+      let key = toSlug(r.label) || "field";
+      const count = seen.get(key) ?? 0;
+      seen.set(key, count + 1);
+      if (count > 0) key = `${key}-${count + 1}`;
+      return {
+        key,
+        label: r.label.trim(),
+        type: r.type,
+        required: r.required,
+        options:
+          r.type === "select"
+            ? r.optionsText.split(",").map((o) => o.trim()).filter(Boolean)
+            : null,
+      };
+    });
+}
+
+function fromCustomFieldDefs(defs: CustomFieldDef[]): CustomFieldFormRow[] {
+  return defs.map((d) => ({
+    label: d.label,
+    type: d.type,
+    required: d.required,
+    optionsText: (d.options ?? []).join(", "),
+  }));
 }
 
 export default function FestHubDashboard() {
@@ -203,9 +264,25 @@ export default function FestHubDashboard() {
       capacity: ev.capacity === null ? "" : String(ev.capacity),
       waitlistEnabled: ev.waitlistEnabled,
       status: ev.status,
+      customFields: fromCustomFieldDefs(ev.customFields),
     });
     setEventFile(null);
     setEventError("");
+  }
+
+  function addCustomFieldRow() {
+    setEventForm((f) => ({ ...f, customFields: [...f.customFields, { ...EMPTY_CUSTOM_FIELD }] }));
+  }
+
+  function updateCustomFieldRow(index: number, patch: Partial<CustomFieldFormRow>) {
+    setEventForm((f) => ({
+      ...f,
+      customFields: f.customFields.map((row, i) => (i === index ? { ...row, ...patch } : row)),
+    }));
+  }
+
+  function removeCustomFieldRow(index: number) {
+    setEventForm((f) => ({ ...f, customFields: f.customFields.filter((_, i) => i !== index) }));
   }
 
   function cancelEditEvent() {
@@ -245,6 +322,7 @@ export default function FestHubDashboard() {
         capacity: eventForm.capacity.trim() === "" ? null : parseInt(eventForm.capacity, 10),
         waitlistEnabled: eventForm.waitlistEnabled,
         status: eventForm.status,
+        customFields: toCustomFieldDefs(eventForm.customFields),
       };
       if (editingEventId) {
         await db.updateEvent(editingEventId, payload, eventFile);
@@ -553,6 +631,68 @@ export default function FestHubDashboard() {
               />
               Enable a waitlist once this event is full
             </label>
+          </div>
+          <div className="form-field">
+            <label>Custom registration fields (optional)</label>
+            <p style={{ fontSize: "0.85rem", color: "var(--ink-soft)", marginTop: -4, marginBottom: 10 }}>
+              Extra questions on this event's registration form — e.g. a team name
+              and teammate names for a team event.
+            </p>
+            {eventForm.customFields.map((row, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 8,
+                  alignItems: "center",
+                  marginBottom: 8,
+                  padding: 10,
+                  border: "1.5px solid #d3ead4",
+                  borderRadius: 8,
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Field label, e.g. Team Name"
+                  value={row.label}
+                  onChange={(e) => updateCustomFieldRow(i, { label: e.target.value })}
+                  style={{ flex: 2, minWidth: 160, padding: "8px 10px", borderRadius: 6, border: "1.5px solid #d3ead4" }}
+                />
+                <select
+                  value={row.type}
+                  onChange={(e) => updateCustomFieldRow(i, { type: e.target.value as CustomFieldType })}
+                  style={{ flex: 1, minWidth: 110 }}
+                >
+                  <option value="text">Short text</option>
+                  <option value="textarea">Paragraph</option>
+                  <option value="select">Dropdown</option>
+                </select>
+                {row.type === "select" && (
+                  <input
+                    type="text"
+                    placeholder="Options, comma-separated"
+                    value={row.optionsText}
+                    onChange={(e) => updateCustomFieldRow(i, { optionsText: e.target.value })}
+                    style={{ flex: 2, minWidth: 160, padding: "8px 10px", borderRadius: 6, border: "1.5px solid #d3ead4" }}
+                  />
+                )}
+                <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.85rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={row.required}
+                    onChange={(e) => updateCustomFieldRow(i, { required: e.target.checked })}
+                  />
+                  Required
+                </label>
+                <button type="button" className="btn btn-danger btn-sm" onClick={() => removeCustomFieldRow(i)}>
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button type="button" className="btn btn-secondary btn-sm" onClick={addCustomFieldRow}>
+              + Add field
+            </button>
           </div>
           <div className="form-field">
             <label>Cover image</label>

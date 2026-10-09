@@ -183,6 +183,18 @@ on conflict (slug) do update set
   waitlist_enabled = excluded.waitlist_enabled,
   status = excluded.status;
 
+-- Demonstrates the custom-fields feature on the one event that's
+-- naturally team-based ("Teams of 4 pass answers down the line").
+-- A plain update (not part of the insert above) so it's additive and
+-- doesn't need touching the big shared column list for every event.
+update events set custom_fields = '[
+  {"key": "team_name", "label": "Team Name", "type": "text", "required": true, "options": null},
+  {"key": "teammate_2", "label": "Teammate 2", "type": "text", "required": false, "options": null},
+  {"key": "teammate_3", "label": "Teammate 3", "type": "text", "required": false, "options": null},
+  {"key": "teammate_4", "label": "Teammate 4", "type": "text", "required": false, "options": null}
+]'::jsonb
+where slug = 'team-relay-round';
+
 -- ========== Registrations ==========
 -- 150-250 fictional registrations spread over the last ~2 weeks (so
 -- the organizer dashboard's sign-ups-per-day chart has real shape),

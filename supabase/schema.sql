@@ -906,6 +906,13 @@ create table if not exists events (
 
 create index if not exists events_fest_idx on events (fest_id);
 
+-- Organizer-defined extra registration fields for this event (e.g. team
+-- name / teammate names for a team event) — an array of
+-- {key, label, type: "text"|"textarea"|"select", required, options}.
+-- Deliberately schemaless (jsonb) rather than new columns, since the
+-- set of fields varies per event, not per table.
+alter table events add column if not exists custom_fields jsonb not null default '[]'::jsonb;
+
 -- No public select policy at all (see the admins/admin_permissions
 -- pattern above) — every public read/write goes through the
 -- SECURITY DEFINER functions below, which never return more than a
@@ -928,6 +935,11 @@ create table if not exists event_registrations (
   updated_at timestamptz not null default now(),
   unique (event_id, email)
 );
+
+-- Answers to that event's custom_fields, keyed by field "key". Validated
+-- client-side against the event's field list (required/type), same
+-- trust level as every other visitor-supplied column on this table.
+alter table event_registrations add column if not exists custom_field_values jsonb not null default '{}'::jsonb;
 
 create index if not exists event_registrations_event_idx on event_registrations (event_id);
 
@@ -984,13 +996,21 @@ $$;
 -- The only way the public can create a registration. Locks the event
 -- row first (select ... for update) so two near-simultaneous
 -- registrations can't both claim the last seat.
+--
+-- Dropped and recreated (rather than a plain `create or replace`) because
+-- adding a new parameter changes the function's argument-type identity —
+-- `create or replace` would otherwise leave the old 6-arg version in
+-- place as a second overload instead of replacing it.
+drop function if exists register_for_event(uuid, text, text, text, text, text);
+
 create or replace function register_for_event(
   p_event_id uuid,
   p_full_name text,
   p_email text,
   p_phone text,
   p_school text,
-  p_class_name text
+  p_class_name text,
+  p_custom_field_values jsonb default '{}'::jsonb
 ) returns table (ticket_code text, status text)
 language plpgsql security definer
 set search_path = public
@@ -1038,17 +1058,18 @@ begin
   new_code := generate_ticket_code();
 
   insert into event_registrations (
-    event_id, ticket_code, full_name, email, phone, school, class_name, status
+    event_id, ticket_code, full_name, email, phone, school, class_name, status, custom_field_values
   ) values (
     p_event_id, new_code, trim(p_full_name), lower(trim(p_email)), trim(p_phone),
-    nullif(trim(p_school), ''), nullif(trim(p_class_name), ''), new_status
+    nullif(trim(p_school), ''), nullif(trim(p_class_name), ''), new_status,
+    coalesce(p_custom_field_values, '{}'::jsonb)
   );
 
   return query select new_code, new_status;
 end;
 $$;
 
-grant execute on function register_for_event(uuid, text, text, text, text, text) to anon, authenticated;
+grant execute on function register_for_event(uuid, text, text, text, text, text, jsonb) to anon, authenticated;
 
 -- The "login" for visitors without accounts: only returns rows if the
 -- ticket code matches one of that email's own registrations, so

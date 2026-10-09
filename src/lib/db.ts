@@ -30,6 +30,8 @@ import type {
   FestEvent,
   EventCategory,
   EventRegistration,
+  CustomFieldDef,
+  CustomFieldValues,
 } from "./types";
 
 const SIGNED_URL_TTL_SECONDS = 60 * 10;
@@ -1692,6 +1694,7 @@ interface EventRow {
   cover_path: string | null;
   status: FestStatus;
   created_at: string;
+  custom_fields: CustomFieldDef[];
 }
 
 function fromEventRow(row: EventRow): FestEvent {
@@ -1716,6 +1719,7 @@ function fromEventRow(row: EventRow): FestEvent {
     coverSrcSet: row.cover_path ? gallerySrcSet(row.cover_path) : null,
     status: row.status,
     createdAt: row.created_at,
+    customFields: row.custom_fields ?? [],
   };
 }
 
@@ -1766,6 +1770,7 @@ export async function addEvent(
     capacity: number | null;
     waitlistEnabled: boolean;
     status: FestStatus;
+    customFields: CustomFieldDef[];
   },
   file: File | null
 ): Promise<FestEvent> {
@@ -1796,6 +1801,7 @@ export async function addEvent(
       waitlist_enabled: data.waitlistEnabled,
       status: data.status,
       cover_path: coverPath,
+      custom_fields: data.customFields,
     })
     .select("*")
     .single();
@@ -1822,6 +1828,7 @@ export async function updateEvent(
     capacity: number | null;
     waitlistEnabled: boolean;
     status: FestStatus;
+    customFields: CustomFieldDef[];
   }>,
   file?: File | null
 ): Promise<FestEvent> {
@@ -1839,6 +1846,7 @@ export async function updateEvent(
   if (data.capacity !== undefined) patch.capacity = data.capacity;
   if (data.waitlistEnabled !== undefined) patch.waitlist_enabled = data.waitlistEnabled;
   if (data.status !== undefined) patch.status = data.status;
+  if (data.customFields !== undefined) patch.custom_fields = data.customFields;
 
   if (file) {
     const coverPath = `events/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
@@ -1894,6 +1902,7 @@ export async function registerForEvent(
     phone: string;
     school: string | null;
     className: string | null;
+    customFieldValues?: CustomFieldValues;
   }
 ): Promise<{ ticketCode: string; status: string }> {
   const { data: rows, error } = await supabase.rpc("register_for_event", {
@@ -1903,6 +1912,7 @@ export async function registerForEvent(
     p_phone: data.phone,
     p_school: data.school,
     p_class_name: data.className,
+    p_custom_field_values: data.customFieldValues ?? {},
   });
   if (error) throw error;
   const row = (rows as { ticket_code: string; status: string }[])[0];
@@ -1938,6 +1948,10 @@ function fromMyRegistrationRow(row: MyRegistrationRow): EventRegistration {
     adminNote: null,
     createdAt: row.created_at,
     updatedAt: row.created_at,
+    // get_my_registrations() doesn't return this column (visitors don't
+    // need to see it echoed back) — admins see the real values via
+    // getEventRegistrations()/getAllEventRegistrations() below.
+    customFieldValues: {},
   };
 }
 
@@ -1986,6 +2000,7 @@ interface EventRegistrationRow {
   admin_note: string | null;
   created_at: string;
   updated_at: string;
+  custom_field_values: CustomFieldValues;
 }
 
 function fromEventRegistrationRow(row: EventRegistrationRow): EventRegistration {
@@ -2003,6 +2018,7 @@ function fromEventRegistrationRow(row: EventRegistrationRow): EventRegistration 
     adminNote: row.admin_note,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    customFieldValues: row.custom_field_values ?? {},
   };
 }
 

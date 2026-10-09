@@ -19,7 +19,16 @@ existing conventions exactly (see [backend.md](backend.md)):
 |---|---|---|
 | `fests` | `slug` (unique), `name`, `tagline`, `description`, `cover_path`, `starts_on`, `ends_on`, `venue`, `status` (`draft`/`published`/`archived`) | Standard pattern: public select where `status in ('published','archived')`, `is_admin()` for everything (including drafts) |
 | `events` | `fest_id` → fests, `slug` (unique), `name`, `category` (`Competition`/`Workshop`/`Quiz`/`Session`/`Social`), `starts_at`, `ends_at`, `venue`, `eligibility`, `registration_opens_at`, `registration_deadline`, `capacity` (null = unlimited), `waitlist_enabled`, `cover_path`, `status` | Same pattern as `fests` |
-| `event_registrations` | `event_id` → events, `ticket_code` (unique), `full_name`, `email`, `phone`, `school`, `class_name`, `status` (`pending`/`confirmed`/`waitlisted`/`cancelled`/`rejected`/`attended`), `checked_in_at`, `admin_note`. Unique on `(event_id, email)` | **No public policy at all** — see below |
+| `event_registrations` | `event_id` → events, `ticket_code` (unique), `full_name`, `email`, `phone`, `school`, `class_name`, `status` (`pending`/`confirmed`/`waitlisted`/`cancelled`/`rejected`/`attended`), `checked_in_at`, `admin_note`, `custom_field_values` (jsonb). Unique on `(event_id, email)` | **No public policy at all** — see below |
+
+`events.custom_fields` (jsonb, default `[]`) holds organizer-defined
+extra registration questions: `{key, label, type: "text"|"textarea"|
+"select", required, options}[]`. `EventPage.tsx` renders them
+dynamically after the fixed fields and validates `required` client-side;
+answers are stored in `event_registrations.custom_field_values` keyed
+by `key`. This is how "team registration" is handled — see
+[README.md](../README.md#known-limitations) for why a dedicated team
+data model was deliberately skipped in favor of this.
 
 Because `fests`/`events` have both a public-select policy (status
 check) and an admin `for all` policy, and Postgres combines multiple
@@ -50,7 +59,7 @@ mediates everything" pattern as `admins`/`admin_permissions` — see
 
 | Function | What it does |
 |---|---|
-| `register_for_event(event_id, full_name, email, phone, school, class_name)` | Locks the event row (`select ... for update`) so two near-simultaneous registrations can't both take the last seat. Rejects if the event isn't published, registration hasn't opened, the deadline has passed, or the email is already registered (the table's own unique constraint is the final backstop). Returns `confirmed` if under capacity, `waitlisted` if full with a waitlist, or raises an exception if full without one. |
+| `register_for_event(event_id, full_name, email, phone, school, class_name, custom_field_values default '{}')` | Locks the event row (`select ... for update`) so two near-simultaneous registrations can't both take the last seat. Rejects if the event isn't published, registration hasn't opened, the deadline has passed, or the email is already registered (the table's own unique constraint is the final backstop). Returns `confirmed` if under capacity, `waitlisted` if full with a waitlist, or raises an exception if full without one. The 7th parameter was added after the original 6-arg version shipped — `schema.sql` explicitly `drop function`s the old signature first, since `create or replace` treats an appended parameter as a different overload rather than replacing the existing one. |
 | `get_my_registrations(email, ticket_code)` | Returns **nothing** unless `ticket_code` matches one of that email's own registrations — then returns every registration under that email. This one check is the entire "auth" model for visitors. |
 | `cancel_my_registration(ticket_code, email)` | Sets `status = 'cancelled'`, scoped to the matching row only. |
 | `get_event_seat_counts()` | Returns `{event_id, taken}` for every event (`confirmed`+`attended` counts) — lets the directory show "N seats left" without any participant data leaking. |

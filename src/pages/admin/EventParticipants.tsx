@@ -108,7 +108,11 @@ export default function EventParticipants() {
   }
 
   function exportCsv() {
-    const header = ["Name", "School", "Class", "Email", "Phone", "Ticket", "Status", "Registered At"];
+    const customFields = event?.customFields ?? [];
+    const header = [
+      "Name", "School", "Class", "Email", "Phone", "Ticket", "Status", "Registered At",
+      ...customFields.map((f) => f.label),
+    ];
     const rows = filtered.map((r) => [
       r.fullName,
       r.school ?? "",
@@ -118,6 +122,7 @@ export default function EventParticipants() {
       r.ticketCode,
       r.status,
       new Date(r.createdAt).toLocaleString(),
+      ...customFields.map((f) => r.customFieldValues[f.key] ?? ""),
     ]);
     const csv = [header, ...rows]
       .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
@@ -263,6 +268,7 @@ export default function EventParticipants() {
                   <th>Ticket</th>
                   <th>Status</th>
                   <th>Registered</th>
+                  {(event?.customFields.length ?? 0) > 0 && <th>Details</th>}
                 </tr>
               </thead>
               <tbody>
@@ -292,6 +298,24 @@ export default function EventParticipants() {
                       </select>
                     </td>
                     <td>{new Date(r.createdAt).toLocaleDateString()}</td>
+                    {(event?.customFields.length ?? 0) > 0 && (
+                      <td>
+                        {event && event.customFields.some((f) => r.customFieldValues[f.key]) ? (
+                          <details>
+                            <summary style={{ cursor: "pointer" }}>View</summary>
+                            <div style={{ fontSize: "0.85rem", marginTop: 4 }}>
+                              {event.customFields.map((f) => (
+                                <div key={f.key}>
+                                  <strong>{f.label}:</strong> {r.customFieldValues[f.key] || "—"}
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

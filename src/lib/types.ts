@@ -235,6 +235,22 @@ export const EVENT_CATEGORIES: EventCategory[] = [
   "Social",
 ];
 
+export type CustomFieldType = "text" | "textarea" | "select";
+
+/** One organizer-defined extra question on an event's registration form
+ *  (e.g. a team name, or teammate names for a team event). */
+export interface CustomFieldDef {
+  /** Stable key used in CustomFieldValues — not shown to visitors. */
+  key: string;
+  label: string;
+  type: CustomFieldType;
+  required: boolean;
+  /** Only used when type === "select". */
+  options: string[] | null;
+}
+
+export type CustomFieldValues = Record<string, string>;
+
 /** One event within a fest — the thing a visitor actually registers for. */
 export interface FestEvent {
   id: string;
@@ -258,6 +274,7 @@ export interface FestEvent {
   coverSrcSet: string | null;
   status: FestStatus;
   createdAt: string;
+  customFields: CustomFieldDef[];
 }
 
 export type RegistrationStatus =
@@ -284,6 +301,7 @@ export interface EventRegistration {
   adminNote: string | null;
   createdAt: string;
   updatedAt: string;
+  customFieldValues: CustomFieldValues;
 }
 
 /**

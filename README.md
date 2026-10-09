@@ -46,8 +46,12 @@ regardless.
   today's sign-ups)
 - Fest and event CRUD: create, edit, publish/unpublish/archive, cover
   image upload
+- Custom per-event registration fields (short text / paragraph /
+  dropdown, each optionally required) — e.g. a team name and teammate
+  names for a team event, with no schema change needed per event
 - Per-event participant management: search, filter by status/school/
-  class, per-row and bulk status changes, CSV export
+  class, per-row and bulk status changes, CSV export (including any
+  custom field answers), a details view per registration
 - Per-event statistics: capacity fill %, status breakdown, sign-ups-
   per-day chart, school breakdown
 
@@ -143,7 +147,25 @@ All captured from the live deployment — see [`docs/screenshots/`](docs/screens
   code, not a password login, by design (see the PRD).
 - **No confirmation emails** — the confirmation page is the only
   record; Brevo/SMTP wiring for registration emails wasn't built this
-  round (P2 in the project's scheme of work).
+  round (P2 in the project's scheme of work) — it needs a transactional
+  email provider's API key, which wasn't available to wire up and test
+  safely in this pass.
+- **No dedicated "team registration"** — rather than redesigning the
+  core data model around teams (which would ripple through capacity
+  counting, the waitlist trigger, and every admin view, right after
+  that model was proven correct against a real Postgres engine),
+  team-style sign-ups are instead handled through custom per-event
+  fields — see "Team Relay Round" in the seed data for a team
+  name + 3 teammate fields. Each registration is still one row with
+  one email/ticket, which keeps the verified capacity/waitlist logic
+  untouched.
+- **The real club's existing Olympiad registration page
+  (`/intra-olympiad-registration-2027`) was intentionally left as-is**
+  rather than migrated onto Fest Hub's generic system. It's a separate,
+  already-live page on the real site with its own table
+  (`olympiad_registrations`) and real prior sign-ups — rebuilding it
+  onto a new system is a product decision with real consequences for
+  that flow, not something to fold into a contest deadline.
 - **Check-in is lookup-based, not camera-scanning** — the QR code is
   there for a phone's native camera/scanner to decode, but the admin
   participants page itself only has a text search box, not an in-app

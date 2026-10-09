@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import * as db from "../lib/db";
-import type { Fest, FestEvent } from "../lib/types";
+import type { Fest, FestEvent, CustomFieldValues } from "../lib/types";
 import { canRegister, eventPill, seatsLeftLabel } from "../lib/festStatus";
 import { validateEmail, validatePhone } from "../lib/validation";
 import { downloadIcsForEvent } from "../lib/ics";
@@ -38,6 +38,7 @@ export default function EventPage() {
   const [phone, setPhone] = useState("");
   const [school, setSchool] = useState("");
   const [className, setClassName] = useState("");
+  const [customValues, setCustomValues] = useState<CustomFieldValues>({});
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -88,6 +89,12 @@ export default function EventPage() {
       setFormError(phoneErr);
       return;
     }
+    for (const field of event.customFields) {
+      if (field.required && !(customValues[field.key] ?? "").trim()) {
+        setFormError(`"${field.label}" is required.`);
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const result = await db.registerForEvent(event.id, {
@@ -96,6 +103,7 @@ export default function EventPage() {
         phone: phone.trim(),
         school: school.trim() || null,
         className: className.trim() || null,
+        customFieldValues: customValues,
       });
       navigate(`/registration/${result.ticketCode}?email=${encodeURIComponent(email.trim())}`);
     } catch (err) {
@@ -224,6 +232,36 @@ export default function EventPage() {
                     <label>Class</label>
                     <input type="text" value={className} onChange={(e) => setClassName(e.target.value)} />
                   </div>
+                  {event.customFields.map((field) => (
+                    <div className="form-field" key={field.key}>
+                      <label>
+                        {field.label} {field.required && <span className="required">*</span>}
+                      </label>
+                      {field.type === "textarea" ? (
+                        <textarea
+                          value={customValues[field.key] ?? ""}
+                          onChange={(e) => setCustomValues({ ...customValues, [field.key]: e.target.value })}
+                          rows={3}
+                        />
+                      ) : field.type === "select" ? (
+                        <select
+                          value={customValues[field.key] ?? ""}
+                          onChange={(e) => setCustomValues({ ...customValues, [field.key]: e.target.value })}
+                        >
+                          <option value="">Select...</option>
+                          {(field.options ?? []).map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          value={customValues[field.key] ?? ""}
+                          onChange={(e) => setCustomValues({ ...customValues, [field.key]: e.target.value })}
+                        />
+                      )}
+                    </div>
+                  ))}
                   <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%" }}>
                     {submitting ? "Registering..." : "Register"}
                   </button>
