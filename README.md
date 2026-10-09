@@ -84,18 +84,16 @@ email delivery, and admin management: see **[docs/SETUP.md](docs/SETUP.md)**.
 
 ## Deployment URL
 
-*(Fest Hub contest deployment — add the live `*.vercel.app` or custom
-subdomain URL here once deployed; see `docs/SETUP.md`.)*
+Fest Hub contest deployment: [mmc-website-fest.vercel.app](https://mmc-website-fest.vercel.app)
 
 The main club site (unaffected by this feature, which stays hidden
 there) is at [manaratmath.club](https://manaratmath.club).
 
 ## Demo Credentials
 
-**Organizer login** (for `/admin/events`): `demo-admin@example.com` —
-password set at deployment time (see the submission form / repository
-owner). Demo-only; granted only the Fest Hub admin sections, not super
-admin.
+**Organizer login** (for `/admin/events`): `demo-admin@manaratmath.club`
+/ `FestHub2026!Judge`. Demo-only; granted only the Fest Hub admin
+sections, not super admin.
 
 **Visitor lookup** (for `/my-registrations`, no account needed): email
 `judge@example.com` with any of these ticket codes —

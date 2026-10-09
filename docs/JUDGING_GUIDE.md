@@ -4,8 +4,7 @@ Everything the rubric asks for, mapped to exactly where to look — for
 the 9th DRMC International Tech Carnival 2026, AI Web Development
 Contest ("Smart Club Operations").
 
-**Demo admin:** `demo-admin@example.com` / set at deployment time (see
-the submitted repository link / contest form for the current password).
+**Demo admin:** `demo-admin@manaratmath.club` / `FestHub2026!Judge`.
 Grants: Fests & Events, Event Participants (not super admin).
 
 **Judge visitor login (no account needed):** email `judge@example.com`

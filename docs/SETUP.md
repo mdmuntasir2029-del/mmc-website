@@ -64,13 +64,26 @@ the whole feature hidden):
    2. Run `schema.sql`, then `supabase/seed.sql` (~3 fests, 9 events
       covering every registration state, ~220 fictional registrations,
       and three judge demo tickets under `judge@example.com`).
-   3. Create a demo admin:
+   3. Create a demo admin (note: Supabase rejects `@example.com` as an
+      invalid domain on signup, so use a real domain you control —
+      this project uses `manaratmath.club`):
       ```sql
-      insert into admins (email) values ('demo-admin@example.com');
+      insert into admins (email) values ('demo-admin@manaratmath.club');
       ```
       Have it set its password via `/signin`'s first-time flow, then
       from `/admin/roles` grant it **only** `Fests & Events` and
       `Event Participants` — not super admin.
+
+      **If sign-in fails with "Email not confirmed"**: some Supabase
+      projects now default **Confirm email** to *on* even without Brevo
+      set up (this doc originally assumed the opposite default). Either
+      turn it off at **Authentication → Providers → Email → Confirm
+      email**, or confirm the account directly via SQL instead of
+      setting up real mail delivery just for a demo account:
+      ```sql
+      update auth.users set email_confirmed_at = now()
+      where email = 'demo-admin@manaratmath.club';
+      ```
    4. New Vercel project, same GitHub repo, same branch, pointed at
       this Supabase project's URL/anon key via its own env vars.
    5. Take a database backup after seeding, in case a judge deletes
