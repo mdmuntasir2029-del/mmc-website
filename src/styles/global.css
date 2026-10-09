@@ -5432,6 +5432,33 @@ tr:hover td {
   color: var(--text-on-dark);
 }
 
+/* Same translucent-on-dark treatment as .fest-search-bar's input, so
+   these forms don't show stark white boxes against the dark glass
+   panels they sit in. */
+.event-register-panel .form-field input,
+.event-register-panel .form-field select,
+.event-register-panel .form-field textarea,
+.my-registrations-lookup .form-field input,
+.my-registrations-lookup .form-field select,
+.my-registrations-lookup .form-field textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  color: var(--text-on-dark);
+}
+
+.event-register-panel .form-field input::placeholder,
+.my-registrations-lookup .form-field input::placeholder {
+  color: rgba(243, 247, 239, 0.4);
+}
+
+.event-register-panel .form-field input:focus,
+.event-register-panel .form-field select:focus,
+.my-registrations-lookup .form-field input:focus,
+.my-registrations-lookup .form-field select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(100, 207, 143, 0.15);
+}
+
 .registration-confirmation {
   max-width: 560px;
   margin: 0 auto;
