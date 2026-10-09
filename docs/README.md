@@ -18,8 +18,8 @@ for a map of how the codebase itself is put together.
   walkthrough with the demo logins.
 - [AI_DISCLOSURE.md](AI_DISCLOSURE.md) — full AI-use disclosure for the
   contest submission.
-- `screenshots/` — contest submission screenshots (added once the Fest
-  Hub deployment is live).
+- `screenshots/` — contest submission screenshots, captured from the
+  live deployment.
 
 For the full depth — every table and RLS policy, every page and admin
 section cross-referenced, exact data-flow walkthroughs, the admin

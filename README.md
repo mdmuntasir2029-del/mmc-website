@@ -127,9 +127,15 @@ disclosure, including what the human team did and did not delegate:
 
 ## Screenshots
 
-*(To be added to `docs/screenshots/` once the contest deployment is
-live — desktop and mobile views of the fest directory, an event page,
-the registration confirmation, and the organizer dashboard.)*
+All captured from the live deployment — see [`docs/screenshots/`](docs/screenshots/):
+
+| | Desktop | Mobile |
+|---|---|---|
+| Fest directory | [fest-directory-desktop.png](docs/screenshots/fest-directory-desktop.png) | [fest-directory-mobile.png](docs/screenshots/fest-directory-mobile.png) |
+| Event page | [event-page-desktop.png](docs/screenshots/event-page-desktop.png) | [event-page-mobile.png](docs/screenshots/event-page-mobile.png) |
+| Registration confirmation | [registration-confirmation.png](docs/screenshots/registration-confirmation.png) | — |
+| Organizer dashboard | [organizer-dashboard-desktop.png](docs/screenshots/organizer-dashboard-desktop.png) | — |
+| Event participants | [event-participants-desktop.png](docs/screenshots/event-participants-desktop.png) | — |
 
 ## Known Limitations
 
