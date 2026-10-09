@@ -1,5 +1,7 @@
 // Fest Hub: sends a registration confirmation/waitlist email via Brevo's
-// transactional email API. Deploy with:
+// transactional email API, with a one-page "Participant Details" PDF
+// (name, ticket code, QR code, event/venue/time, school/class, status)
+// attached for use at check-in — see ticket-pdf.ts. Deploy with:
 //   supabase functions deploy send-registration-email --project-ref <ref>
 //   supabase secrets set BREVO_API_KEY=... SENDER_EMAIL=... SENDER_NAME="Manarat Mathletes Club" --project-ref <ref>
 // Called fire-and-forget from the frontend right after a successful
@@ -13,9 +15,16 @@
 // no public read policy.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { buildTicketPdf } from "./ticket-pdf.ts";
 
 interface RequestBody {
   registrationId: string;
+}
+
+function toBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
 }
 
 Deno.serve(async (req) => {
@@ -50,7 +59,7 @@ Deno.serve(async (req) => {
 
   const { data: registration, error: regError } = await supabase
     .from("event_registrations")
-    .select("full_name, email, ticket_code, status, event_id")
+    .select("full_name, email, ticket_code, status, event_id, school, class_name")
     .eq("id", body.registrationId)
     .single();
   if (regError || !registration) {
@@ -92,8 +101,21 @@ Deno.serve(async (req) => {
         <strong>Ticket code:</strong> ${registration.ticket_code}
       </p>
       <p>Keep this ticket code and this email address — you'll need both to look up or cancel your registration.</p>
+      <p>Your participant details panel is attached as a PDF — bring it
+      (printed or on your phone) on the day of the event for check-in.</p>
     </div>
   `;
+
+  const pdfBytes = await buildTicketPdf({
+    fullName: registration.full_name,
+    ticketCode: registration.ticket_code,
+    eventName: event.name,
+    eventDate,
+    venue: event.venue,
+    school: registration.school,
+    className: registration.class_name,
+    status: registration.status,
+  });
 
   const brevoRes = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
@@ -107,6 +129,12 @@ Deno.serve(async (req) => {
       to: [{ email: registration.email, name: registration.full_name }],
       subject,
       htmlContent: html,
+      attachment: [
+        {
+          content: toBase64(pdfBytes),
+          name: `${registration.ticket_code}-ticket.pdf`,
+        },
+      ],
     }),
   });
 

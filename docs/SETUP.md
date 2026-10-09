@@ -105,6 +105,14 @@ registration, but it's inert until deployed with real secrets (a
 missing deployment just fails silently, same as a declined/invalid
 email provider would — it never blocks the registration itself).
 
+The email states the ticket code directly — no "click to verify" or
+confirmation-code step — and attaches a one-page "Participant Details"
+PDF (`ticket-pdf.ts`, built with `pdf-lib`): name, ticket code, a QR
+code of it, event name/date/venue, school/class if given, and status,
+laid out in a bordered panel sized to whatever content it actually has
+(long names/event titles wrap instead of overflowing). Meant to be
+printed or shown on a phone at check-in.
+
 To turn it on:
 
 1. [Install the Supabase CLI](https://supabase.com/docs/guides/cli) if

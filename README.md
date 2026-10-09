@@ -147,10 +147,13 @@ All captured from the live deployment — see [`docs/screenshots/`](docs/screens
   code, not a password login, by design (see the PRD).
 - **Confirmation emails are built but not yet turned on** — the
   confirmation page is the only record a registrant gets right now.
-  The code (`supabase/functions/send-registration-email/`) is written,
-  wired up, and fails silently when not configured, exactly like a
-  real declined send would — it just needs a Brevo API key and an
-  Edge Function deploy to go live. See
+  The code (`supabase/functions/send-registration-email/`) sends the
+  ticket code directly (no "click to verify" step) plus a one-page
+  "Participant Details" PDF — name, ticket code + QR, event/venue/
+  time, school/class, status — attached for use at check-in on the
+  day of the event. It's written, wired up, and fails silently when
+  not configured, exactly like a real declined send would — it just
+  needs a Brevo API key and an Edge Function deploy to go live. See
   [docs/SETUP.md](docs/SETUP.md#fest-hub-registration-confirmation-emails-optional-not-yet-enabled).
 - **No dedicated "team registration"** — rather than redesigning the
   core data model around teams (which would ripple through capacity
