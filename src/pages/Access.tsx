@@ -51,6 +51,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetCode, setResetCode] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [pendingConfirmation, setPendingConfirmation] = useState(false);
@@ -61,6 +62,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
     setError("");
     setPassword("");
     setConfirmPassword("");
+    setResetCode("");
     setPendingConfirmation(false);
     setResetSent(false);
   }
@@ -161,6 +163,51 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
     }
   }
 
+  /**
+   * Step 2 of "forgot password": exchange the 6-digit code for a
+   * session, then immediately set the new password in that session —
+   * the same two-call sequence ResetPassword.tsx used to do across a
+   * page load, just without relying on a clickable link in between.
+   */
+  async function handleResetWithCode(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+
+    if (!resetCode.trim()) {
+      setError("Enter the code from your email.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Choose a password with at least 6 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords don't match.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await auth.verifyPasswordResetCode(email.trim(), resetCode.trim());
+      await auth.updatePassword(password);
+      const isAdmin = await auth.checkIsAdmin();
+      if (!isAdmin) {
+        await auth.signOut();
+        setError("This account doesn't have admin access.");
+        return;
+      }
+      onSuccess();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? `Could not reset your password: ${err.message}`
+          : "Could not reset your password — the code may be wrong or expired. Request a new one."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   if (pendingConfirmation) {
     return (
       <>
@@ -179,32 +226,77 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
     return (
       <>
         <h1>Reset Your Password</h1>
-        <p className="access-subtitle">Enter your admin email and we'll send you a reset link.</p>
-
-        {error && <div className="form-msg error">{error}</div>}
-        {resetSent && (
-          <div className="form-msg success">
-            If that email has an admin account, a reset link is on its way &mdash; check your inbox.
-          </div>
-        )}
-
-        {!resetSent && (
-          <form onSubmit={handleForgot}>
-            <div className="form-field">
-              <label>
-                Email <span className="required">*</span>
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
-            </div>
-            <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%" }}>
-              {submitting ? "Sending..." : "Send Reset Link"}
+        {!resetSent ? (
+          <>
+            <p className="access-subtitle">Enter your admin email and we'll send you a reset code.</p>
+            {error && <div className="form-msg error">{error}</div>}
+            <form onSubmit={handleForgot}>
+              <div className="form-field">
+                <label>
+                  Email <span className="required">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+              </div>
+              <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%" }}>
+                {submitting ? "Sending..." : "Send Reset Code"}
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <p className="access-subtitle">
+              If that email has an admin account, a 6-digit code is on its way &mdash; check your
+              inbox and enter it below along with your new password.
+            </p>
+            {error && <div className="form-msg error">{error}</div>}
+            <form onSubmit={handleResetWithCode}>
+              <div className="form-field">
+                <label>
+                  Reset Code <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={resetCode}
+                  onChange={(e) => setResetCode(e.target.value)}
+                  placeholder="123456"
+                />
+              </div>
+              <div className="form-field">
+                <label>
+                  New Password <span className="required">*</span>
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </div>
+              <div className="form-field">
+                <label>
+                  Confirm New Password <span className="required">*</span>
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </div>
+              <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "100%" }}>
+                {submitting ? "Resetting..." : "Reset Password"}
+              </button>
+            </form>
+            <button type="button" className="link-toggle" onClick={() => setResetSent(false)}>
+              Didn't get a code? Send again
             </button>
-          </form>
+          </>
         )}
 
         <button type="button" className="link-toggle" onClick={() => switchMode("signin")}>

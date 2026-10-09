@@ -43,8 +43,12 @@ export default function ResetPassword() {
     try {
       await auth.updatePassword(password);
       setSuccess(true);
-    } catch {
-      setError("Could not update your password — the reset link may have expired. Request a new one from the sign-in page.");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? `Could not update your password: ${err.message}`
+          : "Could not update your password — the reset link may have expired. Request a new one from the sign-in page."
+      );
     } finally {
       setSubmitting(false);
     }

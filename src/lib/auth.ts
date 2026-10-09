@@ -7,6 +7,7 @@
  * readable through the API.
  */
 import { supabase } from "./supabaseClient";
+import { SITE_URL } from "./constants";
 
 export async function signIn(email: string, password: string): Promise<void> {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -74,11 +75,31 @@ export async function checkEmailIsAdmin(email: string): Promise<boolean> {
  * on an unknown email — Supabase itself avoids revealing whether an
  * address has an account, so the UI should show the same "check your
  * inbox" message regardless of the outcome.
+ *
+ * redirectTo is the canonical SITE_URL, not window.location.origin —
+ * see the comment on SITE_URL for why: an admin triggering this from a
+ * Vercel preview URL would otherwise get a link back to that preview
+ * origin, which (unless separately allow-listed in Supabase) silently
+ * falls back to whatever Site URL the dashboard has configured instead.
  */
 export async function requestPasswordReset(email: string): Promise<void> {
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
+    redirectTo: `${SITE_URL}/reset-password`,
   });
+}
+
+/**
+ * Exchanges the 6-digit code from the reset-password email for a real
+ * session, so updatePassword() can be called right after. This is the
+ * primary recovery path now — unlike the magic link in redirectTo
+ * above, a plain-text code sitting in an email body can't be
+ * auto-consumed by an email provider's link-prescanning/safe-links
+ * feature, which was silently invalidating the link before anyone
+ * actually clicked it.
+ */
+export async function verifyPasswordResetCode(email: string, code: string): Promise<void> {
+  const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "recovery" });
+  if (error) throw error;
 }
 
 /** Sets a new password for whichever session is currently active — used
