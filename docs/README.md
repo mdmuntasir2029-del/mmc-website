@@ -16,6 +16,9 @@ for a map of how the codebase itself is put together.
 - [JUDGING_GUIDE.md](JUDGING_GUIDE.md) — every contest rubric item
   (A1–C6) mapped to its URL and source file, plus a 5-minute
   walkthrough with the demo logins.
+- [ORGANIZER_GUIDE.md](ORGANIZER_GUIDE.md) — non-technical, for Fest Hub
+  organizers: creating fests/events, managing registrations, check-in
+  on the day. Written for people running events, not writing code.
 - [AI_DISCLOSURE.md](AI_DISCLOSURE.md) — full AI-use disclosure for the
   contest submission.
 - `screenshots/` — contest submission screenshots, captured from the
