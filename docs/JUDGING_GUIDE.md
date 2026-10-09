@@ -97,8 +97,11 @@ Grants: Fests & Events, Event Participants (not super admin).
 | D3 | Automatic waitlist promotion | `promote_waitlist()` trigger on `event_registrations` (`supabase/schema.sql`) — fires on any confirmed→cancelled/rejected transition, whether via a visitor cancelling or an organizer changing status, and bumps the longest-waiting waitlisted registration to confirmed |
 | D4 | Calendar export | "Add to calendar" button on both the event page and the confirmation page, downloads a `.ics` file — `src/lib/ics.ts` |
 
-Not implemented: confirmation emails (no email provider wired up for
-Fest Hub — see `README.md`'s Known Limitations).
+Also implemented, beyond the rubric's own D1–D4: a confirmation email
+(Brevo, via `supabase/functions/send-registration-email/`) sent on
+every successful registration, with a one-page "Participant Details"
+PDF attached (name, ticket code, QR code, event/venue/time, school/
+class, status) for use at check-in.
 
 ## Responsiveness
 
