@@ -3,6 +3,18 @@
 Submitted to the **9th DRMC International Tech Carnival 2026 — AI Web
 Development Contest** ("Smart Club Operations").
 
+> ### ⚠️ This repo has two live deployments — don't confuse them
+>
+> | | Main website | Fest Hub (this contest submission) |
+> |---|---|---|
+> | **Link** | [manaratmath.club](https://manaratmath.club) | [mmc-website-fest.vercel.app](https://mmc-website-fest.vercel.app) |
+> | **Database** | The real club's Supabase project — real students' data | A separate, judging-only Supabase project — mock data only |
+> | **Fest Hub feature visible?** | No, always hidden | Yes |
+>
+> Same codebase, same `main` branch, two different Supabase + Vercel
+> projects. See [Why it runs as its own deployment](#deployment-url)
+> below for the full reasoning.
+
 ## Description
 
 Clubs that run multiple events (fests, workshops, quizzes, contests)
@@ -105,7 +117,10 @@ sections, not super admin.
 (attended).
 
 See **[docs/JUDGING_GUIDE.md](docs/JUDGING_GUIDE.md)** for a full
-rubric-to-feature walkthrough.
+rubric-to-feature walkthrough, or **[docs/ORGANIZER_GUIDE.md](docs/ORGANIZER_GUIDE.md)**
+if you're actually running events through Fest Hub rather than judging it —
+non-technical, covers creating fests/events, managing registrations, and
+check-in on the day.
 
 ## Third-party Services/APIs
 
