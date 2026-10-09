@@ -7,6 +7,7 @@
  * readable through the API.
  */
 import { supabase } from "./supabaseClient";
+import { SITE_URL } from "./constants";
 
 export async function signIn(email: string, password: string): Promise<void> {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -74,10 +75,16 @@ export async function checkEmailIsAdmin(email: string): Promise<boolean> {
  * on an unknown email — Supabase itself avoids revealing whether an
  * address has an account, so the UI should show the same "check your
  * inbox" message regardless of the outcome.
+ *
+ * redirectTo is the canonical SITE_URL, not window.location.origin —
+ * see the comment on SITE_URL for why: an admin triggering this from a
+ * Vercel preview URL would otherwise get a link back to that preview
+ * origin, which (unless separately allow-listed in Supabase) silently
+ * falls back to whatever Site URL the dashboard has configured instead.
  */
 export async function requestPasswordReset(email: string): Promise<void> {
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
+    redirectTo: `${SITE_URL}/reset-password`,
   });
 }
 
