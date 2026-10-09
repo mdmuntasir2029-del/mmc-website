@@ -88,6 +88,20 @@ export async function requestPasswordReset(email: string): Promise<void> {
   });
 }
 
+/**
+ * Exchanges the 6-digit code from the reset-password email for a real
+ * session, so updatePassword() can be called right after. This is the
+ * primary recovery path now — unlike the magic link in redirectTo
+ * above, a plain-text code sitting in an email body can't be
+ * auto-consumed by an email provider's link-prescanning/safe-links
+ * feature, which was silently invalidating the link before anyone
+ * actually clicked it.
+ */
+export async function verifyPasswordResetCode(email: string, code: string): Promise<void> {
+  const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "recovery" });
+  if (error) throw error;
+}
+
 /** Sets a new password for whichever session is currently active — used
  * both by the password-recovery link flow and as a general "change my
  * password while signed in" path. */
