@@ -59,7 +59,7 @@ mediates everything" pattern as `admins`/`admin_permissions` — see
 
 | Function | What it does |
 |---|---|
-| `register_for_event(event_id, full_name, email, phone, school, class_name, custom_field_values default '{}')` | Locks the event row (`select ... for update`) so two near-simultaneous registrations can't both take the last seat. Rejects if the event isn't published, registration hasn't opened, the deadline has passed, or the email is already registered (the table's own unique constraint is the final backstop). Returns `confirmed` if under capacity, `waitlisted` if full with a waitlist, or raises an exception if full without one. The 7th parameter was added after the original 6-arg version shipped — `schema.sql` explicitly `drop function`s the old signature first, since `create or replace` treats an appended parameter as a different overload rather than replacing the existing one. |
+| `register_for_event(event_id, full_name, email, phone, school, class_name, custom_field_values default '{}')` → `(id, ticket_code, status)` | Locks the event row (`select ... for update`) so two near-simultaneous registrations can't both take the last seat. Rejects if the event isn't published, registration hasn't opened, the deadline has passed, or the email is already registered (the table's own unique constraint is the final backstop). Returns `confirmed` if under capacity, `waitlisted` if full with a waitlist, or raises an exception if full without one. Both the 7th input parameter and the `id` output column were added after the original version shipped — `schema.sql` explicitly `drop function`s every prior signature first, since `create or replace` refuses to change either a function's parameter types or its return type in place. |
 | `get_my_registrations(email, ticket_code)` | Returns **nothing** unless `ticket_code` matches one of that email's own registrations — then returns every registration under that email. This one check is the entire "auth" model for visitors. |
 | `cancel_my_registration(ticket_code, email)` | Sets `status = 'cancelled'`, scoped to the matching row only. |
 | `get_event_seat_counts()` | Returns `{event_id, taken}` for every event (`confirmed`+`attended` counts) — lets the directory show "N seats left" without any participant data leaking. |
@@ -174,13 +174,26 @@ product), so this is a one-time confidence check, not a regression
 suite; a real schema change later should get the same treatment again
 rather than trusting a read-through alone.
 
+## Confirmation email (built, not yet activated)
+
+`supabase/functions/send-registration-email/index.ts` — a Deno Edge
+Function that fetches the registration + event via the service role
+key and sends a confirmed/waitlisted email through Brevo's
+transactional API. Called fire-and-forget from `EventPage.tsx`
+(`db.sendRegistrationEmail`, `src/lib/db.ts`) right after a successful
+`registerForEvent()` — `register_for_event()`'s RETURNS TABLE gained an
+`id` column specifically so the frontend has something to pass it.
+Deploying without secrets set, or not deploying it at all, degrades
+silently (the function returns 200 with `{skipped: ...}`, or the fetch
+404s and is swallowed by `.catch(() => {})`) — a missing/misconfigured
+mailer must never block or appear to fail the registration itself. See
+[docs/SETUP.md](../docs/SETUP.md#fest-hub-registration-confirmation-emails-optional-not-yet-enabled)
+for the exact deploy steps. A promoted waitlisted visitor still isn't
+notified of the promotion itself (only the original registration
+triggers this) — they'd find out by checking `/my-registrations` again.
+
 ## Known gaps
 
-- **No confirmation email** — the confirmation page (plus the `.ics`
-  file and QR code on it) is the only record of a successful
-  registration; nothing emails the ticket code, and a promoted
-  waitlisted visitor isn't notified either — they'd find out by
-  checking `/my-registrations` again.
 - **Registration-count scalability**: `getEvents()`/`getFests()` have no
   pagination — fine for a club's scale (dozens of events), would need
   revisiting at real scale.

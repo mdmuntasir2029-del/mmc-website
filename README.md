@@ -145,11 +145,13 @@ All captured from the live deployment — see [`docs/screenshots/`](docs/screens
 
 - **No visitor accounts** — registration lookup is by email + ticket
   code, not a password login, by design (see the PRD).
-- **No confirmation emails** — the confirmation page is the only
-  record; Brevo/SMTP wiring for registration emails wasn't built this
-  round (P2 in the project's scheme of work) — it needs a transactional
-  email provider's API key, which wasn't available to wire up and test
-  safely in this pass.
+- **Confirmation emails are built but not yet turned on** — the
+  confirmation page is the only record a registrant gets right now.
+  The code (`supabase/functions/send-registration-email/`) is written,
+  wired up, and fails silently when not configured, exactly like a
+  real declined send would — it just needs a Brevo API key and an
+  Edge Function deploy to go live. See
+  [docs/SETUP.md](docs/SETUP.md#fest-hub-registration-confirmation-emails-optional-not-yet-enabled).
 - **No dedicated "team registration"** — rather than redesigning the
   core data model around teams (which would ripple through capacity
   counting, the waitlist trigger, and every admin view, right after

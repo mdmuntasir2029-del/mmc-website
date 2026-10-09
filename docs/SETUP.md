@@ -95,6 +95,39 @@ If the club ever wants fest registration live on the real site, it's a
 one-switch change: turn `fests` on from **Admin → Site Sections** on the
 real database.
 
+## Fest Hub: registration confirmation emails (optional, not yet enabled)
+
+Registrants currently only get the on-screen confirmation page (with
+their QR ticket) — no email. Code for this is in
+`supabase/functions/send-registration-email/` and already wired up to
+call fire-and-forget from `EventPage.tsx` right after a successful
+registration, but it's inert until deployed with real secrets (a
+missing deployment just fails silently, same as a declined/invalid
+email provider would — it never blocks the registration itself).
+
+To turn it on:
+
+1. [Install the Supabase CLI](https://supabase.com/docs/guides/cli) if
+   you haven't, and `supabase login`.
+2. In [Brevo](https://www.brevo.com), **SMTP & API → API Keys →
+   Generate a new API key** (this is a *different* key from the SMTP
+   key used for admin sign-in emails above). Also make sure a sender
+   address is verified under **Senders**.
+3. Deploy the function and set its secrets:
+   ```bash
+   supabase functions deploy send-registration-email --project-ref <your-project-ref>
+   supabase secrets set \
+     BREVO_API_KEY=your-brevo-api-key \
+     SENDER_EMAIL=your-verified-sender@example.com \
+     SENDER_NAME="Manarat Mathletes Club" \
+     --project-ref <your-project-ref>
+   ```
+   `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected
+   automatically by the platform for every Edge Function — you don't
+   set those yourself.
+4. That's it — no code or database change needed. The next successful
+   registration will trigger a real email.
+
 ## Brevo email setup
 
 Supabase Auth sends its own emails (signup confirmation, password reset)

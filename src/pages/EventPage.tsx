@@ -105,6 +105,9 @@ export default function EventPage() {
         className: className.trim() || null,
         customFieldValues: customValues,
       });
+      // Fire-and-forget: never let a missing/failed email configuration
+      // block or delay the registration the visitor actually came for.
+      db.sendRegistrationEmail(result.id).catch(() => {});
       navigate(`/registration/${result.ticketCode}?email=${encodeURIComponent(email.trim())}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Could not complete registration.");

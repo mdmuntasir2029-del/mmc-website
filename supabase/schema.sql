@@ -998,10 +998,14 @@ $$;
 -- registrations can't both claim the last seat.
 --
 -- Dropped and recreated (rather than a plain `create or replace`) because
--- adding a new parameter changes the function's argument-type identity —
--- `create or replace` would otherwise leave the old 6-arg version in
--- place as a second overload instead of replacing it.
+-- changing either the parameter list or the output columns changes the
+-- function's identity/return type — `create or replace` refuses both
+-- ("cannot change return type") and would otherwise leave an old version
+-- in place as a second overload instead of replacing it. Both prior
+-- signatures are dropped so this is idempotent regardless of which one a
+-- given database currently has.
 drop function if exists register_for_event(uuid, text, text, text, text, text);
+drop function if exists register_for_event(uuid, text, text, text, text, text, jsonb);
 
 create or replace function register_for_event(
   p_event_id uuid,
@@ -1011,17 +1015,20 @@ create or replace function register_for_event(
   p_school text,
   p_class_name text,
   p_custom_field_values jsonb default '{}'::jsonb
-) returns table (ticket_code text, status text)
+) returns table (id uuid, ticket_code text, status text)
 language plpgsql security definer
 set search_path = public
 as $$
 declare
   ev events%rowtype;
   taken integer;
+  new_id uuid;
   new_code text;
   new_status text;
 begin
-  select * into ev from events where id = p_event_id for update;
+  -- Table-qualified: this function's own `returns table (id uuid, ...)`
+  -- output column would otherwise make a bare `id` ambiguous here too.
+  select * into ev from events where events.id = p_event_id for update;
   if not found then
     raise exception 'Event not found.';
   end if;
@@ -1063,9 +1070,10 @@ begin
     p_event_id, new_code, trim(p_full_name), lower(trim(p_email)), trim(p_phone),
     nullif(trim(p_school), ''), nullif(trim(p_class_name), ''), new_status,
     coalesce(p_custom_field_values, '{}'::jsonb)
-  );
+  )
+  returning event_registrations.id into new_id;
 
-  return query select new_code, new_status;
+  return query select new_id, new_code, new_status;
 end;
 $$;
 

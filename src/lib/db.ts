@@ -1904,7 +1904,7 @@ export async function registerForEvent(
     className: string | null;
     customFieldValues?: CustomFieldValues;
   }
-): Promise<{ ticketCode: string; status: string }> {
+): Promise<{ id: string; ticketCode: string; status: string }> {
   const { data: rows, error } = await supabase.rpc("register_for_event", {
     p_event_id: eventId,
     p_full_name: data.fullName,
@@ -1915,8 +1915,18 @@ export async function registerForEvent(
     p_custom_field_values: data.customFieldValues ?? {},
   });
   if (error) throw error;
-  const row = (rows as { ticket_code: string; status: string }[])[0];
-  return { ticketCode: row.ticket_code, status: row.status };
+  const row = (rows as { id: string; ticket_code: string; status: string }[])[0];
+  return { id: row.id, ticketCode: row.ticket_code, status: row.status };
+}
+
+/** Best-effort confirmation/waitlist email via the send-registration-email
+ *  Edge Function (Brevo). Fire-and-forget by design — see
+ *  EventPage.tsx's call site: a failed or not-yet-configured email must
+ *  never block or appear to fail the registration itself. */
+export async function sendRegistrationEmail(registrationId: string): Promise<void> {
+  await supabase.functions.invoke("send-registration-email", {
+    body: { registrationId },
+  });
 }
 
 interface MyRegistrationRow {
