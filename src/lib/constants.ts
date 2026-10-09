@@ -20,10 +20,10 @@ export const CURRENT_SESSION_YEAR = "2026–2027";
  * admin actually landed.
  *
  * Read from VITE_SITE_URL so each of this codebase's two deployments
- * (this real site, and the separate Fest Hub contest deployment — see
+ * (the real site, and the separate Fest Hub contest deployment — see
  * sourceoftruth/fest-hub.md) can set its own value in its own Vercel
  * project without the other needing a code change. Falls back to the
- * real site's domain, which is correct for local dev and for this
+ * real site's domain, which is correct for local dev and for either
  * deployment even before its env var is added.
  */
 export const SITE_URL = import.meta.env.VITE_SITE_URL ?? "https://manaratmath.club";

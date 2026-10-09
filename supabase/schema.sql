@@ -860,3 +860,335 @@ create policy "mmc_public_admin_delete" on storage.objects
   for delete using (
     bucket_id = 'mmc-public' and is_admin()
   );
+
+-- ========== Fest Hub (Organization -> Fest -> Event -> Registration) ==========
+-- Built for the 9th DRMC International Tech Carnival 2026 AI Web Dev
+-- Contest — see sourceoftruth/fest-hub.md for the full design. Runs
+-- against its OWN Supabase project for the contest deployment (see
+-- docs/SETUP.md); on the real manaratmath.club database this just adds
+-- empty tables, since the `fests` SectionKey defaults to hidden there
+-- (no `site_sections` row inserted for it below).
+
+create table if not exists fests (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  name text not null,
+  tagline text,
+  description text,
+  cover_path text,
+  starts_on date not null,
+  ends_on date not null,
+  venue text,
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  created_at timestamptz not null default now()
+);
+
+create table if not exists events (
+  id uuid primary key default gen_random_uuid(),
+  fest_id uuid not null references fests (id) on delete cascade,
+  slug text not null unique,
+  name text not null,
+  category text not null check (category in ('Competition', 'Workshop', 'Quiz', 'Session', 'Social')),
+  summary text,
+  description text,
+  starts_at timestamptz not null,
+  ends_at timestamptz,
+  venue text,
+  eligibility text,
+  registration_opens_at timestamptz not null default now(),
+  registration_deadline timestamptz not null,
+  capacity integer, -- null = unlimited
+  waitlist_enabled boolean not null default true,
+  cover_path text,
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists events_fest_idx on events (fest_id);
+
+-- Organizer-defined extra registration fields for this event (e.g. team
+-- name / teammate names for a team event) — an array of
+-- {key, label, type: "text"|"textarea"|"select", required, options}.
+-- Deliberately schemaless (jsonb) rather than new columns, since the
+-- set of fields varies per event, not per table.
+alter table events add column if not exists custom_fields jsonb not null default '[]'::jsonb;
+
+-- No public select policy at all (see the admins/admin_permissions
+-- pattern above) — every public read/write goes through the
+-- SECURITY DEFINER functions below, which never return more than a
+-- participant's own rows. Admins read/write the whole table directly.
+create table if not exists event_registrations (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references events (id) on delete cascade,
+  ticket_code text not null unique,
+  full_name text not null,
+  email text not null,
+  phone text not null,
+  school text,
+  class_name text,
+  status text not null default 'pending' check (
+    status in ('pending', 'confirmed', 'waitlisted', 'cancelled', 'rejected', 'attended')
+  ),
+  checked_in_at timestamptz,
+  admin_note text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (event_id, email)
+);
+
+-- Answers to that event's custom_fields, keyed by field "key". Validated
+-- client-side against the event's field list (required/type), same
+-- trust level as every other visitor-supplied column on this table.
+alter table event_registrations add column if not exists custom_field_values jsonb not null default '{}'::jsonb;
+
+create index if not exists event_registrations_event_idx on event_registrations (event_id);
+
+alter table fests enable row level security;
+alter table events enable row level security;
+alter table event_registrations enable row level security;
+
+drop policy if exists "fests_public_select" on fests;
+create policy "fests_public_select" on fests
+  for select to anon, authenticated
+  using (status in ('published', 'archived'));
+
+drop policy if exists "fests_admin_write" on fests;
+create policy "fests_admin_write" on fests
+  for all using (is_admin()) with check (is_admin());
+
+drop policy if exists "events_public_select" on events;
+create policy "events_public_select" on events
+  for select to anon, authenticated
+  using (status in ('published', 'archived'));
+
+drop policy if exists "events_admin_write" on events;
+create policy "events_admin_write" on events
+  for all using (is_admin()) with check (is_admin());
+
+-- event_registrations: admins can read/manage everything directly;
+-- everyone else goes through register_for_event / get_my_registrations
+-- / cancel_my_registration below, never the table itself.
+drop policy if exists "event_registrations_admin_all" on event_registrations;
+create policy "event_registrations_admin_all" on event_registrations
+  for all using (is_admin()) with check (is_admin());
+
+-- Short, readable ticket codes (e.g. MMC-7K2Q9F) — retries on the rare
+-- collision against the table's own unique constraint.
+create or replace function generate_ticket_code() returns text
+language plpgsql
+as $$
+declare
+  candidate text;
+  tries integer := 0;
+begin
+  loop
+    candidate := 'MMC-' || upper(substr(encode(gen_random_bytes(4), 'hex'), 1, 6));
+    exit when not exists (select 1 from event_registrations where ticket_code = candidate);
+    tries := tries + 1;
+    if tries > 20 then
+      raise exception 'Could not generate a unique ticket code';
+    end if;
+  end loop;
+  return candidate;
+end;
+$$;
+
+-- The only way the public can create a registration. Locks the event
+-- row first (select ... for update) so two near-simultaneous
+-- registrations can't both claim the last seat.
+--
+-- Dropped and recreated (rather than a plain `create or replace`) because
+-- changing either the parameter list or the output columns changes the
+-- function's identity/return type — `create or replace` refuses both
+-- ("cannot change return type") and would otherwise leave an old version
+-- in place as a second overload instead of replacing it. Both prior
+-- signatures are dropped so this is idempotent regardless of which one a
+-- given database currently has.
+drop function if exists register_for_event(uuid, text, text, text, text, text);
+drop function if exists register_for_event(uuid, text, text, text, text, text, jsonb);
+
+create or replace function register_for_event(
+  p_event_id uuid,
+  p_full_name text,
+  p_email text,
+  p_phone text,
+  p_school text,
+  p_class_name text,
+  p_custom_field_values jsonb default '{}'::jsonb
+) returns table (id uuid, ticket_code text, status text)
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  ev events%rowtype;
+  taken integer;
+  new_id uuid;
+  new_code text;
+  new_status text;
+begin
+  -- Table-qualified: this function's own `returns table (id uuid, ...)`
+  -- output column would otherwise make a bare `id` ambiguous here too.
+  select * into ev from events where events.id = p_event_id for update;
+  if not found then
+    raise exception 'Event not found.';
+  end if;
+  if ev.status != 'published' then
+    raise exception 'This event is not open for registration.';
+  end if;
+  if now() < ev.registration_opens_at then
+    raise exception 'Registration has not opened yet.';
+  end if;
+  if now() > ev.registration_deadline then
+    raise exception 'The registration deadline has passed.';
+  end if;
+  if exists (
+    select 1 from event_registrations
+    where event_id = p_event_id and lower(email) = lower(p_email)
+  ) then
+    raise exception 'This email is already registered for this event.';
+  end if;
+
+  -- Table-qualified: this function's own `returns table (..., status text)`
+  -- output column would otherwise make a bare `status` ambiguous here.
+  select count(*) into taken from event_registrations
+    where event_registrations.event_id = p_event_id
+      and event_registrations.status in ('confirmed', 'attended');
+
+  if ev.capacity is null or taken < ev.capacity then
+    new_status := 'confirmed';
+  elsif ev.waitlist_enabled then
+    new_status := 'waitlisted';
+  else
+    raise exception 'This event is full.';
+  end if;
+
+  new_code := generate_ticket_code();
+
+  insert into event_registrations (
+    event_id, ticket_code, full_name, email, phone, school, class_name, status, custom_field_values
+  ) values (
+    p_event_id, new_code, trim(p_full_name), lower(trim(p_email)), trim(p_phone),
+    nullif(trim(p_school), ''), nullif(trim(p_class_name), ''), new_status,
+    coalesce(p_custom_field_values, '{}'::jsonb)
+  )
+  returning event_registrations.id into new_id;
+
+  return query select new_id, new_code, new_status;
+end;
+$$;
+
+grant execute on function register_for_event(uuid, text, text, text, text, text, jsonb) to anon, authenticated;
+
+-- The "login" for visitors without accounts: only returns rows if the
+-- ticket code matches one of that email's own registrations, so
+-- knowing someone's email alone isn't enough to see their data.
+create or replace function get_my_registrations(p_email text, p_ticket_code text)
+returns table (
+  id uuid,
+  event_id uuid,
+  ticket_code text,
+  full_name text,
+  email text,
+  phone text,
+  school text,
+  class_name text,
+  status text,
+  checked_in_at timestamptz,
+  created_at timestamptz
+)
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  -- Table-qualified throughout this function: every RETURNS TABLE output
+  -- column here is named identically to an event_registrations column, so
+  -- a bare `email`/`ticket_code`/etc. is ambiguous between the two.
+  if not exists (
+    select 1 from event_registrations
+    where lower(event_registrations.email) = lower(p_email)
+      and event_registrations.ticket_code = p_ticket_code
+  ) then
+    return;
+  end if;
+
+  return query
+    select r.id, r.event_id, r.ticket_code, r.full_name, r.email, r.phone,
+           r.school, r.class_name, r.status, r.checked_in_at, r.created_at
+    from event_registrations r
+    where lower(r.email) = lower(p_email)
+    order by r.created_at desc;
+end;
+$$;
+
+grant execute on function get_my_registrations(text, text) to anon, authenticated;
+
+create or replace function cancel_my_registration(p_ticket_code text, p_email text) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  update event_registrations
+  set status = 'cancelled', updated_at = now()
+  where ticket_code = p_ticket_code
+    and lower(email) = lower(p_email)
+    and status not in ('cancelled');
+
+  if not found then
+    raise exception 'No matching registration found for that ticket code and email.';
+  end if;
+end;
+$$;
+
+grant execute on function cancel_my_registration(text, text) to anon, authenticated;
+
+-- Bonus: automatic waitlist promotion. Whenever a confirmed registration
+-- frees up (cancelled by the visitor, or rejected by an organizer), the
+-- longest-waiting "waitlisted" row for the same event is bumped to
+-- "confirmed" automatically — no admin action needed. security definer
+-- so this fires correctly whether the triggering update came from
+-- cancel_my_registration (runs as the function owner) or a direct admin
+-- table update (runs as the signed-in admin); either way this trigger's
+-- own update bypasses event_registrations' admin-only RLS policy, same
+-- bypass pattern as every other security definer function above.
+create or replace function promote_waitlist() returns trigger
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  next_row event_registrations%rowtype;
+begin
+  if new.status in ('cancelled', 'rejected') and old.status = 'confirmed' then
+    select * into next_row from event_registrations
+      where event_id = new.event_id and status = 'waitlisted'
+      order by created_at asc
+      limit 1
+      for update skip locked;
+    if found then
+      update event_registrations
+        set status = 'confirmed', updated_at = now()
+        where id = next_row.id;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_promote_waitlist on event_registrations;
+create trigger trg_promote_waitlist
+  after update on event_registrations
+  for each row execute function promote_waitlist();
+
+-- Lets the public directory show "12 seats left" without exposing any
+-- participant row.
+create or replace function get_event_seat_counts()
+returns table (event_id uuid, taken integer)
+language sql security definer stable
+set search_path = public
+as $$
+  select event_id, count(*)::int as taken
+  from event_registrations
+  where status in ('confirmed', 'attended')
+  group by event_id;
+$$;
+
+grant execute on function get_event_seat_counts() to anon, authenticated;

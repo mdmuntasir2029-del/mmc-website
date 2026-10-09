@@ -105,3 +105,21 @@ config). There is no staging environment — `main` is production. Schema
 changes are **not** part of the deploy; they have to be run manually
 against the live Supabase project's SQL editor (see the root
 [README.md](../README.md)).
+
+## Fest Hub: one codebase, two deployments
+
+The Organization → Fest → Event → Registration system (`/fests`,
+`/events/:slug`, `/admin/events`, ...) ships in the **same** codebase
+and deploys from the **same** `main` branch as the main club site, but
+is meant to run as a **second, separate Vercel + Supabase deployment**
+rather than going live on `manaratmath.club`:
+
+- A `fests` `SectionKey` (default `false`) gates the whole feature the
+  same way every other section is gated — a database that's never had
+  `supabase/seed.sql` run against it (the real club database) simply
+  never gets a `site_sections` row turning it on.
+- `supabase/seed.sql` is the one thing that's deployment-specific: run
+  it only on the separate Fest Hub Supabase project, never the real one.
+- See [SETUP.md](SETUP.md) for the full two-deployment setup and
+  [sourceoftruth/fest-hub.md](../sourceoftruth/fest-hub.md) for the data
+  model and RPC design.

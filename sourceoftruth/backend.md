@@ -9,6 +9,11 @@ against a project that already has some of it is always safe. There is no
 migration runner; "deploy the schema" means "paste this file into the SQL
 Editor and run it."
 
+> The Fest Hub's `fests`/`events`/`event_registrations` tables and its
+> four public RPCs have their own dedicated reference, including *why*
+> `event_registrations` has zero public policies (unlike everything
+> else here): **[fest-hub.md](fest-hub.md)**.
+
 This document describes what's in there in prose. If the two ever
 disagree, trust the `.sql` file — it's the one that actually runs.
 

@@ -3,6 +3,10 @@
 Concrete walkthroughs of how data actually moves, for the handful of
 flows that cover almost everything else in the app by extension.
 
+> The Fest Hub's registration flow (lock-the-row capacity check, the
+> email+ticket-code visitor "login") is different enough from every flow
+> below that it gets its own write-up: **[fest-hub.md](fest-hub.md)**.
+
 ## 1. Public page read (the common case)
 
 Example: a visitor opens `/awards`.

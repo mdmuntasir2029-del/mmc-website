@@ -70,6 +70,12 @@ const NAV_GROUPS: NavGroup[] = [
     items: [{ to: "/admin/leaderboards", label: "Leaderboards", Icon: IconTrophy, section: "leaderboards" }],
   },
   {
+    label: "Fest Hub",
+    items: [
+      { to: "/admin/events", label: "Fests & Events", Icon: IconCalendar, section: "fests_events" },
+    ],
+  },
+  {
     label: "Site-wide",
     items: [
       { to: "/admin/activity-log", label: "Club Activity Log", Icon: IconCalendar, section: "activity_log" },

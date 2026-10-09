@@ -15,6 +15,11 @@ import ClubPublications from "./pages/ClubPublications";
 import Articles from "./pages/Articles";
 import ClubResources from "./pages/ClubResources";
 import AnnouncementsPage from "./pages/AnnouncementsPage";
+import FestsDirectory from "./pages/FestsDirectory";
+import FestPage from "./pages/FestPage";
+import EventPage from "./pages/EventPage";
+import RegistrationConfirmation from "./pages/RegistrationConfirmation";
+import MyRegistrations from "./pages/MyRegistrations";
 import Leaderboard from "./pages/Leaderboard";
 import HallOfFame from "./pages/HallOfFame";
 import Access from "./pages/Access";
@@ -39,6 +44,8 @@ import AdminAnnouncements from "./pages/admin/Announcements";
 import AdminIssueReports from "./pages/admin/IssueReports";
 import AdminProblemOfTheDay from "./pages/admin/ProblemOfTheDay";
 import AdminFrdCompetitions from "./pages/admin/FrdCompetitions";
+import FestHubDashboard from "./pages/admin/FestHubDashboard";
+import EventParticipants from "./pages/admin/EventParticipants";
 
 function App() {
   return (
@@ -60,6 +67,11 @@ function App() {
             <Route path="resources" element={<ClubResources />} />
           </Route>
           <Route path="/announcements" element={<AnnouncementsPage />} />
+          <Route path="/fests" element={<FestsDirectory />} />
+          <Route path="/fests/:festSlug" element={<FestPage />} />
+          <Route path="/events/:eventSlug" element={<EventPage />} />
+          <Route path="/registration/:ticketCode" element={<RegistrationConfirmation />} />
+          <Route path="/my-registrations" element={<MyRegistrations />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/hall-of-fame" element={<HallOfFame />} />
           <Route path="/signin" element={<Access />} />
@@ -193,6 +205,22 @@ function App() {
               element={
                 <RequireAdminSection section="frd_competitions">
                   <AdminFrdCompetitions />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="events"
+              element={
+                <RequireAdminSection section="fests_events">
+                  <FestHubDashboard />
+                </RequireAdminSection>
+              }
+            />
+            <Route
+              path="events/:eventId/participants"
+              element={
+                <RequireAdminSection section="event_registrations">
+                  <EventParticipants />
                 </RequireAdminSection>
               }
             />

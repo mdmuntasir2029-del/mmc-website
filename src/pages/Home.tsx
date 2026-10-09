@@ -78,6 +78,11 @@ export default function Home() {
                   See Upcoming Events
                 </a>
               )}
+              {sections.fests && (
+                <Link to="/fests" className="btn-ghost-light">
+                  Browse Fests
+                </Link>
+              )}
             </div>
           </div>
         </div>

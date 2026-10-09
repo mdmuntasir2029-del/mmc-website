@@ -5,6 +5,10 @@ route, its visibility key (if any), the component(s) that render it, and
 the table(s) it reads or writes. Use this as the index when you need to
 find "where does X live" or "what does toggling Y actually affect."
 
+> The Fest Hub (Organization → Fest → Event → Registration — `/fests`,
+> `/events/:slug`, `/admin/events`, ...) has its own dedicated reference:
+> **[fest-hub.md](fest-hub.md)**. It isn't duplicated in the tables below.
+
 ## Public routes
 
 | Route | Page component | Notes |

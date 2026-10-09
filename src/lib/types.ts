@@ -205,6 +205,105 @@ export interface CompetitionArchiveEntry {
   createdAt: string;
 }
 
+export type FestStatus = "draft" | "published" | "archived";
+
+/** A fest (festival) — the top level of Organization -> Fest -> Event ->
+ *  Registration. See sourceoftruth/fest-hub.md. */
+export interface Fest {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string | null;
+  description: string | null;
+  coverPath: string | null;
+  coverUrl: string | null;
+  coverSrcSet: string | null;
+  startsOn: string;
+  endsOn: string;
+  venue: string | null;
+  status: FestStatus;
+  createdAt: string;
+}
+
+export type EventCategory = "Competition" | "Workshop" | "Quiz" | "Session" | "Social";
+
+export const EVENT_CATEGORIES: EventCategory[] = [
+  "Competition",
+  "Workshop",
+  "Quiz",
+  "Session",
+  "Social",
+];
+
+export type CustomFieldType = "text" | "textarea" | "select";
+
+/** One organizer-defined extra question on an event's registration form
+ *  (e.g. a team name, or teammate names for a team event). */
+export interface CustomFieldDef {
+  /** Stable key used in CustomFieldValues — not shown to visitors. */
+  key: string;
+  label: string;
+  type: CustomFieldType;
+  required: boolean;
+  /** Only used when type === "select". */
+  options: string[] | null;
+}
+
+export type CustomFieldValues = Record<string, string>;
+
+/** One event within a fest — the thing a visitor actually registers for. */
+export interface FestEvent {
+  id: string;
+  festId: string;
+  slug: string;
+  name: string;
+  category: EventCategory;
+  summary: string | null;
+  description: string | null;
+  startsAt: string;
+  endsAt: string | null;
+  venue: string | null;
+  eligibility: string | null;
+  registrationOpensAt: string;
+  registrationDeadline: string;
+  /** null = unlimited capacity. */
+  capacity: number | null;
+  waitlistEnabled: boolean;
+  coverPath: string | null;
+  coverUrl: string | null;
+  coverSrcSet: string | null;
+  status: FestStatus;
+  createdAt: string;
+  customFields: CustomFieldDef[];
+}
+
+export type RegistrationStatus =
+  | "pending"
+  | "confirmed"
+  | "waitlisted"
+  | "cancelled"
+  | "rejected"
+  | "attended";
+
+/** A registration for one event — looked up by the visitor via email +
+ *  ticket code (there's no visitor-account system on this site). */
+export interface EventRegistration {
+  id: string;
+  eventId: string;
+  ticketCode: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  school: string | null;
+  className: string | null;
+  status: RegistrationStatus;
+  checkedInAt: string | null;
+  adminNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+  customFieldValues: CustomFieldValues;
+}
+
 /**
  * Admin-panel areas that can be granted to individual admins by the
  * super admin (see AdminRoles.tsx / grant_admin_section in schema.sql).
@@ -228,7 +327,9 @@ export type AdminSection =
   | "testimonials"
   | "announcements"
   | "frd_problem_of_the_day"
-  | "frd_competitions";
+  | "frd_competitions"
+  | "fests_events"
+  | "event_registrations";
 
 export const ADMIN_SECTION_LABELS: Record<AdminSection, string> = {
   activity_log: "Club Activity Log",
@@ -246,6 +347,8 @@ export const ADMIN_SECTION_LABELS: Record<AdminSection, string> = {
   announcements: "Announcements (Home)",
   frd_problem_of_the_day: "Problem of the Day (FRD mode)",
   frd_competitions: "Competitions & Archive (FRD mode)",
+  fests_events: "Fests & Events",
+  event_registrations: "Event Participants",
 };
 
 /** Major site sections/pages the admin can show or hide. */
@@ -261,7 +364,8 @@ export type SectionKey =
   | "current_lineup"
   | "testimonials"
   | "announcements"
-  | "resources";
+  | "resources"
+  | "fests";
 
 export const SECTION_KEYS: SectionKey[] = [
   "about",
@@ -276,6 +380,7 @@ export const SECTION_KEYS: SectionKey[] = [
   "current_lineup",
   "testimonials",
   "announcements",
+  "fests",
 ];
 
 export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }> = {
@@ -291,6 +396,7 @@ export const SECTION_LABELS: Record<SectionKey, { title: string; desc: string }>
   current_lineup: { title: "Current Year Lineup", desc: "About page — this session's Hall of Fame entries, shown as cards." },
   testimonials: { title: "What People Say", desc: "About page — testimonials from club personnel." },
   announcements: { title: "Announcements", desc: "Home page — admin-posted announcement images, and the hero's \"See Upcoming Events\" button target." },
+  fests: { title: "Fests & Events", desc: "The /fests directory and event registration system — off by default; the contest/Fest Hub deployment's database seeds this to true, the real club database never does." },
 };
 
 /**
@@ -315,4 +421,9 @@ export const SECTION_DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   current_lineup: true,
   testimonials: true,
   announcements: true,
+  // Deliberately false — see the SECTION_LABELS entry above. The real
+  // manaratmath.club database never gets a `fests` site_sections row,
+  // so this default is what keeps it hidden there permanently; the
+  // Fest Hub contest database's seed.sql inserts ('fests', true).
+  fests: false,
 };

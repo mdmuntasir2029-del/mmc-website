@@ -70,6 +70,11 @@ export default function Navbar() {
                 <Link to="/announcements">Announcements</Link>
               </li>
             )}
+            {sections.fests && (
+              <li>
+                <Link to="/fests">Events</Link>
+              </li>
+            )}
             {sections.leaderboard && (
               <li>
                 <Link to="/leaderboard">Leaderboard</Link>
