@@ -974,8 +974,19 @@ create policy "event_registrations_admin_all" on event_registrations
 
 -- Short, readable ticket codes (e.g. MMC-7K2Q9F) — retries on the rare
 -- collision against the table's own unique constraint.
+--
+-- set search_path explicitly includes `extensions`: Supabase installs
+-- pgcrypto's functions (gen_random_bytes below) into that schema, not
+-- `public`. This function worked fine called on its own (inherits the
+-- caller's full search_path), but broke every single registration in
+-- practice because it's called from inside register_for_event(), which
+-- sets search_path to `public` only for its own execution — and that
+-- restriction carries into any function it calls that doesn't set its
+-- own. Caught on the live site (schema.sql's own idempotent re-run
+-- tests never exercised this — see sourceoftruth/fest-hub.md).
 create or replace function generate_ticket_code() returns text
 language plpgsql
+set search_path = public, extensions
 as $$
 declare
   candidate text;
