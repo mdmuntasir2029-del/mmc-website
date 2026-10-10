@@ -24,6 +24,16 @@
       type="font/woff2"
       crossorigin
     />
+    <!-- Every h1/h2 renders in this weight, including the rest of the
+         homepage hero headline right next to "mathematics" above — same
+         fix, same reason. -->
+    <link
+      rel="preload"
+      href="/fonts/modern/barlow-700.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <!-- The homepage's LCP element is a photo whose URL is only known
          after a client-side Supabase fetch resolves — this can't start
          the DNS/TCP/TLS handshake to a brand-new origin early like it

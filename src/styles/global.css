@@ -90,11 +90,17 @@
   src: url("/fonts/modern/barlow-600.woff2") format("woff2");
 }
 
+/* font-display: optional (not swap, unlike the other Barlow weights
+   below): weight 700 is what every h1/h2 renders in — including the
+   homepage hero's "LIKE YOU HAVE NEVER SEEN BEFORE", which sits in the
+   same first-paint spot as the cursive "mathematics" fixed above, and
+   had the exact same swap-then-visible-snap problem. Preloaded in
+   index.html for the same reason the cursive font is. */
 @font-face {
   font-family: "Barlow";
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  font-display: optional;
   src: url("/fonts/modern/barlow-700.woff2") format("woff2");
 }
 
