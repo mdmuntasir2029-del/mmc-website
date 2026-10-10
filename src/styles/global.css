@@ -108,12 +108,21 @@
 
 /* Cursive accent for the hero's one emphasis word ("excellence") — SIL
    OFL, self-hosted the same way as the rest; license at
-   /fonts/cursive/OFL-DancingScript.txt. */
+   /fonts/cursive/OFL-DancingScript.txt.
+
+   font-display: optional (not swap) deliberately — this word is part of
+   the homepage's first paint, so `swap` was painting it in the fallback
+   cursive font immediately and visibly snapping to Dancing Script a
+   moment later. `optional` gives the browser a very short window to use
+   the font if it's already available (which the preload in index.html
+   makes likely) and otherwise just keeps the fallback for this paint
+   rather than swapping late — no flash either way, at the cost of
+   occasionally keeping the fallback on a very first, uncached visit. */
 @font-face {
   font-family: "Dancing Script";
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  font-display: optional;
   src: url("/fonts/cursive/dancing-script-latin.woff2") format("woff2");
 }
 

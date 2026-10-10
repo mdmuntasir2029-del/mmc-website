@@ -10,6 +10,20 @@
       type="font/woff2"
       crossorigin
     />
+    <!-- The homepage hero's "mathematics" is set in this font and is
+         part of the very first paint — without preloading it, the
+         browser doesn't discover the font file until it's parsed the
+         CSS and matched it against the DOM, by which point the fallback
+         cursive font has already painted and visibly swaps a moment
+         later. See font-display: optional on the @font-face itself for
+         the other half of this fix. -->
+    <link
+      rel="preload"
+      href="/fonts/cursive/dancing-script-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <!-- The homepage's LCP element is a photo whose URL is only known
          after a client-side Supabase fetch resolves — this can't start
          the DNS/TCP/TLS handshake to a brand-new origin early like it
